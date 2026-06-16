@@ -3757,7 +3757,18 @@ function ensureHouseVisible(hn){
 /* ---------- detail panel ---------- */
 const panel=document.getElementById('panel');
 const pTitle=document.getElementById('pTitle'), pSub=document.getElementById('pSub'), pBody=document.getElementById('pBody');
-document.getElementById('pClose').onclick=()=>{ document.body.classList.remove('panel-open'); panel.setAttribute('aria-hidden','true'); clearFocus(); };
+function closePanel(){ document.body.classList.remove('panel-open'); panel.setAttribute('aria-hidden','true'); clearFocus(); }
+document.getElementById('pClose').onclick=closePanel;
+// safety nets so no pop-up can ever trap the user:
+// Esc closes the share window or the detail panel
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'||e.key==='Esc'){
+    const sm=document.getElementById('shareModal');
+    if(sm && sm.classList.contains('open')){ sm.classList.remove('open'); return; }
+    if(document.body.classList.contains('panel-open')) closePanel();
+    const r=document.getElementById('results'); if(r) r.classList.remove('open');
+  }
+});
 
 function field(k,vHtml){ return '<div class="field"><div class="k">'+k+'</div><div class="v">'+vHtml+'</div></div>'; }
 function plink(id,label){ return '<button class="link" data-go="'+esc(id)+'">'+esc(label||persons[id].name||id)+'</button>'; }
