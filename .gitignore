@@ -1,0 +1,9 @@
+# Claude Code session/preview artifacts
+.claude/
+
+# superseded manual-upload folder (Cloudflare uses public/)
+deploy/
+
+# OS junk
+Thumbs.db
+.DS_Store

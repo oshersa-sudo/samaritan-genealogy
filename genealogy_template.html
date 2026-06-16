@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>אילן יוחסין שומרוני — מיפקד 1909</title>
+<style>
+  :root{
+    --bg:#f4f1ea; --panel:#fffdf8; --ink:#2c2620; --muted:#7d7468;
+    --line:#d8cfbe; --accent:#7b5e2e; --accent2:#b8954a;
+    --male:#2f6f8f; --female:#9a4b6e; --hl:#ffe9a8; --hl-border:#e0a82e;
+    --shadow:0 2px 10px rgba(60,45,20,.12);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Segoe UI","Arial Hebrew","David",Arial,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.5;
+  }
+  header{
+    position:sticky; top:0; z-index:30; background:var(--panel);
+    border-bottom:2px solid var(--accent2); box-shadow:var(--shadow);
+    padding:10px 16px;
+  }
+  .title-row{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
+  h1{font-size:20px; margin:0; color:var(--accent)}
+  .sub{font-size:12px; color:var(--muted)}
+  .controls{display:flex; gap:14px; flex-wrap:wrap; align-items:flex-start; margin-top:10px}
+  .ctl{display:flex; flex-direction:column; gap:4px}
+  .ctl label{font-size:11px; color:var(--muted); font-weight:bold}
+  .search-wrap{position:relative; min-width:280px; flex:1}
+  #search{
+    width:100%; padding:8px 12px; font-size:15px; border:1px solid var(--line);
+    border-radius:8px; background:#fff; color:var(--ink);
+  }
+  #search:focus{outline:none; border-color:var(--accent2); box-shadow:0 0 0 2px rgba(184,149,74,.25)}
+  .hint{font-size:11px; color:var(--muted); margin-top:2px}
+  #results{
+    position:absolute; top:100%; inset-inline:0; margin-top:4px; background:#fff;
+    border:1px solid var(--line); border-radius:8px; box-shadow:var(--shadow);
+    max-height:340px; overflow:auto; z-index:40; display:none;
+  }
+  #results.open{display:block}
+  .res{padding:8px 12px; cursor:pointer; border-bottom:1px solid #efe9dd; font-size:14px}
+  .res:last-child{border-bottom:none}
+  .res:hover,.res.active{background:var(--hl)}
+  .res .r-name{font-weight:bold}
+  .res .r-meta{font-size:11px; color:var(--muted)}
+  .res .r-empty{padding:10px 12px; color:var(--muted)}
+  .houses{display:flex; gap:8px; flex-wrap:wrap}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px; padding:5px 10px; font-size:13px;
+    border:1px solid var(--line); border-radius:18px; background:#fff; cursor:pointer; user-select:none;
+  }
+  .chip input{accent-color:var(--accent); margin:0}
+  .chip.on{background:var(--accent); color:#fff; border-color:var(--accent)}
+  .btns{display:flex; gap:8px; align-items:center}
+  button.act{
+    padding:6px 12px; font-size:13px; border:1px solid var(--line); background:#fff;
+    border-radius:7px; cursor:pointer; color:var(--ink);
+  }
+  button.act:hover{background:var(--hl)}
+  main{padding:16px; padding-inline-end:16px; transition:padding-inline-start .2s}
+  body.panel-open main{padding-inline-start:380px}
+  .legend{font-size:12px; color:var(--muted); margin-bottom:12px; display:flex; gap:16px; flex-wrap:wrap; align-items:center}
+  .legend .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-inline-end:4px}
+  .apex{
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:0; margin-bottom:16px; overflow:hidden;
+  }
+  .apex>summary{padding:10px 14px; cursor:pointer; font-weight:bold; color:var(--accent); list-style:none}
+  .apex>summary::-webkit-details-marker{display:none}
+  .apex>summary::before{content:"▸ "; color:var(--accent2)}
+  .apex[open]>summary::before{content:"▾ "}
+  .apex-body{padding:4px 16px 14px; font-size:13.5px}
+  .apex-body b{color:var(--accent)}
+  .apex-body div{margin:4px 0}
+
+  .house-block{margin-bottom:26px}
+  .house-h{font-size:17px; color:var(--accent); border-bottom:2px solid var(--accent2); padding-bottom:4px; margin:0 0 12px}
+  .family-block{
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:12px 14px; margin-bottom:16px; box-shadow:var(--shadow);
+  }
+  .family-h{display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:8px}
+  .family-h .fname{font-size:15px; font-weight:bold; color:var(--ink)}
+  .family-h .fmeta{font-size:11px; color:var(--muted)}
+
+  .gen{font-size:10px; color:#fff; background:var(--accent2); border-radius:10px; padding:1px 7px}
+  .years{font-size:11.5px; color:var(--muted)}
+
+  /* graphical hierarchical tree */
+  #treeHost{overflow:auto; background:#fffdf8; border:1px solid var(--line); border-radius:10px;
+            max-height:calc(100vh - 240px); min-height:440px; position:relative}
+  .tree-canvas{position:relative; transform-origin:100% 0}
+  .tree-svg{position:absolute; top:0; inset-inline-start:0; overflow:visible; pointer-events:none}
+  .node-layer{position:absolute; top:0; left:0; width:100%; height:100%}
+  .canvas-house{position:absolute; inset-inline-end:10px; font-size:15px; font-weight:bold; color:var(--accent);
+                border-bottom:2px solid var(--accent2); padding-bottom:3px}
+  .canvas-family{position:absolute; inset-inline-end:14px; display:flex; align-items:center; gap:10px; font-size:13px; white-space:nowrap}
+  .canvas-family .cf-name{font-weight:bold; color:var(--ink)}
+  .canvas-family .cf-meta{color:var(--muted); font-size:11px}
+  .node-box{position:absolute; width:124px; height:56px; box-sizing:border-box; background:#fff;
+    border:1.5px solid var(--line); border-radius:9px; padding:3px 6px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+    box-shadow:0 1px 3px rgba(60,45,20,.12); transition:box-shadow .12s, transform .12s; overflow:hidden}
+  .node-box:hover{box-shadow:0 4px 12px rgba(60,45,20,.25); transform:translateY(-1px)}
+  .node-box.male{border-color:var(--male)}
+  .node-box.female{border-color:var(--female)}
+  .node-box.unk{border-color:var(--muted)}
+  .node-box .nb-gen{font-size:9px; color:#fff; background:var(--accent2); border-radius:8px; padding:0 6px;
+                    position:absolute; top:3px; inset-inline-end:4px}
+  .node-box .nb-name{font-size:13px; font-weight:700; line-height:1.15; margin-top:7px; color:var(--ink)}
+  .node-box.male .nb-name{color:var(--male)} .node-box.female .nb-name{color:var(--female)}
+  .node-box .nb-years{font-size:10.5px; color:var(--muted); margin-top:1px}
+  .node-box .nb-story{font-size:10px}
+  .node-box.focus{box-shadow:0 0 0 3px var(--hl-border); border-color:var(--hl-border)}
+  .conn{fill:none; stroke:#cbb88f; stroke-width:1.6}
+  .marriage-link{fill:none; stroke:var(--female); stroke-width:1.5; stroke-dasharray:5 4; opacity:.55}
+  .marriage-link.active{stroke:#d23f7d; stroke-width:2.6; opacity:.95; stroke-dasharray:none}
+  .mode-btn.on{background:var(--accent); color:#fff; border-color:var(--accent)}
+  #familyJump{padding:7px 10px; border:1px solid var(--line); border-radius:8px; background:#fff; font:inherit; font-size:13px; color:var(--ink); max-width:250px}
+  #familyJump:focus{outline:none; border-color:var(--accent2)}
+
+  /* detail panel */
+  #panel{
+    position:fixed; top:0; inset-inline-start:0; height:100vh; width:370px; background:var(--panel);
+    border-inline-end:2px solid var(--accent2); box-shadow:var(--shadow); z-index:50;
+    transform:translateX(-100%); transition:transform .2s; overflow:auto; padding:0;
+  }
+  body.panel-open #panel{transform:translateX(0)}
+  .p-head{position:sticky; top:0; background:var(--accent); color:#fff; padding:14px 16px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px}
+  .p-head .p-title{font-size:19px; font-weight:bold}
+  .p-head .p-sub{font-size:12px; opacity:.85; margin-top:2px}
+  .p-close{background:rgba(255,255,255,.2); border:none; color:#fff; font-size:18px; width:30px; height:30px; border-radius:6px; cursor:pointer; flex:0 0 auto}
+  .p-close:hover{background:rgba(255,255,255,.35)}
+  .p-body{padding:14px 16px}
+  .field{margin-bottom:12px}
+  .field .k{font-size:11px; color:var(--muted); font-weight:bold; text-transform:uppercase; letter-spacing:.03em}
+  .field .v{font-size:14px; margin-top:2px}
+  .link{background:none;border:none;font:inherit;color:var(--accent);cursor:pointer;padding:0;text-decoration:underline}
+  .link:hover{color:var(--accent2)}
+  .pill{display:inline-block; background:#efe7d4; border-radius:6px; padding:2px 8px; margin:2px 3px 2px 0; font-size:13px}
+  .sp{border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin-bottom:7px; background:#fff; font-size:13.5px}
+  .sp .sp-name{font-weight:bold}
+  .sp .sp-meta{font-size:11.5px; color:var(--muted); margin-top:2px}
+  .note-box{background:#fbf6e8; border:1px solid var(--accent2); border-radius:8px; padding:8px 10px; font-size:13px}
+  .empty-state{padding:40px; text-align:center; color:var(--muted)}
+  .hasstory{font-size:12px; cursor:default; opacity:.85}
+  .story-box{background:#fbf6e8; border:1px solid var(--accent2); border-radius:8px; padding:10px 12px; font-size:14px; line-height:1.65}
+  .share-btn{
+    padding:4px 10px; font-size:12px; border:1px solid var(--accent); background:#fff; color:var(--accent);
+    border-radius:16px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; white-space:nowrap;
+  }
+  .share-btn:hover{background:var(--accent); color:#fff}
+  .share-btn.full{width:100%; justify-content:center; margin-top:10px; padding:8px}
+  /* share modal */
+  .share-modal{position:fixed; inset:0; background:rgba(40,30,15,.5); z-index:80; display:none; align-items:center; justify-content:center; padding:16px}
+  .share-modal.open{display:flex}
+  .share-card{background:var(--panel); border-radius:12px; width:min(520px,100%); max-height:88vh; overflow:auto; box-shadow:var(--shadow)}
+  .share-head{display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--accent); color:#fff; border-radius:12px 12px 0 0}
+  .share-head .sh-title{font-weight:bold; font-size:16px}
+  .share-head button{background:rgba(255,255,255,.2); border:none; color:#fff; width:30px; height:30px; border-radius:6px; cursor:pointer; font-size:16px}
+  .share-body{padding:14px 16px}
+  .share-body textarea{width:100%; height:200px; resize:vertical; border:1px solid var(--line); border-radius:8px; padding:10px; font:inherit; font-size:13px; background:#fff; color:var(--ink); direction:rtl}
+  .share-actions{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap}
+  .share-actions button{flex:1; min-width:120px; padding:10px; border:none; border-radius:8px; font:inherit; font-size:14px; font-weight:bold; cursor:pointer; color:#fff}
+  .sa-wa{background:#25d366} .sa-wa:hover{background:#1faa50}
+  .sa-mail{background:#5b7fb8} .sa-mail:hover{background:#4a6aaa}
+  .sa-copy{background:var(--accent)} .sa-copy:hover{background:var(--accent2)}
+  .share-hint{font-size:11.5px; color:var(--muted); margin-top:8px}
+  #toast{position:fixed; bottom:20px; inset-inline-start:50%; transform:translateX(50%); background:var(--ink); color:#fff; padding:10px 18px; border-radius:20px; font-size:14px; z-index:90; opacity:0; transition:opacity .2s; pointer-events:none}
+  #toast.show{opacity:1}
+  @media (max-width:640px){
+    body.panel-open main{padding-inline-start:16px}
+    #panel{width:100%}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="title-row">
+    <h1>אילן יוחסין שומרוני</h1>
+    <span class="sub">מיפקד השומרונים 1909 · רשימות פאול קאהלה · הרחבות רצון צדקה · <span id="count"></span></span>
+  </div>
+  <div class="controls">
+    <div class="ctl search-wrap">
+      <label for="search">חיפוש אדם</label>
+      <input id="search" type="text" autocomplete="off"
+             placeholder="שם, חלק משם, או 'שם אב' / 'שם אם' (למשל: אברהם זבולן)">
+      <div class="hint">אפשר לחפש שם בלבד, או שם + שם האב / האם להבחנה. לחיצה על תוצאה תאתר את האדם בעץ.</div>
+      <div id="results"></div>
+    </div>
+    <div class="ctl">
+      <label>סינון לפי בית-אב</label>
+      <div class="houses" id="houseFilter"></div>
+    </div>
+    <div class="ctl">
+      <label>זום</label>
+      <div class="btns">
+        <button class="act" id="zoomOut" title="הקטן">➖</button>
+        <button class="act" id="zoomReset" title="איפוס">100%</button>
+        <button class="act" id="zoomIn" title="הגדל">➕</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <label>קווי נישואין (<span id="marriageCount">0</span> בסך הכל)</label>
+      <div class="btns" id="marriageMode" title="בחרו מתי להציג את קווי הנישואין/הקישור בין המשפחות">
+        <button class="act mode-btn" data-mode="all">הכל</button>
+        <button class="act mode-btn on" data-mode="selected">רק לאדם הנבחר</button>
+        <button class="act mode-btn" data-mode="off">כבוי</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <label>מרכז על משפחה</label>
+      <select id="familyJump"><option value="">— בחרו משפחה לקפיצה —</option></select>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="legend">
+    <span><span class="dot" style="background:var(--male)"></span>זכר</span>
+    <span><span class="dot" style="background:var(--female)"></span>נקבה</span>
+    <span><span class="gen" style="background:var(--accent2)">דור N</span> מספר הדור (כל שכבה = דור)</span>
+    <span><svg width="34" height="10" style="vertical-align:middle"><line x1="0" y1="5" x2="34" y2="5" stroke="var(--female)" stroke-width="1.5" stroke-dasharray="5 4"/></svg> קו נישואין / קישור בין משפחות</span>
+    <span>📖 יש סיפור חיים · שנים: לועזי או ג'רי</span>
+  </div>
+  <div id="apexHost"></div>
+  <div id="treeHost"></div>
+</main>
+
+<aside id="panel" aria-hidden="true">
+  <div class="p-head">
+    <div>
+      <div class="p-title" id="pTitle"></div>
+      <div class="p-sub" id="pSub"></div>
+    </div>
+    <button class="p-close" id="pClose" title="סגור">✕</button>
+  </div>
+  <div class="p-body" id="pBody"></div>
+</aside>
+
+<div class="share-modal" id="shareModal">
+  <div class="share-card">
+    <div class="share-head">
+      <span class="sh-title" id="shareTitle">שיתוף עץ</span>
+      <button id="shareClose" title="סגור">✕</button>
+    </div>
+    <div class="share-body">
+      <textarea id="shareText" readonly></textarea>
+      <div class="share-actions">
+        <button class="sa-wa" data-m="whatsapp">📱 וואטסאפ</button>
+        <button class="sa-mail" data-m="email">✉️ אימייל</button>
+        <button class="sa-copy" data-m="copy">📋 העתק</button>
+      </div>
+      <div class="share-hint">השיתוף שולח את העץ כטקסט. ברשתות מסוימות טקסט ארוך עלול להיחתך — אפשר תמיד להעתיק את הכל.</div>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const STORIES = /*__STORIES__*/{};
+
+/* ---------- index building ---------- */
+const persons = {};
+const familyList = [];   // {house, name, no, ref, rootIds:[], allIds:[]}
+const houseNames = [];
+DATA.houses.forEach(h=>{
+  if(!houseNames.includes(h.house)) houseNames.push(h.house);
+  (h.families||[]).forEach(f=>{
+    const fam={house:h.house, name:f.family, no:f.family_no, ref:f.ref_code||'', rootIds:[], allIds:[]};
+    (f.persons||[]).forEach(p=>{
+      p._house=h.house; p._family=f.family;
+      persons[p.id]=p; fam.allIds.push(p.id);
+    });
+    familyList.push(fam);
+  });
+});
+const idSet=new Set(Object.keys(persons));
+
+// single-parent map: father_id is authoritative; children_ids only fills gaps.
+// guarantees every person appears exactly once in the tree.
+const parentOf={};
+Object.values(persons).forEach(p=>{ if(p.father_id && idSet.has(p.father_id)) parentOf[p.id]=p.father_id; });
+Object.values(persons).forEach(p=>{
+  (p.children_ids||[]).forEach(cid=>{ if(idSet.has(cid) && !parentOf[cid] && cid!==p.id) parentOf[cid]=p.id; });
+});
+const childMap={};
+idSet.forEach(id=>childMap[id]=[]);
+Object.keys(parentOf).forEach(cid=>{ childMap[parentOf[cid]].push(cid); });
+// roots per family = persons without an assigned parent
+familyList.forEach(fam=>{
+  fam.allIds.forEach(id=>{ if(!parentOf[id]) fam.rootIds.push(id); });
+});
+
+/* ---------- helpers ---------- */
+function norm(s){
+  if(s==null) return '';
+  return s.toString()
+    .replace(/[֑-ׇ]/g,'')
+    .replace(/[“”"'׳״()=\[\]?.,\/\\#־_-]/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+function numYear(v){ return (typeof v==='number') ? v : (typeof v==='string' && /^\d{3,4}$/.test(v.trim()) ? parseInt(v) : null); }
+function gregApprox(y){ const n=numYear(y); return n? (n+584) : null; }
+function yearStr(p){
+  const b=numYear(p.birth), d=numYear(p.death);
+  if(b==null && d==null) return '';
+  const bs=b!=null?b:'', ds=d!=null?d:'';
+  return '('+bs+(d!=null||b!=null?'–':'')+ds+')';
+}
+// Gregorian life-years from the prose (STORIES); format nicely
+function gregOf(id){ return (STORIES[id]&&STORIES[id].g)||''; }
+function fmtGreg(g){
+  if(!g) return '';
+  const parts=g.split('–'); const b=(parts[0]||'').trim(), d=(parts[1]||'').trim();
+  if(b&&d) return b+'–'+d;
+  if(b&&!d) return 'יליד '+b;
+  if(!b&&d) return 'נפ׳ '+d;
+  return g;
+}
+// the years label shown on a row: prefer the (meaningful) Gregorian span; fall back to the census Hijri years
+function displayYears(id,p){
+  const g=gregOf(id);
+  if(g) return '('+fmtGreg(g)+')';
+  return yearStr(p);
+}
+function fatherNameOf(p){
+  if(parentOf[p.id] && persons[parentOf[p.id]]) return persons[parentOf[p.id]].name||'';
+  return p.father||'';
+}
+function motherNamesOf(p){
+  if(parentOf[p.id] && persons[parentOf[p.id]]) return (persons[parentOf[p.id]].spouses||[]).map(s=>s.name||'');
+  return [];
+}
+// longest valid id prefix
+function resolveId(raw){
+  if(raw==null) return null;
+  raw=raw.toString().trim();
+  let best=null;
+  for(let i=1;i<=raw.length;i++){ const pre=raw.slice(0,i); if(idSet.has(pre)) best=pre; }
+  return best;
+}
+function spouseTargetId(sp){
+  const fields=[sp.note,sp.birth,sp.death].filter(x=>typeof x==='string');
+  for(const f of fields){
+    const m=f.match(/#\s*([0-9][0-9א-ת׳'']*)/);
+    if(m){ const id=resolveId(m[1]); if(id) return id; }
+  }
+  if(typeof sp.ref==='string'){ const id=resolveId(sp.ref); if(id) return id; }
+  return null;
+}
+
+/* ---------- graphical hierarchical tree (top-down, SVG connectors) ---------- */
+const SVGNS='http://www.w3.org/2000/svg';
+const NODE_W=124, NODE_H=56, COL_W=150, ROW_H=120, PADX=26, HOUSE_H=34, FAM_H=28, FAM_GAP=70;
+const domByPerson=new Map();      // id -> node box element
+const posByPerson=new Map();      // id -> {cx,cy} center px in canvas
+const treeHost=document.getElementById('treeHost');
+let zoom=1, marriageMode='selected', focusedBox=null, focusedPersonId=null;
+
+// tidy layout for one family: leaves get sequential columns, parents centered over children
+function layoutFamily(fam){
+  const pos=new Map(); let nextX=0, maxD=0; const guard=new Set();
+  function assign(id, depth){
+    if(guard.has(id)) return; guard.add(id);
+    if(depth>maxD) maxD=depth;
+    const kids=(childMap[id]||[]).slice().sort(byBirthIds).filter(c=>!guard.has(c));
+    if(!kids.length){ pos.set(id,{x:nextX,y:depth}); nextX+=1; return; }
+    kids.forEach(c=>assign(c,depth+1));
+    const xs=kids.map(c=>pos.get(c).x);
+    pos.set(id,{x:(Math.min(...xs)+Math.max(...xs))/2, y:depth});
+  }
+  fam.rootIds.slice().sort(byBirthIds).forEach(r=>assign(r,0));
+  return {pos, cols:Math.max(nextX,1), depth:maxD+1};
+}
+
+function makeNodeBox(id){
+  const p=persons[id];
+  const d=document.createElement('div');
+  d.className='node-box '+(p.sex==='M'?'male':p.sex==='F'?'female':'unk');
+  const gen=genOf(id);
+  const story=(STORIES[id]&&STORIES[id].t)?' <span class="nb-story" title="יש סיפור חיים">📖</span>':'';
+  const ys=displayYears(id,p);
+  d.innerHTML='<div class="nb-gen">דור '+gen+'</div>'+
+    '<div class="nb-name">'+esc(p.name||'(ללא שם)')+story+'</div>'+
+    (ys?'<div class="nb-years">'+ys+'</div>':'');
+  d.onclick=()=>openPerson(id);
+  return d;
+}
+function elbowPath(par,ch){
+  const pb=par.cy+NODE_H/2, ct=ch.cy-NODE_H/2, my=pb+(ct-pb)/2;
+  return 'M '+par.cx+' '+pb+' V '+my+' H '+ch.cx+' V '+ct;
+}
+function marriagePath(a,b){
+  const dx=b.cx-a.cx, dy=b.cy-a.cy, len=Math.hypot(dx,dy)||1;
+  const off=Math.min(70, Math.max(28,len*0.18));
+  const mx=(a.cx+b.cx)/2 + (-dy/len)*off, my=(a.cy+b.cy)/2 + (dx/len)*off;
+  return 'M '+a.cx+' '+a.cy+' Q '+mx+' '+my+' '+b.cx+' '+b.cy;
+}
+
+function renderTree(){
+  treeHost.innerHTML=''; domByPerson.clear(); posByPerson.clear(); focusedBox=null;
+  const active=getActiveHouses();
+  const canvas=document.createElement('div'); canvas.className='tree-canvas';
+  const svg=document.createElementNS(SVGNS,'svg'); svg.setAttribute('class','tree-svg');
+  const nodeLayer=document.createElement('div'); nodeLayer.className='node-layer';
+  canvas.appendChild(svg); canvas.appendChild(nodeLayer);
+
+  // pass A: collect visible houses/families + layouts, compute the widest family
+  const plan=[]; let maxW=600;
+  houseNames.forEach(hn=>{
+    if(active.size && !active.has(hn)) return;
+    const fams=familyList.filter(f=>f.house===hn);
+    if(!fams.length) return;
+    const entry={house:hn, fams:fams.map(fam=>{ const L=layoutFamily(fam); maxW=Math.max(maxW, PADX*2+L.cols*COL_W); return {fam,L}; })};
+    plan.push(entry);
+  });
+  if(!plan.length){ treeHost.innerHTML='<div class="empty-state">לא נבחר בית-אב להצגה.</div>'; return; }
+
+  // pass B: position everything, right-anchored (RTL) so all families align to the right edge
+  let cursorY=14; const connectors=[];
+  plan.forEach(entry=>{
+    const hl=document.createElement('div'); hl.className='canvas-house'; hl.style.top=cursorY+'px';
+    hl.textContent=entry.house; nodeLayer.appendChild(hl);
+    cursorY+=HOUSE_H;
+    entry.fams.forEach(({fam,L})=>{
+      const fl=document.createElement('div'); fl.className='canvas-family'; fl.style.top=cursorY+'px';
+      const finfo=document.createElement('span');
+      finfo.innerHTML='<span class="cf-name">'+esc(fam.name)+'</span> '+
+        '<span class="cf-meta">'+fam.allIds.length+' אנשים · '+L.depth+' דורות'+(fam.ref?' · קוד '+esc(fam.ref):'')+'</span>';
+      fl.appendChild(finfo);
+      const shb=document.createElement('button'); shb.className='share-btn'; shb.innerHTML='🔗 שתף עץ';
+      shb.onclick=(e)=>{ e.stopPropagation(); openShare(fam.rootIds, fam.name); };
+      fl.appendChild(shb);
+      nodeLayer.appendChild(fl);
+      const top0=cursorY+FAM_H;
+      L.pos.forEach((pp,id)=>{
+        const cx=maxW - (PADX + pp.x*COL_W + COL_W/2);   // right-anchored: first child (x=0) on the right
+        const cy=top0 + pp.y*ROW_H + NODE_H/2;
+        posByPerson.set(id,{cx,cy});
+        const box=makeNodeBox(id);
+        box.style.left=(cx-NODE_W/2)+'px'; box.style.top=(cy-NODE_H/2)+'px';
+        nodeLayer.appendChild(box); domByPerson.set(id,box);
+        (childMap[id]||[]).forEach(c=>{ if(L.pos.has(c)) connectors.push([id,c]); });
+      });
+      cursorY=top0 + L.depth*ROW_H + FAM_GAP;
+    });
+  });
+
+  const totalH=cursorY+10;
+  canvas.style.width=maxW+'px'; canvas.style.height=totalH+'px';
+  svg.setAttribute('width',maxW); svg.setAttribute('height',totalH);
+  svg.setAttribute('viewBox','0 0 '+maxW+' '+totalH);
+
+  // parent→child connectors
+  const frag=[];
+  connectors.forEach(([pid,cid])=>{
+    const a=posByPerson.get(pid), b=posByPerson.get(cid); if(!a||!b) return;
+    frag.push('<path class="conn" d="'+elbowPath(a,b)+'"/>');
+  });
+  // marriage links (always built; per-link data so visibility can follow the chosen mode)
+  let mCount=0; const drawn=new Set();
+  Object.values(persons).forEach(p=>{
+    (p.spouses||[]).forEach(sp=>{
+      const t=spouseTargetId(sp); if(!t) return;
+      if(!posByPerson.has(p.id)||!posByPerson.has(t)) return;
+      const key=[p.id,t].sort().join('~'); if(drawn.has(key)) return; drawn.add(key);
+      frag.push('<path class="marriage-link" data-a="'+esc(p.id)+'" data-b="'+esc(t)+'" d="'+marriagePath(posByPerson.get(p.id),posByPerson.get(t))+'"/>');
+      mCount++;
+    });
+  });
+  svg.innerHTML=frag.join('');
+  treeHost.appendChild(canvas);
+  marriageCountEl && (marriageCountEl.textContent=mCount);
+  applyZoom();
+  applyMarriageMode();
+}
+function applyZoom(){ const c=treeHost.querySelector('.tree-canvas'); if(c) c.style.zoom=zoom; }
+function applyMarriageMode(){
+  const svg=treeHost.querySelector('.tree-svg'); if(!svg) return;
+  svg.querySelectorAll('.marriage-link').forEach(l=>{
+    const a=l.getAttribute('data-a'), b=l.getAttribute('data-b');
+    const touches = focusedPersonId && (a===focusedPersonId || b===focusedPersonId);
+    if(marriageMode==='off'){ l.style.display='none'; l.classList.remove('active'); }
+    else if(marriageMode==='all'){ l.style.display=''; l.classList.toggle('active', !!touches); }
+    else { /* selected */ l.style.display=touches?'':'none'; l.classList.toggle('active', !!touches); }
+  });
+}
+function esc(s){ return (s==null?'':s.toString()).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ---------- house filter ---------- */
+const houseFilter=document.getElementById('houseFilter');
+houseNames.forEach(hn=>{
+  const lab=document.createElement('label'); lab.className='chip on';
+  const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=true; cb.value=hn;
+  cb.onchange=()=>{ lab.classList.toggle('on',cb.checked); renderTree(); };
+  lab.appendChild(cb);
+  const short=hn.replace(/^[א-ת]\.\s*/,'');
+  lab.appendChild(document.createTextNode(short));
+  houseFilter.appendChild(lab);
+});
+function getActiveHouses(){
+  const s=new Set();
+  houseFilter.querySelectorAll('input').forEach(cb=>{ if(cb.checked) s.add(cb.value); });
+  return s;
+}
+function ensureHouseVisible(hn){
+  houseFilter.querySelectorAll('input').forEach(cb=>{
+    if(cb.value===hn && !cb.checked){ cb.checked=true; cb.parentElement.classList.add('on'); }
+  });
+}
+
+/* ---------- detail panel ---------- */
+const panel=document.getElementById('panel');
+const pTitle=document.getElementById('pTitle'), pSub=document.getElementById('pSub'), pBody=document.getElementById('pBody');
+document.getElementById('pClose').onclick=()=>{ document.body.classList.remove('panel-open'); panel.setAttribute('aria-hidden','true'); clearFocus(); };
+
+function field(k,vHtml){ return '<div class="field"><div class="k">'+k+'</div><div class="v">'+vHtml+'</div></div>'; }
+function plink(id,label){ return '<button class="link" data-go="'+esc(id)+'">'+esc(label||persons[id].name||id)+'</button>'; }
+
+function openPerson(id){
+  const p=persons[id]; if(!p) return;
+  focusNode(id);
+  focusedPersonId=id; applyMarriageMode();
+  pTitle.textContent=p.name||'(ללא שם)';
+  pSub.textContent=p._house.replace(/^[א-ת]\.\s*/,'')+' · '+p._family;
+  let html='';
+
+  const meta=[];
+  meta.push('מזהה מיפקד: '+esc(p.id));
+  if(p.code) meta.push('קוד עץ: '+esc(p.code));
+  meta.push('מין: '+(p.sex==='M'?'זכר':p.sex==='F'?'נקבה':'לא ידוע'));
+  html+=field('פרטים', meta.join(' · '));
+
+  // life-years (Gregorian, from the prose) — shown prominently
+  const g=gregOf(id);
+  if(g){
+    const parts=g.split('–'); const bb=(parts[0]||'').trim(), dd=(parts[1]||'').trim();
+    let span=fmtGreg(g);
+    if(bb&&dd && /^\d{3,4}$/.test(bb) && /^\d{3,4}$/.test(dd)) span+=' <span class="years">(חי כ-'+(parseInt(dd)-parseInt(bb))+' שנים)</span>';
+    html+=field('שנות חיים (לועזי)', span);
+  }
+  // census dates (Hijri)
+  const dates=[];
+  if(p.birth!=null){ const ga=gregApprox(p.birth); dates.push('לידה: '+esc(p.birth)+(ga?' <span class="years">(≈'+ga+' לסה״נ)</span>':'')); }
+  if(p.death!=null){ const ga=gregApprox(p.death); dates.push('פטירה: '+esc(p.death)+(ga?' <span class="years">(≈'+ga+' לסה״נ)</span>':'')); }
+  if(dates.length) html+=field('שנים לפי המיפקד (לוח הג׳רי)', dates.join('<br>'));
+
+  // life story (simplified prose)
+  if(STORIES[id] && STORIES[id].t){
+    html+=field('סיפור חיים', '<div class="story-box">'+esc(STORIES[id].t)+'</div>');
+  }
+
+  // parents
+  let par='';
+  if(parentOf[id] && persons[parentOf[id]]) par='אב: '+plink(parentOf[id]);
+  else if(p.father) par='אב: '+esc(p.father);
+  const moms=motherNamesOf(p);
+  if(moms.length){ par+=(par?'<br>':'')+'<span class="years">אם (מבין נשות האב): '+moms.map(esc).join(' / ')+'</span>'; }
+  if(par) html+=field('הורים', par);
+
+  // children
+  const kids=childMap[id]||[];
+  if(kids.length){
+    html+=field('צאצאים ('+kids.length+')',
+      kids.map(cid=>'<span class="pill">'+plink(cid)+(displayYears(cid,persons[cid])?' <span class="years">'+displayYears(cid,persons[cid])+'</span>':'')+'</span>').join(''));
+  }
+
+  // spouses
+  if((p.spouses||[]).length){
+    let sh='';
+    p.spouses.forEach(sp=>{
+      const tid=spouseTargetId(sp);
+      let line='<div class="sp"><div class="sp-name">'+(tid?plink(tid,sp.name):esc(sp.name||'(בן/בת זוג)'))+'</div>';
+      const m=[];
+      if(sp.ref) m.push('הפניה: '+esc(sp.ref));
+      if(typeof sp.birth==='string'&&!/^\d/.test(sp.birth)) m.push(esc(sp.birth));
+      else if(sp.birth!=null) m.push('לידה '+esc(sp.birth));
+      if(typeof sp.death==='string'&&!/^\d/.test(sp.death)) m.push(esc(sp.death));
+      else if(sp.death!=null) m.push('פטירה '+esc(sp.death));
+      if(sp.note) m.push(esc(sp.note));
+      if(m.length) line+='<div class="sp-meta">'+m.join(' · ')+'</div>';
+      line+='</div>'; sh+=line;
+    });
+    html+=field('נישואין', sh);
+  }
+
+  if(p.note) html+=field('הערה','<div class="note-box">'+esc(p.note)+'</div>');
+
+  // generation in family
+  const gen=genOf(id);
+  if(gen) html+=field('דור','דור '+gen+' במשפחת '+esc(p._family));
+
+  pBody.innerHTML=html;
+  pBody.querySelectorAll('[data-go]').forEach(b=> b.onclick=()=>openPerson(b.getAttribute('data-go')) );
+  const shareBtn=document.createElement('button'); shareBtn.className='share-btn full';
+  shareBtn.innerHTML=(childMap[id]||[]).length ? '🔗 שתף את הענף של '+(p.name||'אדם זה') : '🔗 שתף אדם זה';
+  shareBtn.onclick=()=>openShare([id], (childMap[id]||[]).length?('הענף של '+(p.name||'אדם זה')):(p.name||'אדם זה'));
+  pBody.appendChild(shareBtn);
+  document.body.classList.add('panel-open'); panel.setAttribute('aria-hidden','false');
+}
+
+function genOf(id){
+  let g=1, cur=id, guard=0;
+  while(parentOf[cur] && guard++<100){ g++; cur=parentOf[cur]; }
+  return g;
+}
+
+/* ---------- focus / locate ---------- */
+function clearFocus(){ if(focusedBox){ focusedBox.classList.remove('focus'); focusedBox=null; } }
+function focusNode(id){
+  if(persons[id]) ensureHouseVisible(persons[id]._house);
+  if(!domByPerson.has(id)) renderTree();
+  const box=domByPerson.get(id);
+  if(!box) return;
+  clearFocus();
+  box.classList.add('focus'); focusedBox=box;
+  box.scrollIntoView({behavior:'smooth', block:'center', inline:'center'});
+}
+
+/* ---------- search ---------- */
+const search=document.getElementById('search'), results=document.getElementById('results');
+function searchPersons(q){
+  const toks=norm(q).split(' ').filter(Boolean);
+  if(!toks.length) return [];
+  const out=[];
+  Object.values(persons).forEach(p=>{
+    const own=norm(p.name); if(!own) return;
+    const fath=norm(fatherNameOf(p));
+    const moth=norm(motherNamesOf(p).join(' '));
+    const combined=own+' '+fath+' '+moth;
+    const ownHits=toks.filter(t=>own.includes(t)).length;
+    if(!ownHits) return;
+    if(!toks.every(t=>combined.includes(t))) return;
+    out.push({p,ownHits});
+  });
+  out.sort((a,b)=> b.ownHits-a.ownHits || (numYear(a.p.birth)||9999)-(numYear(b.p.birth)||9999));
+  return out.slice(0,40);
+}
+function showResults(list){
+  if(!list.length){ results.innerHTML='<div class="r-empty">לא נמצאו תוצאות</div>'; results.classList.add('open'); return; }
+  results.innerHTML='';
+  list.forEach(({p})=>{
+    const d=document.createElement('div'); d.className='res';
+    const fa=fatherNameOf(p);
+    d.innerHTML='<div class="r-name">'+esc(p.name||'(ללא שם)')+' <span class="years">'+displayYears(p.id,p)+'</span></div>'+
+      '<div class="r-meta">'+esc(p._family)+(fa?' · אב: '+esc(fa):'')+'</div>';
+    d.onclick=()=>{ results.classList.remove('open'); search.value=p.name||''; openPerson(p.id); };
+    results.appendChild(d);
+  });
+  results.classList.add('open');
+}
+let activeIdx=-1;
+search.addEventListener('input',()=>{
+  const q=search.value.trim();
+  activeIdx=-1;
+  if(!q){ results.classList.remove('open'); return; }
+  showResults(searchPersons(q));
+});
+search.addEventListener('keydown',e=>{
+  const items=[...results.querySelectorAll('.res')];
+  if(e.key==='ArrowDown'){ e.preventDefault(); activeIdx=Math.min(activeIdx+1,items.length-1); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); activeIdx=Math.max(activeIdx-1,0); }
+  else if(e.key==='Enter'){ if(items[activeIdx]) items[activeIdx].click(); return; }
+  else return;
+  items.forEach((it,i)=>it.classList.toggle('active',i===activeIdx));
+  if(items[activeIdx]) items[activeIdx].scrollIntoView({block:'nearest'});
+});
+document.addEventListener('click',e=>{ if(!e.target.closest('.search-wrap')) results.classList.remove('open'); });
+
+/* ---------- apex / root genealogy ---------- */
+function renderApex(){
+  const rg=DATA.root_genealogy; if(!rg) return;
+  const host=document.getElementById('apexHost');
+  let inner='';
+  if(rg.danfi_apex){ const a=rg.danfi_apex;
+    inner+='<div><b>בית אב הדנפים — אב קדמון:</b> '+esc(a.founder||'')+'</div>';
+    if(a.sons) inner+='<div>בנים: '+a.sons.map(esc).join(' · ')+'</div>';
+    if(a.via_yitzhak) inner+='<div>'+esc(a.via_yitzhak)+'</div>';
+    if(a.shalabi_root) inner+='<div>'+esc(a.shalabi_root)+'</div>';
+  }
+  if(rg.marhibi_apex) inner+='<div><b>בית אב המרחיבים:</b> '+esc(rg.marhibi_apex)+'</div>';
+  if(rg.tsfari_apex) inner+='<div><b>בית אב הצפרים:</b> '+esc(rg.tsfari_apex)+'</div>';
+  if(rg.note) inner+='<div class="years">'+esc(rg.note)+'</div>';
+  host.innerHTML='<details class="apex"><summary>אילן-השורש הקדום (האבות הקדמונים — מעל המיפקד)</summary><div class="apex-body">'+inner+'</div></details>';
+}
+
+/* ---------- share ---------- */
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),1900);
+}
+function byBirthIds(a,b){ return (numYear(persons[a].birth)||9999)-(numYear(persons[b].birth)||9999); }
+function buildTreeText(rootIds, title){
+  const lines=[];
+  lines.push(title);
+  lines.push('— אילן יוחסין שומרוני · מיפקד 1909 (רשימות פאול קאהלה, הרחבות רצון צדקה) —');
+  lines.push('');
+  const seen=new Set();
+  function rec(id, depth){
+    if(seen.has(id)) return; seen.add(id);
+    const p=persons[id]; if(!p) return;
+    const indent=depth>0 ? '   '.repeat(depth)+'└ ' : '';
+    const g=gregOf(id); const yr=g?(' ('+fmtGreg(g)+')'):(yearStr(p)?(' '+yearStr(p)):'');
+    lines.push(indent+'דור '+(depth+1)+': '+(p.name||'(ללא שם)')+yr);
+    (childMap[id]||[]).slice().sort(byBirthIds).forEach(c=>rec(c,depth+1));
+  }
+  rootIds.forEach(r=>rec(r,0));
+  lines.push('');
+  lines.push('נוצר באפליקציית אילן היוחסין השומרוני.');
+  return lines.join('\n');
+}
+let currentShareText='';
+function openShare(rootIds, title){
+  currentShareText=buildTreeText(rootIds, title);
+  document.getElementById('shareTitle').textContent='שיתוף: '+title;
+  document.getElementById('shareText').value=currentShareText;
+  document.getElementById('shareModal').classList.add('open');
+}
+function shareVia(method){
+  const text=currentShareText;
+  const capped = text.length>1600 ? text.slice(0,1580)+'\n… (הרשימה קוצרה לשיתוף — ראו את העץ המלא באפליקציה)' : text;
+  if(method==='whatsapp'){ window.open('https://wa.me/?text='+encodeURIComponent(capped),'_blank'); }
+  else if(method==='email'){ window.location.href='mailto:?subject='+encodeURIComponent('אילן יוחסין שומרוני')+'&body='+encodeURIComponent(capped); }
+  else if(method==='copy'){
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(()=>toast('הועתק ללוח ✓'),()=>fallbackCopy()); }
+    else fallbackCopy();
+  }
+}
+function fallbackCopy(){ const ta=document.getElementById('shareText'); ta.focus(); ta.select(); try{document.execCommand('copy'); toast('הועתק ללוח ✓');}catch(e){ toast('בחרו והעתיקו ידנית'); } }
+document.getElementById('shareClose').onclick=()=>document.getElementById('shareModal').classList.remove('open');
+document.getElementById('shareModal').addEventListener('click',e=>{ if(e.target.id==='shareModal') e.currentTarget.classList.remove('open'); });
+document.querySelectorAll('.share-actions button').forEach(b=> b.onclick=()=>shareVia(b.getAttribute('data-m')) );
+
+/* ---------- controls ---------- */
+const marriageCountEl=document.getElementById('marriageCount');
+function setZoom(z){ zoom=Math.min(1.6, Math.max(0.35, Math.round(z*100)/100)); document.getElementById('zoomReset').textContent=Math.round(zoom*100)+'%'; applyZoom(); }
+document.getElementById('zoomIn').onclick=()=>setZoom(zoom+0.15);
+document.getElementById('zoomOut').onclick=()=>setZoom(zoom-0.15);
+document.getElementById('zoomReset').onclick=()=>setZoom(1);
+// marriage-line mode buttons
+document.querySelectorAll('#marriageMode .mode-btn').forEach(b=>{
+  b.onclick=()=>{
+    marriageMode=b.getAttribute('data-mode');
+    document.querySelectorAll('#marriageMode .mode-btn').forEach(x=>x.classList.toggle('on', x===b));
+    applyMarriageMode();
+  };
+});
+// "center on family" dropdown
+const familyJump=document.getElementById('familyJump');
+familyList.forEach((fam,i)=>{
+  const o=document.createElement('option'); o.value=i;
+  o.textContent=fam.name+' ('+fam.house.replace(/^[א-ת]\.\s*/,'')+')';
+  familyJump.appendChild(o);
+});
+familyJump.onchange=()=>{
+  const i=familyJump.value; if(i==='') return;
+  const fam=familyList[+i]; if(!fam||!fam.rootIds.length) return;
+  ensureHouseVisible(fam.house);
+  renderTree();
+  const target=domByPerson.get(fam.rootIds[0]);
+  if(target){ clearFocus(); target.classList.add('focus'); focusedBox=target; target.scrollIntoView({behavior:'smooth', block:'center', inline:'center'}); }
+  familyJump.value='';
+};
+
+/* ---------- init ---------- */
+document.getElementById('count').textContent=Object.keys(persons).length+' אנשים · '+houseNames.length+' בתי-אב · '+familyList.length+' משפחות';
+renderApex();
+renderTree();
+</script>
+</body>
+</html>

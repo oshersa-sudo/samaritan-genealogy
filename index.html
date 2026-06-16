@@ -1,0 +1,4016 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>אילן יוחסין שומרוני — מיפקד 1909</title>
+<style>
+  :root{
+    --bg:#f4f1ea; --panel:#fffdf8; --ink:#2c2620; --muted:#7d7468;
+    --line:#d8cfbe; --accent:#7b5e2e; --accent2:#b8954a;
+    --male:#2f6f8f; --female:#9a4b6e; --hl:#ffe9a8; --hl-border:#e0a82e;
+    --shadow:0 2px 10px rgba(60,45,20,.12);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Segoe UI","Arial Hebrew","David",Arial,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.5;
+  }
+  header{
+    position:sticky; top:0; z-index:30; background:var(--panel);
+    border-bottom:2px solid var(--accent2); box-shadow:var(--shadow);
+    padding:10px 16px;
+  }
+  .title-row{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
+  h1{font-size:20px; margin:0; color:var(--accent)}
+  .sub{font-size:12px; color:var(--muted)}
+  .controls{display:flex; gap:14px; flex-wrap:wrap; align-items:flex-start; margin-top:10px}
+  .ctl{display:flex; flex-direction:column; gap:4px}
+  .ctl label{font-size:11px; color:var(--muted); font-weight:bold}
+  .search-wrap{position:relative; min-width:280px; flex:1}
+  #search{
+    width:100%; padding:8px 12px; font-size:15px; border:1px solid var(--line);
+    border-radius:8px; background:#fff; color:var(--ink);
+  }
+  #search:focus{outline:none; border-color:var(--accent2); box-shadow:0 0 0 2px rgba(184,149,74,.25)}
+  .hint{font-size:11px; color:var(--muted); margin-top:2px}
+  #results{
+    position:absolute; top:100%; inset-inline:0; margin-top:4px; background:#fff;
+    border:1px solid var(--line); border-radius:8px; box-shadow:var(--shadow);
+    max-height:340px; overflow:auto; z-index:40; display:none;
+  }
+  #results.open{display:block}
+  .res{padding:8px 12px; cursor:pointer; border-bottom:1px solid #efe9dd; font-size:14px}
+  .res:last-child{border-bottom:none}
+  .res:hover,.res.active{background:var(--hl)}
+  .res .r-name{font-weight:bold}
+  .res .r-meta{font-size:11px; color:var(--muted)}
+  .res .r-empty{padding:10px 12px; color:var(--muted)}
+  .houses{display:flex; gap:8px; flex-wrap:wrap}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px; padding:5px 10px; font-size:13px;
+    border:1px solid var(--line); border-radius:18px; background:#fff; cursor:pointer; user-select:none;
+  }
+  .chip input{accent-color:var(--accent); margin:0}
+  .chip.on{background:var(--accent); color:#fff; border-color:var(--accent)}
+  .btns{display:flex; gap:8px; align-items:center}
+  button.act{
+    padding:6px 12px; font-size:13px; border:1px solid var(--line); background:#fff;
+    border-radius:7px; cursor:pointer; color:var(--ink);
+  }
+  button.act:hover{background:var(--hl)}
+  main{padding:16px; padding-inline-end:16px; transition:padding-inline-start .2s}
+  body.panel-open main{padding-inline-start:380px}
+  .legend{font-size:12px; color:var(--muted); margin-bottom:12px; display:flex; gap:16px; flex-wrap:wrap; align-items:center}
+  .legend .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-inline-end:4px}
+  .apex{
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:0; margin-bottom:16px; overflow:hidden;
+  }
+  .apex>summary{padding:10px 14px; cursor:pointer; font-weight:bold; color:var(--accent); list-style:none}
+  .apex>summary::-webkit-details-marker{display:none}
+  .apex>summary::before{content:"▸ "; color:var(--accent2)}
+  .apex[open]>summary::before{content:"▾ "}
+  .apex-body{padding:4px 16px 14px; font-size:13.5px}
+  .apex-body b{color:var(--accent)}
+  .apex-body div{margin:4px 0}
+
+  .house-block{margin-bottom:26px}
+  .house-h{font-size:17px; color:var(--accent); border-bottom:2px solid var(--accent2); padding-bottom:4px; margin:0 0 12px}
+  .family-block{
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:12px 14px; margin-bottom:16px; box-shadow:var(--shadow);
+  }
+  .family-h{display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:8px}
+  .family-h .fname{font-size:15px; font-weight:bold; color:var(--ink)}
+  .family-h .fmeta{font-size:11px; color:var(--muted)}
+
+  .gen{font-size:10px; color:#fff; background:var(--accent2); border-radius:10px; padding:1px 7px}
+  .years{font-size:11.5px; color:var(--muted)}
+
+  /* graphical hierarchical tree */
+  #treeHost{overflow:auto; background:#fffdf8; border:1px solid var(--line); border-radius:10px;
+            max-height:calc(100vh - 240px); min-height:440px; position:relative}
+  .tree-canvas{position:relative; transform-origin:100% 0}
+  .tree-svg{position:absolute; top:0; inset-inline-start:0; overflow:visible; pointer-events:none}
+  .node-layer{position:absolute; top:0; left:0; width:100%; height:100%}
+  .canvas-house{position:absolute; inset-inline-end:10px; font-size:15px; font-weight:bold; color:var(--accent);
+                border-bottom:2px solid var(--accent2); padding-bottom:3px}
+  .canvas-family{position:absolute; inset-inline-end:14px; display:flex; align-items:center; gap:10px; font-size:13px; white-space:nowrap}
+  .canvas-family .cf-name{font-weight:bold; color:var(--ink)}
+  .canvas-family .cf-meta{color:var(--muted); font-size:11px}
+  .node-box{position:absolute; width:124px; height:56px; box-sizing:border-box; background:#fff;
+    border:1.5px solid var(--line); border-radius:9px; padding:3px 6px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+    box-shadow:0 1px 3px rgba(60,45,20,.12); transition:box-shadow .12s, transform .12s; overflow:hidden}
+  .node-box:hover{box-shadow:0 4px 12px rgba(60,45,20,.25); transform:translateY(-1px)}
+  .node-box.male{border-color:var(--male)}
+  .node-box.female{border-color:var(--female)}
+  .node-box.unk{border-color:var(--muted)}
+  .node-box .nb-gen{font-size:9px; color:#fff; background:var(--accent2); border-radius:8px; padding:0 6px;
+                    position:absolute; top:3px; inset-inline-end:4px}
+  .node-box .nb-name{font-size:13px; font-weight:700; line-height:1.15; margin-top:7px; color:var(--ink)}
+  .node-box.male .nb-name{color:var(--male)} .node-box.female .nb-name{color:var(--female)}
+  .node-box .nb-years{font-size:10.5px; color:var(--muted); margin-top:1px}
+  .node-box .nb-story{font-size:10px}
+  .node-box.focus{box-shadow:0 0 0 3px var(--hl-border); border-color:var(--hl-border)}
+  .conn{fill:none; stroke:#cbb88f; stroke-width:1.6}
+  .marriage-link{fill:none; stroke:var(--female); stroke-width:1.5; stroke-dasharray:5 4; opacity:.55}
+  .marriage-link.active{stroke:#d23f7d; stroke-width:2.6; opacity:.95; stroke-dasharray:none}
+  .mode-btn.on{background:var(--accent); color:#fff; border-color:var(--accent)}
+  #familyJump{padding:7px 10px; border:1px solid var(--line); border-radius:8px; background:#fff; font:inherit; font-size:13px; color:var(--ink); max-width:250px}
+  #familyJump:focus{outline:none; border-color:var(--accent2)}
+
+  /* detail panel */
+  #panel{
+    position:fixed; top:0; inset-inline-start:0; height:100vh; width:370px; background:var(--panel);
+    border-inline-end:2px solid var(--accent2); box-shadow:var(--shadow); z-index:50;
+    transform:translateX(-100%); transition:transform .2s; overflow:auto; padding:0;
+  }
+  body.panel-open #panel{transform:translateX(0)}
+  .p-head{position:sticky; top:0; background:var(--accent); color:#fff; padding:14px 16px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px}
+  .p-head .p-title{font-size:19px; font-weight:bold}
+  .p-head .p-sub{font-size:12px; opacity:.85; margin-top:2px}
+  .p-close{background:rgba(255,255,255,.2); border:none; color:#fff; font-size:18px; width:30px; height:30px; border-radius:6px; cursor:pointer; flex:0 0 auto}
+  .p-close:hover{background:rgba(255,255,255,.35)}
+  .p-body{padding:14px 16px}
+  .field{margin-bottom:12px}
+  .field .k{font-size:11px; color:var(--muted); font-weight:bold; text-transform:uppercase; letter-spacing:.03em}
+  .field .v{font-size:14px; margin-top:2px}
+  .link{background:none;border:none;font:inherit;color:var(--accent);cursor:pointer;padding:0;text-decoration:underline}
+  .link:hover{color:var(--accent2)}
+  .pill{display:inline-block; background:#efe7d4; border-radius:6px; padding:2px 8px; margin:2px 3px 2px 0; font-size:13px}
+  .sp{border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin-bottom:7px; background:#fff; font-size:13.5px}
+  .sp .sp-name{font-weight:bold}
+  .sp .sp-meta{font-size:11.5px; color:var(--muted); margin-top:2px}
+  .note-box{background:#fbf6e8; border:1px solid var(--accent2); border-radius:8px; padding:8px 10px; font-size:13px}
+  .empty-state{padding:40px; text-align:center; color:var(--muted)}
+  .hasstory{font-size:12px; cursor:default; opacity:.85}
+  .story-box{background:#fbf6e8; border:1px solid var(--accent2); border-radius:8px; padding:10px 12px; font-size:14px; line-height:1.65}
+  .share-btn{
+    padding:4px 10px; font-size:12px; border:1px solid var(--accent); background:#fff; color:var(--accent);
+    border-radius:16px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; white-space:nowrap;
+  }
+  .share-btn:hover{background:var(--accent); color:#fff}
+  .share-btn.full{width:100%; justify-content:center; margin-top:10px; padding:8px}
+  /* share modal */
+  .share-modal{position:fixed; inset:0; background:rgba(40,30,15,.5); z-index:80; display:none; align-items:center; justify-content:center; padding:16px}
+  .share-modal.open{display:flex}
+  .share-card{background:var(--panel); border-radius:12px; width:min(520px,100%); max-height:88vh; overflow:auto; box-shadow:var(--shadow)}
+  .share-head{display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--accent); color:#fff; border-radius:12px 12px 0 0}
+  .share-head .sh-title{font-weight:bold; font-size:16px}
+  .share-head button{background:rgba(255,255,255,.2); border:none; color:#fff; width:30px; height:30px; border-radius:6px; cursor:pointer; font-size:16px}
+  .share-body{padding:14px 16px}
+  .share-body textarea{width:100%; height:200px; resize:vertical; border:1px solid var(--line); border-radius:8px; padding:10px; font:inherit; font-size:13px; background:#fff; color:var(--ink); direction:rtl}
+  .share-actions{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap}
+  .share-actions button{flex:1; min-width:120px; padding:10px; border:none; border-radius:8px; font:inherit; font-size:14px; font-weight:bold; cursor:pointer; color:#fff}
+  .sa-wa{background:#25d366} .sa-wa:hover{background:#1faa50}
+  .sa-mail{background:#5b7fb8} .sa-mail:hover{background:#4a6aaa}
+  .sa-copy{background:var(--accent)} .sa-copy:hover{background:var(--accent2)}
+  .share-hint{font-size:11.5px; color:var(--muted); margin-top:8px}
+  #toast{position:fixed; bottom:20px; inset-inline-start:50%; transform:translateX(50%); background:var(--ink); color:#fff; padding:10px 18px; border-radius:20px; font-size:14px; z-index:90; opacity:0; transition:opacity .2s; pointer-events:none}
+  #toast.show{opacity:1}
+  @media (max-width:640px){
+    body.panel-open main{padding-inline-start:16px}
+    #panel{width:100%}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="title-row">
+    <h1>אילן יוחסין שומרוני</h1>
+    <span class="sub">מיפקד השומרונים 1909 · רשימות פאול קאהלה · הרחבות רצון צדקה · <span id="count"></span></span>
+  </div>
+  <div class="controls">
+    <div class="ctl search-wrap">
+      <label for="search">חיפוש אדם</label>
+      <input id="search" type="text" autocomplete="off"
+             placeholder="שם, חלק משם, או 'שם אב' / 'שם אם' (למשל: אברהם זבולן)">
+      <div class="hint">אפשר לחפש שם בלבד, או שם + שם האב / האם להבחנה. לחיצה על תוצאה תאתר את האדם בעץ.</div>
+      <div id="results"></div>
+    </div>
+    <div class="ctl">
+      <label>סינון לפי בית-אב</label>
+      <div class="houses" id="houseFilter"></div>
+    </div>
+    <div class="ctl">
+      <label>זום</label>
+      <div class="btns">
+        <button class="act" id="zoomOut" title="הקטן">➖</button>
+        <button class="act" id="zoomReset" title="איפוס">100%</button>
+        <button class="act" id="zoomIn" title="הגדל">➕</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <label>קווי נישואין (<span id="marriageCount">0</span> בסך הכל)</label>
+      <div class="btns" id="marriageMode" title="בחרו מתי להציג את קווי הנישואין/הקישור בין המשפחות">
+        <button class="act mode-btn" data-mode="all">הכל</button>
+        <button class="act mode-btn on" data-mode="selected">רק לאדם הנבחר</button>
+        <button class="act mode-btn" data-mode="off">כבוי</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <label>מרכז על משפחה</label>
+      <select id="familyJump"><option value="">— בחרו משפחה לקפיצה —</option></select>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="legend">
+    <span><span class="dot" style="background:var(--male)"></span>זכר</span>
+    <span><span class="dot" style="background:var(--female)"></span>נקבה</span>
+    <span><span class="gen" style="background:var(--accent2)">דור N</span> מספר הדור (כל שכבה = דור)</span>
+    <span><svg width="34" height="10" style="vertical-align:middle"><line x1="0" y1="5" x2="34" y2="5" stroke="var(--female)" stroke-width="1.5" stroke-dasharray="5 4"/></svg> קו נישואין / קישור בין משפחות</span>
+    <span>📖 יש סיפור חיים · שנים: לועזי או ג'רי</span>
+  </div>
+  <div id="apexHost"></div>
+  <div id="treeHost"></div>
+</main>
+
+<aside id="panel" aria-hidden="true">
+  <div class="p-head">
+    <div>
+      <div class="p-title" id="pTitle"></div>
+      <div class="p-sub" id="pSub"></div>
+    </div>
+    <button class="p-close" id="pClose" title="סגור">✕</button>
+  </div>
+  <div class="p-body" id="pBody"></div>
+</aside>
+
+<div class="share-modal" id="shareModal">
+  <div class="share-card">
+    <div class="share-head">
+      <span class="sh-title" id="shareTitle">שיתוף עץ</span>
+      <button id="shareClose" title="סגור">✕</button>
+    </div>
+    <div class="share-body">
+      <textarea id="shareText" readonly></textarea>
+      <div class="share-actions">
+        <button class="sa-wa" data-m="whatsapp">📱 וואטסאפ</button>
+        <button class="sa-mail" data-m="email">✉️ אימייל</button>
+        <button class="sa-copy" data-m="copy">📋 העתק</button>
+      </div>
+      <div class="share-hint">השיתוף שולח את העץ כטקסט. ברשתות מסוימות טקסט ארוך עלול להיחתך — אפשר תמיד להעתיק את הכל.</div>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+const DATA = {
+ "document": {
+  "title": "מיפקד השומרונים בשנת 1909",
+  "source_publication": "א.ב. – חדשות השומרונים, גיליון 500 (15.12.1989)",
+  "primary_source": "פרופ' פאול קאהלה (רשימות מיפקד 1909)",
+  "expansions_by": "רצון בן בנימים צדקה",
+  "trees_by": "בנימים צדקה",
+  "note": "כל 29 עמודי ה-PDF נקראו. פענוח הרשימות המבניות (קאהלה) הושלם במלואו: 3 בתי-אב, 10 משפחות, סעיף בודדים. נותרו: תמלול הפרוזה (שלב 2) וקריאת 8 הדיאגרמות הגרפיות (שלב 3).",
+  "status": "הושלם: שלב 1 (מיפקד מבני, 193 רשומות) + שלב 2 (תמלול 17 עמודי פרוזה) + שלב 3 (8 דיאגרמות, כולל אילן-השורש). מוכן למסירה ל-Claude Code."
+ },
+ "reference_code_legend": {
+  "note": "קוד-הפניה = מזהה + אות בית-אב + קוד-משפחה. נשמרו גולמיים. השיוך אומת פיזית מקריאת כל הבלוקים:",
+  "ד'א": "הדנפי / משפחת אלטיף (1)",
+  "ד'ב": "הדנפי / משפחת שלבי (2)",
+  "ד'ג / ד'יג": "הדנפי / משפחת משלמה (3)",
+  "ד'יד / ד'ד": "הדנפי / משפחת עבד-אלה (4)",
+  "ד'ה": "הדנפי / משפחת הסתרי (5)",
+  "מ' / מי' / אמי'": "המרחיבי (בית אב המרחיבים)",
+  "צ' / צי' / צ": "הצפרי (בית אב הצפרים)",
+  "כ' / כב' / כי' / לב' / לד'": "לא ודאי — אולי בית-אב/משפחה נוספת (אולי הכהנים, שפורסמו בנפרד). טעון אימות."
+ },
+ "houses": [
+  {
+   "house": "ב. בית אב הדנפים",
+   "families": [
+    {
+     "family_no": 1,
+     "family": "משפחת אלטיף הדנפי",
+     "branch": "ענף שלמה בן אבּ-ספֿוה",
+     "ref_code": "ד'א",
+     "persons": [
+      {
+       "id": "38",
+       "code": "א",
+       "name": "יוסף לֻגֻּפְֿי",
+       "sex": "M",
+       "father": "שלמה בן אבּ-ספֿוה",
+       "spouses": [],
+       "children_ids": [
+        "39",
+        "49"
+       ]
+      },
+      {
+       "id": "39",
+       "code": "א/1",
+       "name": "יצחק לֻגֻּפְֿי",
+       "sex": "M",
+       "father_id": "38",
+       "birth": 1245,
+       "spouses": [
+        {
+         "name": "לדֻהְרָה בת אסעד",
+         "ref": "209כב'-צ",
+         "death": 1312
+        }
+       ],
+       "children_ids": [
+        "40",
+        "41",
+        "42",
+        "43"
+       ]
+      },
+      {
+       "id": "40",
+       "code": "א/1/א",
+       "name": "סלגֿח",
+       "sex": "F",
+       "father_id": "39",
+       "birth": 1268,
+       "spouses": [
+        {
+         "name": "יעקב בן ישמעאל",
+         "ref": "162ד'ה",
+         "birth": 1260,
+         "death": 1299
+        }
+       ]
+      },
+      {
+       "id": "41",
+       "code": "א/1/ב",
+       "name": "שפיקה",
+       "sex": "F",
+       "father_id": "39",
+       "birth": 1275,
+       "death": 1322,
+       "spouses": [
+        {
+         "name": "יצחק",
+         "ref": "5כ'"
+        }
+       ]
+      },
+      {
+       "id": "42",
+       "code": "א/1/ג",
+       "name": "ירבקה",
+       "sex": "F",
+       "father_id": "39",
+       "birth": 1280,
+       "spouses": [
+        {
+         "name": "אפרים בן שלמה",
+         "ref": "66ד'א",
+         "birth": 1264,
+         "death": 1322
+        }
+       ]
+      },
+      {
+       "id": "43",
+       "code": "א/1/ד",
+       "name": "זבולן",
+       "sex": "M",
+       "father_id": "39",
+       "birth": 1282,
+       "spouses": [
+        {
+         "name": "רבקה בת פינחס",
+         "ref": "34כב'",
+         "birth": 1288
+        }
+       ],
+       "children_ids": [
+        "44",
+        "45",
+        "46",
+        "47",
+        "48"
+       ]
+      },
+      {
+       "id": "44",
+       "code": "א/1/ד-א'",
+       "name": "יוסף לוטפי",
+       "sex": "M",
+       "father_id": "43",
+       "birth": 1310
+      },
+      {
+       "id": "45",
+       "code": "א/1/ד-ב'",
+       "name": "יצחק",
+       "sex": "M",
+       "father_id": "43",
+       "birth": 1312
+      },
+      {
+       "id": "46",
+       "code": "א/1/ד-ג'",
+       "name": "עפיף",
+       "sex": "M",
+       "father_id": "43",
+       "birth": 1315
+      },
+      {
+       "id": "47",
+       "code": "א/1/ד-ד'",
+       "name": "לוטפיה",
+       "sex": "F",
+       "father_id": "43",
+       "birth": 1317
+      },
+      {
+       "id": "48",
+       "code": "א/1/ד-ה'",
+       "name": "אברהם",
+       "sex": "M",
+       "father_id": "43",
+       "birth": 1322
+      },
+      {
+       "id": "49",
+       "code": "א/2",
+       "name": "רבקה",
+       "sex": "F",
+       "father_id": "38",
+       "spouses": [
+        {
+         "name": "שלמה",
+         "ref": null,
+         "note": "המשך הרשומה נחתך בתחתית העמודה — לאימות"
+        }
+       ]
+      },
+      {
+       "id": "50",
+       "code": "ב",
+       "name": "שלמה לֻגֻּפְֿי",
+       "sex": "M",
+       "father": "שלמה בן אבּ-ספֿוה",
+       "note": "נישא פעמיים",
+       "spouses": [
+        {
+         "name": "נשונה בת ישמעאל",
+         "ref": "149ד'ה",
+         "birth": 1236,
+         "note": "אשתו השנייה; ילדיו 2-4 ממנה"
+        }
+       ],
+       "children_ids": [
+        "51",
+        "57",
+        "66"
+       ]
+      },
+      {
+       "id": "51",
+       "code": "ב/1",
+       "name": "יוסף",
+       "sex": "M",
+       "father_id": "50",
+       "birth": 1240,
+       "death": 1264,
+       "spouses": [
+        {
+         "name": "זהרה בת אסעד",
+         "ref": "209בב'-צ'",
+         "death": 1312
+        }
+       ],
+       "children_ids": [
+        "52"
+       ]
+      },
+      {
+       "id": "52",
+       "code": "ב/1/א",
+       "name": "יוסף",
+       "sex": "M",
+       "father_id": "51",
+       "birth": 1264,
+       "death": 1327,
+       "spouses": [
+        {
+         "name": "עזייה בת מרחיב",
+         "note": "נפטרה"
+        },
+        {
+         "name": "מרים בת חביב",
+         "ref": "234צ'",
+         "note": "גורשה"
+        },
+        {
+         "name": "אלה בת יעקב אלשלבי",
+         "ref": "74ד'ב"
+        }
+       ],
+       "children_ids": [
+        "53",
+        "55",
+        "56"
+       ]
+      },
+      {
+       "id": "53",
+       "code": "ב/1/א-א'",
+       "name": "אברהם",
+       "sex": "M",
+       "father_id": "52",
+       "birth": 1297,
+       "spouses": [
+        {
+         "name": "תמאם בת יצחק",
+         "ref": "7כ'",
+         "birth": 1306
+        }
+       ],
+       "children_ids": [
+        "54"
+       ]
+      },
+      {
+       "id": "54",
+       "code": "ב/1/א-א'1",
+       "name": "עבד-חנונה",
+       "sex": "M",
+       "father_id": "53",
+       "birth": 1326
+      },
+      {
+       "id": "55",
+       "code": "ב/1/א-ב'",
+       "name": "ישראל",
+       "sex": "M",
+       "father_id": "52",
+       "birth": 1298
+      },
+      {
+       "id": "56",
+       "code": "ב/1/א-ג'",
+       "name": "זהִיֶה",
+       "sex": "F",
+       "father_id": "52",
+       "birth": 1301,
+       "spouses": [
+        {
+         "name": "שלמה",
+         "ref": "13לב'",
+         "birth": 1280,
+         "death": 1327
+        }
+       ]
+      },
+      {
+       "id": "57",
+       "code": "ב/2",
+       "name": "אבּ-סְכֻּוָה",
+       "sex": "M",
+       "father_id": "50",
+       "birth": 1260,
+       "death": 1318,
+       "spouses": [
+        {
+         "name": "ורדה בת עמרם",
+         "ref": "3כב'",
+         "birth": 1258,
+         "death": 1319,
+         "note": "נישואיה השניים"
+        }
+       ],
+       "children_ids": [
+        "58",
+        "65אא'",
+        "65בּ'",
+        "65ד"
+       ]
+      },
+      {
+       "id": "58",
+       "code": "ב/2/א",
+       "name": "עבדאלה",
+       "sex": "M",
+       "father_id": "57",
+       "birth": 1286,
+       "spouses": [
+        {
+         "name": "מרים בת יעקב",
+         "ref": "20כב'",
+         "birth": 1288
+        }
+       ],
+       "children_ids": [
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65"
+       ]
+      },
+      {
+       "id": "59",
+       "code": "ב/2/א-א'",
+       "name": "(שם לאימות)",
+       "sex": null,
+       "father_id": "58",
+       "birth": 1309
+      },
+      {
+       "id": "60",
+       "code": "ב/2/א-ב'",
+       "name": "סלים",
+       "sex": "M",
+       "father_id": "58",
+       "birth": 1312
+      },
+      {
+       "id": "61",
+       "code": "ב/2/א-ג'",
+       "name": "פֻּדִיר (זהר)",
+       "sex": "M",
+       "father_id": "58",
+       "birth": 1316
+      },
+      {
+       "id": "62",
+       "code": "ב/2/א-ד'",
+       "name": "בַּדְרָיָה = פִּפְּרָיָה",
+       "sex": "F",
+       "father_id": "58",
+       "birth": 1317
+      },
+      {
+       "id": "63",
+       "code": "ב/2/א-ה'",
+       "name": "רג'ה = אבּ-סכוה",
+       "sex": "M",
+       "father_id": "58",
+       "birth": 1320
+      },
+      {
+       "id": "64",
+       "code": "ב/2/א-ו'",
+       "name": null,
+       "sex": null,
+       "father_id": "58",
+       "note": "ילד אחד שמת בן שנה וחצי"
+      },
+      {
+       "id": "65",
+       "code": "ב/2/א-ז'",
+       "name": "חֲרִיֶה = טובה",
+       "sex": "F",
+       "father_id": "58",
+       "birth": 1324
+      },
+      {
+       "id": "65אא'",
+       "code": "ב/2/ב",
+       "name": "גמליאל",
+       "sex": "M",
+       "father_id": "57",
+       "birth": 1289,
+       "spouses": [
+        {
+         "name": "הדִיֶה בת אפרים",
+         "ref": "67ד'א",
+         "birth": 1307
+        }
+       ],
+       "note": "ללא ילדים"
+      },
+      {
+       "id": "65בּ'",
+       "code": "ב/2/ג",
+       "name": "שלום",
+       "sex": "M",
+       "father_id": "57",
+       "birth": 1294,
+       "spouses": [
+        {
+         "name": "רבקה בת אפריס",
+         "ref": "68ד'א",
+         "birth": 1310
+        }
+       ],
+       "children_ids": [
+        "65ג"
+       ]
+      },
+      {
+       "id": "65ג",
+       "code": "ב/2/ג-א'",
+       "name": "עיפאת",
+       "sex": null,
+       "father_id": "65בּ'"
+      },
+      {
+       "id": "65ד",
+       "code": "ב/2/ד",
+       "name": "עזיזה",
+       "sex": "F",
+       "father_id": "57",
+       "spouses": [
+        {
+         "name": "עזי (שפיק) בן יעקב",
+         "ref": "21כב'"
+        }
+       ]
+      },
+      {
+       "id": "66",
+       "code": "ב/3",
+       "name": "אפרים",
+       "sex": "M",
+       "father_id": "50",
+       "birth": 1264,
+       "death": 1322,
+       "spouses": [
+        {
+         "name": "רבקה בת יצחק לנטפי",
+         "ref": "42ד'א",
+         "birth": 1280
+        }
+       ],
+       "children_ids": [
+        "67"
+       ]
+      },
+      {
+       "id": "67",
+       "code": "ב/3/א",
+       "name": "הדִיֶה",
+       "sex": "F",
+       "father_id": "66",
+       "birth": 1307,
+       "spouses": [
+        {
+         "name": "גמליאל בן אבּ-סכנה",
+         "ref": "65אא'-ד'א",
+         "birth": 1289
+        }
+       ]
+      },
+      {
+       "id": "68",
+       "code": "ב/3/ב",
+       "name": "רפיקה",
+       "sex": "F",
+       "father_id": "66",
+       "birth": 1310,
+       "spouses": [
+        {
+         "name": "שלום בן אבּ-סכוה",
+         "birth": 1294
+        }
+       ]
+      },
+      {
+       "id": "69",
+       "code": "ב/3/ג",
+       "name": "תמים = כַּאמֵל",
+       "sex": "M",
+       "father_id": "66",
+       "birth": 1315
+      },
+      {
+       "id": "70",
+       "code": "ב/4",
+       "name": "זַינָאבּ = פִּצֻּנָה",
+       "sex": "F",
+       "father_id": "50",
+       "birth": 1252,
+       "death": 1301,
+       "spouses": [
+        {
+         "name": "עבד-חנונה בן ישראל",
+         "ref": "80דב'",
+         "note": "= אדם #80 (קישור הדדי)"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "family_no": 2,
+     "family": "משפחת שלבי הדנפי",
+     "ref_code": "ד'ב",
+     "persons": [
+      {
+       "id": "71",
+       "code": "א",
+       "name": "יוסף שלפֿי (השלכי)",
+       "sex": "M",
+       "children_ids": [
+        "72"
+       ]
+      },
+      {
+       "id": "72",
+       "code": "א/1",
+       "name": "יעקב",
+       "sex": "M",
+       "birth": 1253,
+       "death": 1307,
+       "father_id": "71",
+       "children_ids": [
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78"
+       ],
+       "spouses": [
+        {
+         "name": "שמסה בת ישראל הסתרי",
+         "ref": "130ד'ה",
+         "birth": 1267,
+         "death": 1307,
+         "note": "= אדם #130"
+        }
+       ]
+      },
+      {
+       "id": "73",
+       "code": "א/1/א'",
+       "name": "בנימים",
+       "sex": "M",
+       "father_id": "72",
+       "note": "נפטר ללא ילדים"
+      },
+      {
+       "id": "74",
+       "code": "א/1/ב'",
+       "name": "אֵלָה",
+       "sex": "F",
+       "birth": 1278,
+       "death": 1305,
+       "father_id": "72",
+       "spouses": [
+        {
+         "name": "יוסף בן יוסף הדנפי",
+         "ref": "52ד'א",
+         "birth": 1264,
+         "death": 1327,
+         "note": "= אדם #52"
+        }
+       ]
+      },
+      {
+       "id": "75",
+       "code": "א/1/ג'",
+       "name": "שַׁלַבִּי",
+       "sex": "M",
+       "birth": 1281,
+       "father_id": "72",
+       "children_ids": [
+        "75א"
+       ],
+       "spouses": [
+        {
+         "name": "מסעוּדָה בת ישמעאל הסתרי",
+         "ref": "124ד'ה"
+        }
+       ]
+      },
+      {
+       "id": "75א",
+       "code": "א/1/ג'-א'",
+       "name": "אליס (עליס)",
+       "sex": "F",
+       "birth": 1319,
+       "father_id": "75"
+      },
+      {
+       "id": "76",
+       "code": "א/1/ד'",
+       "name": "פריד",
+       "sex": "M",
+       "death": 1309,
+       "father_id": "72"
+      },
+      {
+       "id": "77",
+       "code": "א/1/ה'",
+       "name": "עזיז",
+       "sex": "M",
+       "birth": 1294,
+       "father_id": "72",
+       "note": "רווק"
+      },
+      {
+       "id": "78",
+       "code": "א/1/ו'",
+       "name": "חילמי",
+       "sex": "M",
+       "birth": 1296,
+       "father_id": "72",
+       "children_ids": [
+        "78-son"
+       ],
+       "spouses": [
+        {
+         "name": "עפִיפָה בת שלמה הדנפי",
+         "birth": 1303
+        }
+       ]
+      },
+      {
+       "id": "78-son",
+       "code": "א/1/ו'-א'",
+       "name": null,
+       "father_id": "78",
+       "note": "בן אחד, מת"
+      },
+      {
+       "id": "79",
+       "code": "ב/.../1",
+       "name": "ישראל אלמנעלם (=המורה)",
+       "sex": "M",
+       "children_ids": [
+        "80",
+        "81",
+        "82",
+        "83"
+       ],
+       "note": "פרוגניטור ב'=שלבי; בנו עבד-חנונה; #79 בנו. מת."
+      },
+      {
+       "id": "80",
+       "code": "ב/1/א",
+       "name": "עבד-חנונה",
+       "sex": "M",
+       "birth": 1252,
+       "death": 1301,
+       "father_id": "79",
+       "spouses": [
+        {
+         "name": "פגעה (זִינַאבּ) בת שלמה הדנפי",
+         "ref": "70דא'",
+         "birth": "= אדם #70 (הדדי); ללא ילדים"
+        }
+       ]
+      },
+      {
+       "id": "81",
+       "code": "ב/1/ב",
+       "name": "זוהֲרָה",
+       "sex": "F",
+       "birth": 1254,
+       "father_id": "79",
+       "spouses": [
+        {
+         "name": "חביב/חובב הצפרי",
+         "ref": "228צי'",
+         "birth": 1242,
+         "death": 1303,
+         "note": "= אדם #228 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "82",
+       "code": "ב/1/ג",
+       "name": "שמסה",
+       "sex": "F",
+       "birth": 1256,
+       "father_id": "79",
+       "spouses": [
+        {
+         "name": "אברהם (=חליל) המרחיבי",
+         "ref": "193מי'",
+         "birth": 1250,
+         "death": 1306,
+         "note": "= אדם #193 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "83",
+       "code": "ב/1/ד",
+       "name": "זבולן",
+       "sex": "M",
+       "birth": 1258,
+       "death": 1278,
+       "father_id": "79"
+      }
+     ]
+    },
+    {
+     "family_no": 3,
+     "family": "משפחת משלמה הדנפי (– א')",
+     "ref_code": "ד'ג / ד'יג",
+     "persons": [
+      {
+       "id": "84",
+       "code": "א",
+       "name": "אברהם בן שלח",
+       "sex": "M",
+       "children_ids": [
+        "85",
+        "88",
+        "89",
+        "93",
+        "94"
+       ],
+       "note": "פרוגניטור א' (אבי-המשפחה: אבּ-ספֿוה -> בנו שלח -> בניו)"
+      },
+      {
+       "id": "85",
+       "code": "א/1",
+       "name": "שלח",
+       "sex": "M",
+       "birth": 1246,
+       "death": 1279,
+       "father_id": "84",
+       "children_ids": [
+        "86",
+        "87"
+       ],
+       "spouses": [
+        {
+         "name": "רבקה בת יוסף לוטפי",
+         "ref": "49ד'א",
+         "birth": "= אדם #49",
+         "death": "אם הבן הראשון"
+        },
+        {
+         "name": "ורדה בת עמרס",
+         "ref": "3כי'",
+         "note": "אם הבן השני"
+        }
+       ]
+      },
+      {
+       "id": "86",
+       "code": "א/1/א",
+       "name": "סלגֿח",
+       "sex": "F",
+       "father_id": "85",
+       "spouses": [
+        {
+         "name": "יעקב בן אהרן",
+         "ref": "18כי'"
+        }
+       ]
+      },
+      {
+       "id": "87",
+       "code": "א/1/ב",
+       "name": "מריס",
+       "sex": "F",
+       "birth": 1277,
+       "father_id": "85",
+       "spouses": [
+        {
+         "name": "שלח (=צאלח) הצפרי",
+         "ref": "229צ'",
+         "birth": 1272,
+         "note": "= אדם #229 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "88",
+       "code": "א/2",
+       "name": "טרחפֶה",
+       "sex": "F",
+       "birth": 1245,
+       "death": 1317,
+       "father_id": "84",
+       "spouses": [
+        {
+         "name": "יצחק בן שלמה",
+         "ref": "28כ'",
+         "death": 1257
+        },
+        {
+         "name": "אבו סֻאתֶה"
+        },
+        {
+         "name": "סלים (סאלם) בן עבד-אלה הדנפי",
+         "ref": "112ד'ד",
+         "birth": 1228,
+         "death": 1302,
+         "note": "= אדם #112 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "89",
+       "code": "א/3",
+       "name": "אבּ-סְפְֿוָה \"שהראן\"",
+       "sex": "M",
+       "birth": 1256,
+       "father_id": "84",
+       "children_ids": [
+        "90",
+        "91",
+        "92",
+        "93"
+       ],
+       "spouses": [
+        {
+         "name": "חפיזה בת אבּ-ספֿוה בן עבד-אלה",
+         "ref": "108ד'יד",
+         "birth": 1266,
+         "death": 1294,
+         "note": "= אדם #108; אם הבן הראשון"
+        },
+        {
+         "name": "ניעמה בת עבד-חנונה הסתרי",
+         "ref": "147ד'ה",
+         "birth": 1278,
+         "note": "= אדם #147; אם שלושת הילדים הבאים"
+        }
+       ]
+      },
+      {
+       "id": "90",
+       "code": "א/3/א",
+       "name": "אברהם",
+       "sex": "M",
+       "birth": 1283,
+       "father_id": "89",
+       "note": "רווק"
+      },
+      {
+       "id": "91",
+       "code": "א/3/ב",
+       "name": "שלח",
+       "sex": "M",
+       "birth": 1294,
+       "father_id": "89",
+       "note": "רווק"
+      },
+      {
+       "id": "92",
+       "code": "א/3/ג",
+       "name": "פגעה = זִינַאבּ",
+       "sex": "F",
+       "birth": 1300,
+       "father_id": "89",
+       "spouses": [
+        {
+         "name": "סעד בן שלמה הצפרי",
+         "ref": "247צ'",
+         "birth": 1274,
+         "death": "= אדם #247 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "93",
+       "code": "א/3/ד",
+       "name": "משלמה",
+       "sex": "M",
+       "birth": 1309,
+       "father_id": "89"
+      },
+      {
+       "id": "94",
+       "code": "א/4",
+       "name": "שמסה",
+       "sex": "F",
+       "father_id": "84",
+       "spouses": [
+        {
+         "name": "יהושע בן יוסף המרחיבי",
+         "ref": "166מ'",
+         "birth": 1239,
+         "death": 1293,
+         "note": "= אדם #166 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "95",
+       "code": "ב",
+       "name": "יצחק בן שלח",
+       "sex": "M",
+       "children_ids": [
+        "96"
+       ],
+       "note": "פרוגניטור ב' של המשפחה"
+      },
+      {
+       "id": "96",
+       "code": "ב/1",
+       "name": "שלח",
+       "sex": "M",
+       "birth": 1218,
+       "father_id": "95",
+       "children_ids": [
+        "97",
+        "98"
+       ],
+       "spouses": [
+        {
+         "name": "פאתבה בת יצחק המרחיבי",
+         "ref": "190אמי'",
+         "birth": 1256,
+         "death": 1318,
+         "note": "= אדם #190א (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "97",
+       "code": "ב/1/א",
+       "name": "זַהֲרָה",
+       "sex": "F",
+       "birth": 1267,
+       "father_id": "96",
+       "spouses": [
+        {
+         "name": "חביב",
+         "ref": "180מ'",
+         "birth": 1258,
+         "death": 1307,
+         "note": "= אדם #180 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "98",
+       "code": "ב/1/ב",
+       "name": "ישמעאל",
+       "sex": "M",
+       "birth": 1278,
+       "father_id": "96",
+       "spouses": [
+        {
+         "name": "חפיזה בת שלמה הדנפי",
+         "ref": "106ד'יד",
+         "birth": "= אדם #106; ללא ילדים"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "family_no": 4,
+     "family": "משפחת עבד-אלה הדנפי",
+     "ref_code": "ד'יד / ד'ד",
+     "persons": [
+      {
+       "id": "100",
+       "code": "א",
+       "name": "אבּ-ספֿוה",
+       "sex": "M",
+       "children_ids": [
+        "101",
+        "104",
+        "107",
+        "108",
+        "109",
+        "110",
+        "111"
+       ]
+      },
+      {
+       "id": "101",
+       "code": "א/1",
+       "name": "סעד",
+       "sex": "M",
+       "birth": 1255,
+       "father_id": "100",
+       "children_ids": [
+        "102",
+        "103"
+       ],
+       "spouses": [
+        {
+         "name": "פאתבה בת יצחק מרחיבי",
+         "ref": "190אמי'",
+         "death": 1318,
+         "note": "= אדם #190א? נישואין שניים"
+        }
+       ]
+      },
+      {
+       "id": "102",
+       "code": "א/1/א",
+       "name": "מסעוּדָה",
+       "sex": "F",
+       "father_id": "101",
+       "spouses": [
+        {
+         "name": "מליח",
+         "ref": "30כב'",
+         "birth": 1286
+        }
+       ]
+      },
+      {
+       "id": "103",
+       "code": "א/1/ב",
+       "name": "עבד-אלה",
+       "sex": "M",
+       "birth": 1300,
+       "death": 1321,
+       "father_id": "101"
+      },
+      {
+       "id": "104",
+       "code": "א/2",
+       "name": "שלמה",
+       "sex": "M",
+       "birth": 1260,
+       "death": 1307,
+       "father_id": "100",
+       "children_ids": [
+        "105",
+        "106"
+       ],
+       "spouses": [
+        {
+         "name": "סנעאד בת ישראל הסתרי",
+         "birth": 1271,
+         "note": "נישואין שלישיים"
+        }
+       ]
+      },
+      {
+       "id": "105",
+       "code": "2/א",
+       "name": "עפיפֶה",
+       "sex": "F",
+       "birth": 1303,
+       "father_id": "104",
+       "spouses": [
+        {
+         "name": "חילמי בן יעקב אלשלבי",
+         "ref": "78ד'ב",
+         "birth": 1296,
+         "death": "= אדם #78"
+        }
+       ]
+      },
+      {
+       "id": "106",
+       "code": "2/ב",
+       "name": "חפיזֶה",
+       "sex": "F",
+       "father_id": "104",
+       "spouses": [
+        {
+         "name": "ישמעאל בן שלח",
+         "ref": "98ד'ג",
+         "birth": 1278,
+         "death": "= אדם #98"
+        }
+       ]
+      },
+      {
+       "id": "107",
+       "code": "3",
+       "name": "לאה",
+       "sex": "F",
+       "birth": 1265,
+       "father_id": "100",
+       "spouses": [
+        {
+         "name": "ישמעאל בן ישמעאל הסתרי",
+         "ref": "122ד'ה",
+         "birth": 1232,
+         "death": 1300,
+         "note": "= אדם #122"
+        }
+       ]
+      },
+      {
+       "id": "108",
+       "code": "4",
+       "name": "חפיזה",
+       "sex": "F",
+       "birth": 1266,
+       "death": 1294,
+       "father_id": "100",
+       "spouses": [
+        {
+         "name": "אבּ-ספֿוה שהראן",
+         "ref": "89ד'ג",
+         "birth": 1256,
+         "death": "= אדם #89 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "109",
+       "code": "5",
+       "name": "זוהֲרָה",
+       "sex": "F",
+       "birth": 1268,
+       "death": 1325,
+       "father_id": "100",
+       "spouses": [
+        {
+         "name": "שת (=ריזק) המרחיבי",
+         "ref": "172מ'",
+         "birth": 1247,
+         "death": 1323,
+         "note": "= אדם #172 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "110",
+       "code": "6",
+       "name": "אברהם",
+       "sex": "M",
+       "birth": 1270,
+       "death": 1323,
+       "father_id": "100",
+       "spouses": [
+        {
+         "name": "לבִּיפֶה בת סאלם",
+         "ref": "114ד'יד",
+         "birth": 1276,
+         "death": 1324,
+         "note": "= אדם #114 (הדדי); הילדים מתו ללא צאצאים"
+        }
+       ]
+      },
+      {
+       "id": "111",
+       "code": "7",
+       "name": "אמינֶה",
+       "sex": "F",
+       "birth": 1277,
+       "father_id": "100",
+       "spouses": [
+        {
+         "name": "אבּ-ספֿוה בן סעד הסתרי",
+         "ref": "151ד'ה",
+         "birth": 1271,
+         "death": "= אדם #151 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "112",
+       "code": "ב",
+       "name": "סָאלֶם",
+       "sex": "M",
+       "birth": 1228,
+       "death": 1302,
+       "children_ids": [
+        "113",
+        "114",
+        "115"
+       ],
+       "spouses": [
+        {
+         "name": "טרחפה בת אברהם בן שלח",
+         "ref": "88ד'יג",
+         "birth": 1250,
+         "death": 1317,
+         "note": "= אדם #88 (הדדי)"
+        }
+       ],
+       "note": "פרוגניטור ב'; נולד ביפו; שוחט"
+      },
+      {
+       "id": "113",
+       "code": "ב/1",
+       "name": "סלִים",
+       "sex": "M",
+       "birth": 1274,
+       "father_id": "112",
+       "note": "השוחט של השומרונים; אשתו וילדיו מתו"
+      },
+      {
+       "id": "114",
+       "code": "ב/2",
+       "name": "לבִּיפֶה",
+       "sex": "F",
+       "birth": 1276,
+       "death": 1324,
+       "father_id": "112",
+       "spouses": [
+        {
+         "name": "אברהם בן אבּ-ספֿוה",
+         "ref": "110ד'יד",
+         "birth": 1270,
+         "death": 1323,
+         "note": "= אדם #110 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "115",
+       "code": "ב/3",
+       "name": "סעדֶה",
+       "sex": "F",
+       "birth": 1278,
+       "father_id": "112",
+       "children_ids": [
+        "116",
+        "117",
+        "118"
+       ],
+       "spouses": [
+        {
+         "name": "בנימים בן שלמה המטרי העזתי",
+         "ref": "252",
+         "birth": "= אדם #252"
+        }
+       ]
+      },
+      {
+       "id": "116",
+       "code": "ב/3/א",
+       "name": "וַסִילָה",
+       "sex": "F",
+       "birth": 1298,
+       "father_id": "115",
+       "spouses": [
+        {
+         "name": "שלח בן אברהם",
+         "note": "פרטים נחתכו"
+        }
+       ]
+      },
+      {
+       "id": "117",
+       "code": "ב/3/ב",
+       "name": "[ז]פיקה / ופלקה",
+       "sex": "F",
+       "birth": 1301,
+       "father_id": "115",
+       "spouses": [
+        {
+         "name": "אברהם בן [..]",
+         "ref": "..מי'",
+         "death": 1320
+        },
+        {
+         "name": "עבד-חנונה הסתרי",
+         "birth": 1271
+        }
+       ],
+       "note": "מוזכרת כ'ופלקה בת כנימים המטרי עזתי'; נשואה גם לאברהם #203 (הדדי)"
+      },
+      {
+       "id": "118",
+       "code": "ב/3/ג",
+       "name": "זהרה (לאימות)",
+       "sex": "F",
+       "birth": 1280,
+       "death": 1317,
+       "father_id": "115",
+       "spouses": [
+        {
+         "name": "שת (=מרזוק) המרחיבי",
+         "ref": "167מ'",
+         "birth": 1273,
+         "death": "= אדם #167 (הדדי)"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "family_no": 5,
+     "family": "משפחת הסתרי הדנפי (ישמעאל בן ישראל)",
+     "ref_code": "ד'ה",
+     "persons": [
+      {
+       "id": "121",
+       "code": "א",
+       "name": "ישמעאל",
+       "sex": "M",
+       "birth": 1168,
+       "children_ids": [
+        "122",
+        "135"
+       ],
+       "note": "פרוגניטור (ישמעאל בן ישראל הדנפי)"
+      },
+      {
+       "id": "122",
+       "code": "א/1",
+       "name": "ישראל הסתרי",
+       "sex": "M",
+       "birth": 1232,
+       "death": 1299,
+       "father_id": "121",
+       "children_ids": [
+        "123",
+        "130",
+        "131",
+        "132",
+        "133",
+        "134"
+       ],
+       "spouses": [
+        {
+         "name": "מסעודה בת שלמה",
+         "ref": "515כ'",
+         "note": "אם ילדים א-ג"
+        },
+        {
+         "name": "לאה בת אבּ-ספֿוה",
+         "ref": "710לד'",
+         "birth": 1265,
+         "note": "אם ילדים ד-ו"
+        }
+       ]
+      },
+      {
+       "id": "123",
+       "code": "א/1/א'",
+       "name": "ישמעאל",
+       "sex": "M",
+       "death": 1322,
+       "father_id": "122",
+       "children_ids": [
+        "124",
+        "125",
+        "126",
+        "127",
+        "128",
+        "129"
+       ],
+       "spouses": [
+        {
+         "name": "פרגֿ'ה בת ישראל",
+         "ref": "25",
+         "note": "ללא ילדים"
+        },
+        {
+         "name": "בדיעה בת יעקב",
+         "ref": "19כ'",
+         "birth": 1285
+        }
+       ]
+      },
+      {
+       "id": "124",
+       "code": "א/1/א'-1",
+       "name": "מסעודה",
+       "sex": "F",
+       "birth": 1305,
+       "father_id": "123",
+       "spouses": [
+        {
+         "name": "שלבי",
+         "ref": "75ד'ב",
+         "birth": 1281,
+         "death": "= אדם #75"
+        }
+       ]
+      },
+      {
+       "id": "125",
+       "code": "א/1/א'-2",
+       "name": "עיזואת",
+       "sex": "M",
+       "birth": 1307,
+       "father_id": "123"
+      },
+      {
+       "id": "126",
+       "code": "א/1/א'-3",
+       "name": "גֿמילה",
+       "sex": "F",
+       "birth": 1309,
+       "father_id": "123",
+       "note": "עיוורת"
+      },
+      {
+       "id": "127",
+       "code": "א/1/א'-4",
+       "name": "ודיעה",
+       "sex": "F",
+       "birth": 1312,
+       "father_id": "123"
+      },
+      {
+       "id": "128",
+       "code": "א/1/א'-5",
+       "name": "סֻפֿרי",
+       "sex": "M",
+       "birth": 1317,
+       "father_id": "123"
+      },
+      {
+       "id": "129",
+       "code": "א/1/א'-6",
+       "name": "ישמעאל",
+       "sex": "M",
+       "birth": 1322,
+       "father_id": "123",
+       "note": "נולד 4 ימים אחרי מות אביו"
+      },
+      {
+       "id": "130",
+       "code": "א/1/ב'",
+       "name": "שמסה",
+       "sex": "F",
+       "birth": 1267,
+       "father_id": "122",
+       "spouses": [
+        {
+         "name": "יעקב השלבי",
+         "ref": "72ד'ב",
+         "birth": 1233,
+         "death": 1307,
+         "note": "= אדם #72 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "131",
+       "code": "א/1/ג'",
+       "name": "סעדה",
+       "sex": "F",
+       "birth": 1271,
+       "father_id": "122",
+       "spouses": [
+        {
+         "name": "זבולן בן ישראל (השלכי)",
+         "note": "לא ילדה לו"
+        },
+        {
+         "name": "יהושע בן יוסף",
+         "ref": "166מי'",
+         "birth": 1239,
+         "death": 1293,
+         "note": "= אדם #166"
+        },
+        {
+         "name": "שלמה בן אבּ-ספֿוה",
+         "ref": "104ד'יד",
+         "birth": 1260,
+         "death": 1307,
+         "note": "= אדם #104 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "132",
+       "code": "א/1/ד'",
+       "name": "מפריקֶה",
+       "sex": "F",
+       "birth": 1280,
+       "death": 1307,
+       "father_id": "122",
+       "spouses": [
+        {
+         "name": "סעד בן שלמה הצפרי",
+         "ref": "247צ'",
+         "birth": 1274,
+         "death": "= אדם #247 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "133",
+       "code": "א/1/ה'",
+       "name": "תמים",
+       "sex": "M",
+       "birth": 1287,
+       "father_id": "122",
+       "spouses": [
+        {
+         "name": "פגעה=זִינַאבּ בת אברהם",
+         "ref": "217צ'",
+         "birth": 1300,
+         "death": "= אדם #217 (הדדי); שלושת הילדים מתו קטנים"
+        }
+       ]
+      },
+      {
+       "id": "134",
+       "code": "א/1/ו'",
+       "name": "פאוֹזי",
+       "sex": "M",
+       "father_id": "122"
+      },
+      {
+       "id": "135",
+       "code": "א/2",
+       "name": "עבד-חנונה",
+       "sex": "M",
+       "birth": 1234,
+       "death": 1301,
+       "father_id": "121",
+       "children_ids": [
+        "136",
+        "140"
+       ],
+       "spouses": [
+        {
+         "name": "זִינַאבּ (פגעה) בת ישראל",
+         "ref": "121ד'ה",
+         "birth": "= אדם #121"
+        }
+       ]
+      },
+      {
+       "id": "136",
+       "code": "א/2/א",
+       "name": "יוסף",
+       "sex": "M",
+       "birth": 1262,
+       "death": 1321,
+       "father_id": "135",
+       "children_ids": [
+        "137",
+        "138"
+       ],
+       "spouses": [
+        {
+         "name": "אניסה בת מרחיב",
+         "ref": "213צ'",
+         "birth": 1260,
+         "death": 1310,
+         "note": "= אדם #213 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "137",
+       "code": "א/2/א-1",
+       "name": "אברהם",
+       "sex": "M",
+       "birth": 1286,
+       "father_id": "136",
+       "spouses": [
+        {
+         "name": "רֻסְמִיֶה בת אבּ-סכוה",
+         "ref": "115ד'",
+         "birth": 1309,
+         "note": "בן אחד מת בגיל 7 ימים"
+        }
+       ]
+      },
+      {
+       "id": "138",
+       "code": "א/2/א-2",
+       "name": "נגעמן",
+       "sex": "M",
+       "birth": 1289,
+       "father_id": "136",
+       "spouses": [
+        {
+         "name": "רשיאה בת אברהם",
+         "ref": "220צ'",
+         "birth": 1308,
+         "death": "= אדם #220 (הדדי); ילד אחד מת בגיל 10 ימים"
+        }
+       ]
+      },
+      {
+       "id": "139",
+       "code": "א/2/א-3",
+       "name": "צדיקה",
+       "sex": "F",
+       "birth": 1292,
+       "father_id": "136",
+       "spouses": [
+        {
+         "name": "יצחק",
+         "ref": "5כ'",
+         "birth": 1272
+        }
+       ]
+      },
+      {
+       "id": "140",
+       "code": "א/2/ב",
+       "name": "אברהם",
+       "sex": "M",
+       "birth": 1271,
+       "father_id": "135",
+       "spouses": [
+        {
+         "name": "פֿפֿיקה בת בנימים המטרי העזתי",
+         "ref": "117",
+         "birth": 1301,
+         "death": "= אדם #117"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "house": "ג. בית אב המרחיבים",
+   "families": [
+    {
+     "family_no": 1,
+     "family": "משפחת יהושע המרחיבי",
+     "ref_code": "מ' / מי'",
+     "persons": [
+      {
+       "id": "164",
+       "code": "א",
+       "name": "יהושע",
+       "sex": "M",
+       "children_ids": [
+        "165"
+       ],
+       "note": "פרוגניטור (מרחיב -> יהושע)"
+      },
+      {
+       "id": "165",
+       "code": "א/1",
+       "name": "יוסף",
+       "sex": "M",
+       "birth": 1223,
+       "death": 1290,
+       "father_id": "164",
+       "children_ids": [
+        "166",
+        "170",
+        "177",
+        "179"
+       ],
+       "spouses": [
+        {
+         "name": "לטיפה אלערגֿיה (=הצולעה)",
+         "ref": "165מ'? (=#256)",
+         "note": "אשתו השנייה; = אדם #256"
+        }
+       ]
+      },
+      {
+       "id": "166",
+       "code": "א/1/א'",
+       "name": "יהושע",
+       "sex": "M",
+       "birth": 1239,
+       "death": 1293,
+       "father_id": "165",
+       "children_ids": [
+        "167",
+        "171"
+       ],
+       "spouses": [
+        {
+         "name": "שמסה בת אברהם",
+         "ref": "94ד'ג",
+         "birth": "= אדם #94"
+        },
+        {
+         "name": "סעגֿאר בת ישראל",
+         "ref": "113ד'ה"
+        }
+       ]
+      },
+      {
+       "id": "167",
+       "code": "א/1/א'-1",
+       "name": "שת (=מרזוק)",
+       "sex": "M",
+       "birth": 1273,
+       "father_id": "166",
+       "children_ids": [
+        "168",
+        "169"
+       ],
+       "spouses": [
+        {
+         "name": "זהרה בת אבּ-סכוה",
+         "ref": "118ד'יד",
+         "birth": 1280,
+         "death": 1317,
+         "note": "= אדם #118 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "168",
+       "code": "א/1/א'-1-א'",
+       "name": "מרחיב",
+       "sex": "M",
+       "birth": 1312,
+       "father_id": "167"
+      },
+      {
+       "id": "169",
+       "code": "א/1/א'-1-ב'",
+       "name": "יהונשע (=יהושע)",
+       "sex": "M",
+       "birth": 1317,
+       "father_id": "167"
+      },
+      {
+       "id": "170",
+       "code": "א/1/ב",
+       "name": "סעגֿד (סעוד)",
+       "sex": "F",
+       "birth": 1275,
+       "father_id": "165",
+       "spouses": [
+        {
+         "name": "סעד בן יעקב",
+         "ref": "202מ'",
+         "death": 1285
+        },
+        {
+         "name": "בנימים בן שלמה",
+         "ref": "240צ'",
+         "birth": 1258,
+         "death": 1320,
+         "note": "= אדם #240 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "171",
+       "code": "א/1/א'-3",
+       "name": "יצחק",
+       "sex": "M",
+       "birth": 1292,
+       "father_id": "166",
+       "note": "רווק"
+      },
+      {
+       "id": "172",
+       "code": "א/1/ב'",
+       "name": "שת (=ריזק)",
+       "sex": "M",
+       "birth": 1247,
+       "death": 1323,
+       "father_id": "165",
+       "children_ids": [
+        "173",
+        "174",
+        "175",
+        "177"
+       ],
+       "spouses": [
+        {
+         "name": "זהורה בת אבּ-סכוה בן עבד-אלה",
+         "ref": "109ד'יד",
+         "birth": 1268,
+         "death": 1325,
+         "note": "= אדם #109 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "173",
+       "code": "א/1/ב'-1",
+       "name": "נימרה",
+       "sex": "F",
+       "birth": 1282,
+       "death": 1325,
+       "father_id": "172",
+       "spouses": [
+        {
+         "name": "צפר (=סבאח)",
+         "ref": "184מ'",
+         "birth": 1262,
+         "death": "= אדם #184 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "174",
+       "code": "א/1/ב'-2",
+       "name": "אפרים",
+       "sex": "M",
+       "birth": 1287,
+       "father_id": "172",
+       "spouses": [
+        {
+         "name": "קמרה בת חביב",
+         "ref": "183מ'",
+         "birth": 1287,
+         "death": "= אדם #183 (הדדי); ללא ילדים"
+        }
+       ]
+      },
+      {
+       "id": "175",
+       "code": "א/1/ג'",
+       "name": "בנימים (=אמין)",
+       "sex": "M",
+       "birth": 1257,
+       "death": 1310,
+       "father_id": "172",
+       "children_ids": [
+        "176",
+        "176א"
+       ],
+       "spouses": [
+        {
+         "name": "עדִילֶה בת מרחיב",
+         "ref": "198מ'",
+         "birth": "= אדם #198 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "176",
+       "code": "א/1/ג'-1",
+       "name": "שפֿיקֶה",
+       "sex": "F",
+       "birth": 1288,
+       "father_id": "175",
+       "spouses": [
+        {
+         "name": "אריה",
+         "ref": "242",
+         "birth": "= אדם #242 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "176א",
+       "code": "א/1/ג'-2",
+       "name": "ישמעאל",
+       "sex": "M",
+       "birth": 1297,
+       "father_id": "175",
+       "note": "השם נשמט מרשימת קאהלה; א.ב. הקצה #176א; שואב המים לשומרונים"
+      },
+      {
+       "id": "177",
+       "code": "א/1/ד'",
+       "name": "זבולן",
+       "sex": "M",
+       "birth": 1259,
+       "death": 1307,
+       "father_id": "172",
+       "spouses": [
+        {
+         "name": "פֿרגֿ'יה בת ישראל הסתרי",
+         "ref": "257",
+         "note": "= אדם #257; ללא ילדים"
+        }
+       ]
+      },
+      {
+       "id": "178",
+       "code": "א/1/ה'",
+       "name": "ניגֿמה",
+       "sex": "F",
+       "birth": 1265,
+       "father_id": "166",
+       "spouses": [
+        {
+         "name": "יעקב בן מרחיב",
+         "ref": "211צ'",
+         "birth": 1258,
+         "death": 1316,
+         "note": "= אדם #211 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "179",
+       "code": "א/2",
+       "name": "יצחק",
+       "sex": "M",
+       "birth": 1225,
+       "death": 1289,
+       "father_id": "164",
+       "children_ids": [
+        "180",
+        "184"
+       ],
+       "spouses": [
+        {
+         "name": "ענברה בת יעקב",
+         "ref": "237צ'",
+         "birth": 1245,
+         "death": 1293,
+         "note": "= אדם #237 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "180",
+       "code": "א/2/א'",
+       "name": "חביב",
+       "sex": "M",
+       "birth": 1258,
+       "death": 1307,
+       "father_id": "179",
+       "children_ids": [
+        "181"
+       ],
+       "spouses": [
+        {
+         "name": "זהרה בת שלמה",
+         "ref": "79ד'ד",
+         "birth": 1267
+        }
+       ]
+      },
+      {
+       "id": "181",
+       "code": "א/2/א'-2",
+       "name": "יוסף",
+       "sex": "M",
+       "birth": 1285,
+       "death": 1322,
+       "father_id": "180",
+       "spouses": [
+        {
+         "name": "זכִּירה בת צפר",
+         "ref": "185מ'",
+         "birth": 1299,
+         "death": "= אדם #185 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "182",
+       "code": "א/2/א'-2-?",
+       "name": null,
+       "father_id": "181",
+       "note": "בת אחת שמתה"
+      },
+      {
+       "id": "183",
+       "code": "א/?",
+       "name": "קמרה",
+       "sex": "F",
+       "father_id": "179?",
+       "spouses": [
+        {
+         "name": "אפרים בן שת",
+         "ref": "174מ'",
+         "birth": 1287,
+         "death": "= אדם #174 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "184",
+       "code": "א/2/ב'",
+       "name": "צפר (=סבאח)",
+       "sex": "M",
+       "birth": 1262,
+       "father_id": "179",
+       "children_ids": [
+        "185"
+       ],
+       "spouses": [
+        {
+         "name": "נימרה בת שת",
+         "ref": "173מ'",
+         "birth": 1282,
+         "death": 1325,
+         "note": "= אדם #173 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "185",
+       "code": "א/2/ב'-1",
+       "name": "זכִּירה",
+       "sex": "F",
+       "birth": 1299,
+       "father_id": "184",
+       "spouses": [
+        {
+         "name": "יוסף",
+         "ref": "181מ'",
+         "birth": 1285,
+         "death": 1322,
+         "note": "= אדם #181 (הדדי)"
+        },
+        {
+         "name": "יעקב בן סעד",
+         "ref": "206מ'",
+         "birth": 1275,
+         "death": "= אדם #206 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "186",
+       "code": "2/בי-2",
+       "name": "מַלכָּה",
+       "sex": "F",
+       "birth": 1311,
+       "spouses": [
+        {
+         "name": "סעד בן סעד",
+         "ref": "208מ'",
+         "birth": 1285,
+         "death": "= אדם #208 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "187",
+       "code": "2/בי-3",
+       "name": "פהימה",
+       "sex": "F",
+       "spouses": [
+        {
+         "name": "זבולן בן אברהם",
+         "ref": "204מ'",
+         "birth": 1304,
+         "death": "= אדם #204 (הדדי); אירוסין"
+        }
+       ]
+      },
+      {
+       "id": "188",
+       "code": "2/בי-4",
+       "name": "(בת אחת =) קפה",
+       "sex": "F"
+      },
+      {
+       "id": "189",
+       "code": "2/בי-5",
+       "name": "מצליח",
+       "sex": "M"
+      },
+      {
+       "id": "190",
+       "code": "2/ג'",
+       "name": "נאצר",
+       "sex": "M",
+       "birth": 1271,
+       "death": 1326,
+       "spouses": [
+        {
+         "name": "זוהרה בת סעד",
+         "ref": "205מ'",
+         "birth": 1271,
+         "death": "= אדם #205; ללא ילדים"
+        }
+       ]
+      },
+      {
+       "id": "190א",
+       "code": "2/ד'",
+       "name": "פאתחה",
+       "sex": "F",
+       "birth": 1256,
+       "death": 1318,
+       "spouses": [
+        {
+         "name": "שלח בן יצחק",
+         "ref": "96ד'יא",
+         "birth": "= אדם #96"
+        },
+        {
+         "name": "סעד בן אבּ-ספֿוה",
+         "ref": "101ד'יד",
+         "birth": "= אדם #101"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "family_no": 2,
+     "family": "משפחת מרחיב המרחיבי",
+     "ref_code": "מ' / מי'",
+     "persons": [
+      {
+       "id": "192",
+       "code": "א",
+       "name": "מרחיב (=פרג')",
+       "sex": "M",
+       "death": 1280,
+       "children_ids": [
+        "193",
+        "198",
+        "199",
+        "200"
+       ],
+       "note": "מענף אחר: יעקב -> מרחיב. אשתו אם-חליל (מתה בגיל ~100)"
+      },
+      {
+       "id": "193",
+       "code": "א/1",
+       "name": "אברהם (=חליל)",
+       "sex": "M",
+       "birth": 1250,
+       "death": 1305,
+       "father_id": "192",
+       "children_ids": [
+        "194",
+        "195",
+        "196",
+        "197"
+       ],
+       "spouses": [
+        {
+         "name": "שמסה בת ישראל",
+         "ref": "82ד'ב",
+         "birth": 1256,
+         "death": "= אדם #82 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "194",
+       "code": "א/1-א'",
+       "name": "רפיק",
+       "sex": "M",
+       "birth": 1292,
+       "father_id": "193",
+       "note": "רווק"
+      },
+      {
+       "id": "195",
+       "code": "א/1-ב'",
+       "name": "יששכר",
+       "sex": "M",
+       "father_id": "193"
+      },
+      {
+       "id": "196",
+       "code": "א/1-ג'",
+       "name": "חפֻוף",
+       "sex": "M",
+       "birth": 1302,
+       "father_id": "193",
+       "note": "רווק; בעל עין אחת"
+      },
+      {
+       "id": "197",
+       "code": "א/1-ד'",
+       "name": "אנוש",
+       "sex": "M",
+       "death": 1318,
+       "father_id": "193"
+      },
+      {
+       "id": "198",
+       "code": "א/2",
+       "name": "עדִילֶה",
+       "sex": "F",
+       "father_id": "192",
+       "spouses": [
+        {
+         "name": "בנימים בן יוסף",
+         "ref": "175מ'",
+         "birth": 1257,
+         "death": 1310,
+         "note": "= אדם #175 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "199",
+       "code": "א/3",
+       "name": "סעדה",
+       "sex": "F",
+       "father_id": "192",
+       "spouses": [
+        {
+         "name": "אברהם בן סעד",
+         "ref": "203מ'",
+         "birth": 1263,
+         "death": 1320,
+         "note": "= אדם #203 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "200",
+       "code": "א/4",
+       "name": "שלח אלעיארב (=חפץ)",
+       "sex": "M",
+       "birth": 1271,
+       "father_id": "192",
+       "children_ids": [
+        "201"
+       ],
+       "spouses": [
+        {
+         "name": "זהרה בת סעד",
+         "ref": "205מ'",
+         "birth": 1271,
+         "death": "= אדם #205; גורשה"
+        },
+        {
+         "name": "עזיזה בת שמעון",
+         "ref": "258",
+         "birth": 1301,
+         "death": 1315
+        },
+        {
+         "name": "עריפה בת כנימים",
+         "ref": "241צ'",
+         "birth": 1300,
+         "death": 1322,
+         "note": "= אדם #241 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "201",
+       "code": "א/4-א'",
+       "name": "מרחיב (פרג')",
+       "sex": "M",
+       "birth": 1318,
+       "father_id": "200"
+      },
+      {
+       "id": "202",
+       "code": "ב",
+       "name": "סעד",
+       "sex": "M",
+       "death": 1285,
+       "spouses": [
+        {
+         "name": "אל-פֻלֶלה",
+         "ref": "262",
+         "death": 1280,
+         "note": "אם ילדים 1-3"
+        },
+        {
+         "name": "[אשה שנייה]",
+         "birth": 1275,
+         "note": "אם ילדים 4-5"
+        }
+       ],
+       "note": "פרוגניטור ב'"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "house": "ד. בית אב הצפרים",
+   "families": [
+    {
+     "family_no": 1,
+     "family": "משפחת מרחיב הצפרי",
+     "ref_code": "צ'",
+     "persons": [
+      {
+       "id": "209",
+       "code": "א",
+       "name": "יעקב צדקה",
+       "sex": "M",
+       "children_ids": [
+        "210"
+       ],
+       "note": "פרוגניטור (ישמעאל -> יעקב צדקה)"
+      },
+      {
+       "id": "210",
+       "code": "א/1",
+       "name": "מרחיב (=פרג')",
+       "sex": "M",
+       "birth": 1239,
+       "death": 1299,
+       "father_id": "209",
+       "children_ids": [
+        "211",
+        "213",
+        "214",
+        "224"
+       ],
+       "spouses": [
+        {
+         "name": "טרחֶה (=פֻדִיעֶה)",
+         "ref": "259",
+         "note": "= אדם #259; אם ילדים א-ב"
+        },
+        {
+         "name": "זִינַאבּ (פועה) בת עבד-בורא",
+         "ref": "1260ד'?",
+         "death": 1289,
+         "note": "אם ילדים ג-ד"
+        }
+       ]
+      },
+      {
+       "id": "211",
+       "code": "א/1/א'",
+       "name": "יעקב",
+       "sex": "M",
+       "birth": 1258,
+       "death": 1316,
+       "father_id": "210",
+       "children_ids": [
+        "212"
+       ],
+       "spouses": [
+        {
+         "name": "נגֿ'יה בת יוסף",
+         "ref": "178מ'",
+         "birth": 1265,
+         "note": "= אדם #178; נולדה ביפו"
+        },
+        {
+         "name": "בהיה בת עבד-חנונה",
+         "ref": "148ד'ה",
+         "birth": 1279,
+         "death": "= אדם #148 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "212",
+       "code": "א/1/א'-1",
+       "name": "סֻדריֶה",
+       "sex": "F",
+       "birth": 1315,
+       "father_id": "211",
+       "spouses": [
+        {
+         "name": "צדקה בן אברהם",
+         "ref": "218צ'",
+         "birth": 1301,
+         "death": "= אדם #218 (הדדי); ביפו"
+        }
+       ]
+      },
+      {
+       "id": "213",
+       "code": "א/1/ב'",
+       "name": "אניסה",
+       "sex": "F",
+       "birth": 1260,
+       "death": 1310,
+       "father_id": "210",
+       "spouses": [
+        {
+         "name": "יוסף בן עבד-חנונה",
+         "ref": "136ד'ה",
+         "birth": 1262,
+         "death": 1321,
+         "note": "= אדם #136 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "214",
+       "code": "א/1/ג'",
+       "name": "אברהם",
+       "sex": "M",
+       "birth": 1272,
+       "father_id": "210",
+       "children_ids": [
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "221",
+        "222",
+        "223"
+       ],
+       "spouses": [
+        {
+         "name": "קמרה (=ירחה) בת סעד",
+         "ref": "160ד'",
+         "birth": 1276,
+         "death": "= אדם #160"
+        }
+       ]
+      },
+      {
+       "id": "215",
+       "code": "א/1/ג'-1",
+       "name": "פרץ",
+       "sex": "M",
+       "birth": 1295,
+       "father_id": "214",
+       "spouses": [
+        {
+         "name": "סעדִיֶה בת אבּ-ספֿוה",
+         "ref": "152ד'ה",
+         "birth": "= אדם #152 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "216",
+       "code": "א/1/ג'-1-א'",
+       "name": "יצחק",
+       "sex": "M",
+       "birth": 1325,
+       "father_id": "215"
+      },
+      {
+       "id": "217",
+       "code": "2/ג",
+       "name": "זִינַאבּ (=פגעה)",
+       "sex": "F",
+       "birth": 1297,
+       "father_id": "214",
+       "spouses": [
+        {
+         "name": "ממים/תמים בן ישראל",
+         "ref": "133ד'ה",
+         "birth": 1287,
+         "death": "= אדם #133 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "218",
+       "code": "3/ג",
+       "name": "צדקה",
+       "sex": "M",
+       "birth": 1301,
+       "father_id": "214",
+       "spouses": [
+        {
+         "name": "סֻדריֶה בת יעקב",
+         "ref": "212צ'",
+         "birth": 1315,
+         "death": "= אדם #212 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "219",
+       "code": "4/ג",
+       "name": "נור (=מנֻסּבּחֶ)",
+       "sex": "M",
+       "birth": 1305,
+       "father_id": "214"
+      },
+      {
+       "id": "220",
+       "code": "5/ג",
+       "name": "רשיאה",
+       "sex": "F",
+       "birth": 1308,
+       "father_id": "214",
+       "spouses": [
+        {
+         "name": "נגעמן בן יוסף",
+         "ref": "138ד'ה",
+         "birth": 1289,
+         "death": "= אדם #138 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "221",
+       "code": "6/ג",
+       "name": "יפת (=חופֿנִי)",
+       "sex": "M",
+       "birth": 1312,
+       "father_id": "214"
+      },
+      {
+       "id": "222",
+       "code": "7/ג",
+       "name": "גואל (=פֻדִיע)",
+       "sex": "M",
+       "birth": 1317,
+       "father_id": "214"
+      },
+      {
+       "id": "223",
+       "code": "8/ג",
+       "name": "גמליאל (=גֻמאל)",
+       "sex": "M",
+       "birth": 1321,
+       "father_id": "214"
+      },
+      {
+       "id": "224",
+       "code": "ד",
+       "name": "יפת (=חסן)",
+       "sex": "M",
+       "birth": 1282,
+       "father_id": "210",
+       "children_ids": [
+        "225",
+        "226",
+        "227"
+       ],
+       "spouses": [
+        {
+         "name": "מרים בת חביב",
+         "ref": "234צ'",
+         "birth": 1283,
+         "death": "= אדם #234 (הדדי); גורשה"
+        },
+        {
+         "name": "הדִיֶה בת יצחק",
+         "ref": "6כי'",
+         "birth": 1290
+        }
+       ]
+      },
+      {
+       "id": "225",
+       "code": "ד/1",
+       "name": "יוסף",
+       "sex": "M",
+       "birth": 1315,
+       "father_id": "224"
+      },
+      {
+       "id": "226",
+       "code": "ד/2",
+       "name": "עובדיה (=עֻאפֿד)",
+       "sex": "M",
+       "birth": 1319,
+       "father_id": "224"
+      },
+      {
+       "id": "227",
+       "code": "ד/3",
+       "name": "יוכבד (=גֿ'ילֶה)",
+       "sex": "F",
+       "birth": 1324,
+       "father_id": "224"
+      }
+     ]
+    },
+    {
+     "family_no": 2,
+     "family": "משפחת חובב הצפרי",
+     "ref_code": "צ'",
+     "persons": [
+      {
+       "id": "228",
+       "code": "(פרוגניטור)",
+       "name": "חובב (=חביב)",
+       "sex": "M",
+       "birth": 1242,
+       "death": 1303,
+       "children_ids": [
+        "229",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238"
+       ],
+       "spouses": [
+        {
+         "name": "זוהרה בת ישראל אלשנואין",
+         "ref": "81ד'ב",
+         "birth": 1254,
+         "death": "= אדם #81 (הדדי)"
+        }
+       ],
+       "note": "ראש המשפחה"
+      },
+      {
+       "id": "229",
+       "code": "א",
+       "name": "שלח (=צאלח)",
+       "sex": "M",
+       "birth": 1272,
+       "father_id": "228",
+       "children_ids": [
+        "230",
+        "231",
+        "232"
+       ],
+       "spouses": [
+        {
+         "name": "מרים בת שלח",
+         "ref": "87ד'יג",
+         "birth": 1277,
+         "death": "= אדם #87 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "230",
+       "code": "א/1",
+       "name": "בנימים (אלאמין)",
+       "sex": "M",
+       "birth": 1295,
+       "father_id": "229",
+       "spouses": [
+        {
+         "name": "זִינַאבּ (פועה) בת שמעון בן עבד-חנונה",
+         "ref": "145ד'ה",
+         "birth": 1315,
+         "death": "= אדם #145 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "231",
+       "code": "א/2",
+       "name": "סעד",
+       "sex": "M",
+       "birth": 1307,
+       "father_id": "229"
+      },
+      {
+       "id": "232",
+       "code": "א/3",
+       "name": "אשר (=ממדוח)",
+       "sex": "M",
+       "birth": 1310,
+       "father_id": "229"
+      },
+      {
+       "id": "233",
+       "code": "ב",
+       "name": "פלֻגֿח",
+       "sex": "F",
+       "birth": 1276,
+       "father_id": "228",
+       "spouses": [
+        {
+         "name": "שמעון בן עבד-חנונה",
+         "ref": "143ד'ה",
+         "birth": 1274,
+         "death": "= אדם #143 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "234",
+       "code": "ג",
+       "name": "מרים",
+       "sex": "F",
+       "birth": 1283,
+       "father_id": "228",
+       "spouses": [
+        {
+         "name": "יפת בן מרחיב",
+         "ref": "224צ'",
+         "birth": 1282,
+         "death": "= אדם #224 (הדדי); גורשה"
+        },
+        {
+         "name": "יוסף בן יוסף",
+         "ref": "52ד'א",
+         "birth": 1264,
+         "death": 1327,
+         "note": "= אדם #52; גורשה"
+        },
+        {
+         "name": "עבד-הרחום בן סעד",
+         "ref": "155ד'ה",
+         "birth": 1273,
+         "death": "= אדם #155 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "235",
+       "code": "ד",
+       "name": "יוסף",
+       "sex": "M",
+       "birth": 1290,
+       "father_id": "228",
+       "spouses": [
+        {
+         "name": "בדִיעֶה בת סעד",
+         "ref": "248צ'",
+         "birth": 1307,
+         "death": "= אדם #248 (הדדי); עדיין אין ילדים"
+        }
+       ]
+      },
+      {
+       "id": "236",
+       "code": "ה",
+       "name": "פתח-אלה",
+       "sex": "M",
+       "birth": 1296,
+       "father_id": "228",
+       "note": "רווק"
+      },
+      {
+       "id": "237",
+       "code": "3",
+       "name": "ענבְּרָה",
+       "sex": "F",
+       "death": 1293,
+       "father_id": "228",
+       "spouses": [
+        {
+         "name": "יצחק בן יהושע",
+         "ref": "179מ'",
+         "birth": 1225,
+         "death": 1289,
+         "note": "= אדם #179 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "238",
+       "code": "4",
+       "name": "זוהֲרָה",
+       "sex": "F",
+       "birth": 1250,
+       "father_id": "228",
+       "spouses": [
+        {
+         "name": "סעד בן ישמעאל הסתרי",
+         "ref": "150ד'ה",
+         "birth": 1240,
+         "death": 1300,
+         "note": "= אדם #150 (הדדי)"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "family_no": 3,
+     "family": "משפחת שלמה הצפרי",
+     "ref_code": "צ'",
+     "persons": [
+      {
+       "id": "239",
+       "code": "ב",
+       "name": "שלמה צדקה",
+       "sex": "M",
+       "children_ids": [
+        "240",
+        "242",
+        "243",
+        "244",
+        "245",
+        "246"
+       ],
+       "spouses": [
+        {
+         "name": "אספהאן",
+         "ref": "261",
+         "birth": "= אדם #261; אם בנימים"
+        },
+        {
+         "name": "נֶשָׁוֻן בת ישמעאל",
+         "ref": "149ד'ה",
+         "birth": 1236,
+         "note": "= אדם #149; אם הילדים אריה וסעד"
+        }
+       ],
+       "note": "מת. (שלמה בן ישמעאל בן שלח בן אבּ-זהותה הצפרי)"
+      },
+      {
+       "id": "240",
+       "code": "א",
+       "name": "בנימים (אלאמין)",
+       "sex": "M",
+       "birth": 1258,
+       "death": 1320,
+       "father_id": "239",
+       "children_ids": [
+        "241"
+       ],
+       "spouses": [
+        {
+         "name": "סעוד בת יהושע",
+         "ref": "179מ'/170מ'",
+         "birth": 1277,
+         "note": "= אדם #170?"
+        }
+       ]
+      },
+      {
+       "id": "241",
+       "code": "א/1",
+       "name": "עריפה",
+       "sex": "F",
+       "birth": 1300,
+       "death": 1322,
+       "father_id": "240",
+       "spouses": [
+        {
+         "name": "שלמה",
+         "ref": "13לב'",
+         "birth": 1288,
+         "death": 1327
+        },
+        {
+         "name": "שלח [אלע'ארב]",
+         "ref": "200מ'",
+         "birth": "= אדם #200 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "242",
+       "code": "ב/?",
+       "name": "[נימר]",
+       "sex": "M",
+       "father_id": "239",
+       "spouses": [
+        {
+         "name": "שפיקה בת [בנימים]",
+         "ref": "176מ'",
+         "birth": "= אדם #176 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "243",
+       "code": "ב/?",
+       "name": "זפאי (=זפי)",
+       "sex": "M",
+       "birth": 1300,
+       "father_id": "239",
+       "spouses": [
+        {
+         "name": "חוסון בת [סעד]",
+         "ref": "249צ'",
+         "birth": 1312,
+         "death": "= אדם #249 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "244",
+       "code": "ב/?",
+       "name": "מנטיע",
+       "sex": "M",
+       "father_id": "239",
+       "note": "לקוי בשכלו"
+      },
+      {
+       "id": "245",
+       "code": "ב/?",
+       "name": "ישראל",
+       "sex": "M",
+       "father_id": "239"
+      },
+      {
+       "id": "246",
+       "code": "ב/4",
+       "name": "יצחק",
+       "sex": "M",
+       "birth": 1315,
+       "father_id": "239",
+       "note": "בעל עין אחת"
+      },
+      {
+       "id": "247",
+       "code": "ג",
+       "name": "סעד",
+       "sex": "M",
+       "birth": 1274,
+       "children_ids": [
+        "248",
+        "249"
+       ],
+       "spouses": [
+        {
+         "name": "מפרוקה בת ישראל בן ישמעאל",
+         "ref": "132ד'ה",
+         "birth": 1280,
+         "death": "= אדם #132 (הדדי); אם ילדים א,ב"
+        },
+        {
+         "name": "זינאב בת אבּ-ספֿוה שהראן",
+         "ref": "92ד'ג",
+         "birth": 1300,
+         "death": "= אדם #92; ללא ילדים"
+        }
+       ],
+       "note": "פרוגניטור ג'"
+      },
+      {
+       "id": "248",
+       "code": "ג/1",
+       "name": "בַּדִיעָה",
+       "sex": "F",
+       "birth": 1307,
+       "father_id": "247",
+       "spouses": [
+        {
+         "name": "יוסף בן חביב",
+         "ref": "235צ'",
+         "birth": 1290,
+         "death": "= אדם #235 (הדדי)"
+        }
+       ]
+      },
+      {
+       "id": "249",
+       "code": "ג/2",
+       "name": "חוסון",
+       "sex": "F",
+       "birth": 1312,
+       "father_id": "247",
+       "spouses": [
+        {
+         "name": "זפאי בן אריה",
+         "ref": "243",
+         "birth": 1300,
+         "death": "= אדם #243 (הדדי)"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "house": "ה. שמות שומרונים שלא נמצאו בגיניאולוגיה (בודדים)",
+   "families": [
+    {
+     "family_no": null,
+     "family": "בודדים",
+     "persons": [
+      {
+       "id": "251",
+       "code": null,
+       "name": "(בת אבּ-ספֿוה בן שלח)",
+       "sex": "F",
+       "note": "אשת הכהן הגדול עמרם; ref 1.כ'"
+      },
+      {
+       "id": "252",
+       "code": null,
+       "name": "בנימים [המטרי העזתי]",
+       "sex": "M",
+       "note": "ממשפחת המטרי; ref 115ד'יד; = בן-זוג #115"
+      },
+      {
+       "id": "253",
+       "code": null,
+       "name": "שלח",
+       "sex": "M",
+       "spouses": [
+        {
+         "name": "נסילה",
+         "ref": "116"
+        }
+       ],
+       "note": "פרטים נחתכו"
+      },
+      {
+       "id": "254",
+       "code": null,
+       "name": "אברהם",
+       "sex": "M",
+       "birth": 1272,
+       "spouses": [
+        {
+         "name": "קַמרה",
+         "ref": "160ד'",
+         "birth": "= אדם #160"
+        }
+       ],
+       "note": "ככל הנראה זהה ל-#214 (אותו אברהם בן 1272 שנשא את קמרה #160)"
+      },
+      {
+       "id": "255",
+       "code": null,
+       "name": "סַעַד בן עבד אלחאלק",
+       "sex": "M",
+       "death": 1326,
+       "spouses": [
+        {
+         "name": "סעדה",
+         "ref": "161ד'ה",
+         "birth": "= אדם #161"
+        }
+       ]
+      },
+      {
+       "id": "256",
+       "code": null,
+       "name": "לטיפה אלארג'ה (=הצולעה)",
+       "sex": "F",
+       "spouses": [
+        {
+         "name": "יוסף",
+         "ref": "165מ'",
+         "birth": "= אדם #165"
+        }
+       ],
+       "note": "= אשת יוסף #165"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "inventory": {
+  "structured_census_status": "הושלם — כל 29 העמודים נקראו; כל הבלוקים המבניים חולצו.",
+  "captured_ids": "38-256 (כמעט רציף).",
+  "remaining_id_gaps": "99, 119, 191, 250, 257-262 — אלו מופיעים רק כהפניות (השמות הזמינים שובצו ב-spouses) או הושמטו במקור.",
+  "pending": [
+   "שלב 2: תמלול מלא של קטעי הפרוזה (הרחבה) לקבצי טקסט + שיוך דורות עדכניים/תאריכים לועזיים",
+   "שלב 3: קריאת 8 הדיאגרמות הגרפיות (עמודים 3,5,7,11,15,19,20,26) לאימות וקישור"
+  ]
+ },
+ "root_genealogy": {
+  "note": "אילן-השורש הקדום, מתוך עצי החיים הגרפיים (עמוד 3). מקשר את כל בתי-האב לאב קדמון.",
+  "danfi_apex": {
+   "founder": "אברהם, שבא מדמשק (מחצית ראשונה של המאה ה-17)",
+   "sons": [
+    "עבד-הרחום",
+    "ישמעאל (-> שורש הסתרי)",
+    "אבּ-סכוה (-> אברהם, משלמה[משפ' 3], עבד-אלה[משפ' 4], יעקב, יצחק)"
+   ],
+   "via_yitzhak": "יצחק -> אבּ-סכוה -> {שלמה [שורש אלטיף משפ' 1], יוסף, שמעון}",
+   "shalabi_root": "צדקה=שלבי / עבד-חנונה 'אלמנעלם' [שורש שלבי משפ' 2]"
+  },
+  "marhibi_apex": "יעקב בן אברהם -> מרחיב ('מרחיב הקטן', מאה 18) -> {אפרים, יהושע[->יהושעי], יעקב[->מרחיבי], אברהם}",
+  "tsfari_apex": "אבּ-זהותה בן יוסף בן אבּ-זהותה -> {יוסף, שלמה[->סעד], שלח[->ישמעאל->{שלמה,יעקב}=אבות משפחת צדקה]}"
+ }
+};
+const STORIES = {
+ "_note": "סיפורי-חיים בשפה פשוטה, מעובדים מהרחבות הפרוזה של רצון צדקה (עמודים 74-98). 't'=טקסט, 'g'=שנות חיים לועזיות כפי שמופיעות בפרוזה.",
+
+ "38": {"t":"אבי ענף אלטיף הדנפי, בנו של אבּ-ספֿוה בן עבד-חנונה. היו לו שני ילדים: יצחק ורבקה."},
+ "39": {"t":"אדם נדיב מאוד שהתעשר מהמסחר. במקום ארון הכסף שעשה מרחיב צדקה לבית הכנסת, עשה ארון נחושת מצופה זהב ובו הונח 'מכתב אבישע' (ספר התורה העתיק). נתן צדקה בסתר לעניים, היה איש דתי ופירנס את כל המשפחה כי היה העשיר בה. נשא את זהרה בת סעד הצפרי.", "g":"1824–1915"},
+ "40": {"t":"בתו של יצחק לוטפי. נישאה ליעקב בן ישמעאל הסתרי, שידע קרוא וכתוב ושירה.", "g":"1851–1935"},
+ "41": {"t":"בת יצחק לוטפי. נישאה לכהן יצחק וילדה לו את עמרם, צדקה, הדיה, תמאם ומרים.", "g":"1858–1904"},
+ "42": {"t":"בת יצחק לוטפי. נישאה לאפרים בן שלמה הדנפי. ילדה ילדים רבים שמתו בקטנותם; נותרו לה בן (תמים) ושתי בנות. אשה רגילה ושקטה.", "g":"1863–1946"},
+ "43": {"t":"בן יצחק לוטפי. הצטיין בכתב יד יפה במיוחד — בכתב מרובע, בכתב רהוט ('טרשי') ובערבית. אחרי מות אביו התרושש והתפרנס מהעתקת ספרים. נשא ב-1884 את רבקה בת הכהן פינחס. כונה 'אבו עפיף' על שם בנו שמת בקטנותו.", "g":"1865–1917"},
+ "44": {"t":"בנו של זבולן.", "g":"1892–1963"},
+ "45": {"t":"בן זבולן. אחיו עפיף פירנס אותו."},
+ "46": {"t":"בן זבולן. עבד כפקיד אצל חאג' נימר אל-נבולסי, מגדולי עשירי שכם, ועסק בחינוך, באדמות ובבתים. נשא את נזמיה בת עבד-אלה הדנפי. היה נדיב ותמך בנזקקים.", "g":"1897–1940"},
+ "47": {"t":"בת זבולן. נישאה לסלים בן עבד-אלה הדנפי שנהרג ברעידת האדמה של 1927; נותרה אלמנה עד מותה.", "g":"1900–1975"},
+ "48": {"t":"הצעיר בבני זבולן והבולט מכל אחיו. ידע את הספרים בעל-פה ולמד היטב את השיראן השומרוני. כמעט הראשון שדיבר עברית מודרנית. עבד במשרד ההוצאה לפועל בבית המשפט בשכם וקיבל פנסיה מהבריטים, מהירדנים ומישראל.", "g":"1904–1982"},
+ "49": {"t":"בת יוסף לוטפי. נישאה לשלח בן אברהם הדנפי; בתם סלגֿח נישאה לכהן הגדול יעקב בן אהרן."},
+ "50": {"t":"אדם חכם וזקן בית הכנסת. נשא את נשונה בת ישמעאל, אלמנת הכהן אהרן בן שלמה. ילדיו: יוסף (מאשתו הראשונה), אבּ-סכוה, אפרים וזינאב.", "g":"–1888"},
+ "51": {"t":"בן שלמה. נשא את זהרה בת סעד הצפרי. נפטר צעיר כשאשתו הרה, ובנם נקרא יוסף על שמו.", "g":"1824–1847"},
+ "52": {"t":"נשא שלוש נשים: עזיה בת מרחיב (מתה), מרים בת חביב צדקה (גורשה), ואלה בת יעקב אלשלבי שילדה את אברהם.", "g":"1847–1909"},
+ "53": {"t":"סוחר. הרחיב את עסקיו ונתן סחורה לכפריים ללא חשבון — וכך הפסיד את כל כספו. היה נדיב ודתי. ב-1939 נסע לחיפה לגבות חוב, נסע בטעות במכונית ממשלתית שהסיעה עדים במשפט נגד כנופיות, ותוקפים שחשבוהו לעד רצחו אותו. אשתו מתה מצער שנה אחריו.", "g":"1879–1939"},
+ "54": {"t":"בן אברהם. המשיך בעסקי המסחר של אביו.", "g":"1908–"},
+ "55": {"t":"בן יוסף בן יוסף. פקיד ומנהל חשבונות אצל סוחרי שכם. בעיר סלט שבעבר הירדן הסתכסך עם ערבים שהפילוהו מבניין למותו. הובא לקבורה בשכם.", "g":"1880–1918"},
+ "56": {"t":"בת יוסף בן יוסף. נישאה לשלמה בן עמרם הכהן.", "g":"1883–1950"},
+ "57": {"t":"פקיד בכיר בממשל הטורקי שעבד אצל הקיימקאם (מושל שכם). ידע טורקית, עברית וערבית, והיה בקיא גדול בשיראן. נשא את ורדה בת עמרם. ילדיו: עבד-אלה, גמליאל, שלום ועזיזה.", "g":"1843–1899"},
+ "58": {"t":"היה אחראי על משרד הטאבו (רישום המקרקעין) בשכם. למד בעצמו תנ\"ך ופירושי חכמי השומרונים, רכש השכלה רבה, היה בעל כתב יפה בערבית וזיכרון מצוין — ידע את מיקומה של כל חלקת אדמה באזור שכם.", "g":"1850–1937"},
+ "65אא'": {"t":"בן אבּ-סכוה. נשא את הדיה בת אפרים הדנפי. עסק במכירת בשר לשומרונים — קנה כבשים בשותפות ומכרם — והעתיק ספרים בערבית למכירה.", "g":"1872–1932"},
+ "65בּ'": {"t":"בן אבּ-סכוה. נשא את רפיקה בת אפרים הדנפי. זמר ראשון בעל קול עשיר ויפה; העתיק ספרים רבים; שוחט מוסמך; עבד כפקיד ואחר כך פתח חנות בדים.", "g":"1877–1942"},
+ "65ד": {"t":"בת אבּ-סכוה. נישאה לעזי בן הכהן הגדול יעקב בן אהרן. אמרו שהיתה אשה יפה מאוד.", "g":"1880–1918"},
+ "66": {"t":"בקיא במדרש השומרוני — פירש בקצרה את כל התורה, ידע את ספרי בראשית ושמות בעל-פה וחיבר פיוטים רבים. התפרנס ממסחר בבדים בשוק שכם. נשא את רבקה בת יצחק הדנפי.", "g":"1847–1905"},
+ "67": {"t":"בת אפרים. נישאה לבן-דודה גמליאל."},
+ "68": {"t":"בת אפרים. נישאה לבן-דודה שלום (סלים)."},
+ "69": {"t":"בן אפרים. ידע את ספרי בראשית ושמות בעל-פה, היה זמר והעתיק ספרים רבים (אך לא מכרם). עבד כפקיד-שוטר בממשלת המנדט וקיבל פנסיה עד מותו.", "g":"1897–1983"},
+
+ "71": {"t":"אבי משפחת שלבי, בן צדקה בן יעקב הדנפי. אביו צדקה כונה 'שלבי' (=יפה)."},
+ "72": {"t":"איש רב-עלילות שנודע בבריחתו לאנגליה מפני רודפיו, בעזרת סגן הקונסול הבריטי בחיפה, בשנות ה-50 של המאה ה-19. אחר כך שב לשכם וחזר לדת. נשא את שמסה בת ישראל הסתרי, אשה מכובדת.", "g":"1817–1889"},
+ "73": {"t":"נשא שתי נשים שלא ילדו לו. עבד כפקיד ומנהל חשבונות אצל הסוחרים; הואשם פעם במעילה ונחבש שנים רבות. כתב מעט ולא היה זמר.", "g":"–1908"},
+ "74": {"t":"בת יעקב השלבי.", "g":"1861–1888"},
+ "75": {"t":"אישיות גדולה כעין עורך-דין: למד במצרים ושהה באיסטנבול, ובשובו לשכם עסק בעריכת דין (כינוהו 'אבוקטו'=Advocate) והציל אנשים מעונש. בקיא בלשון הערבית והעתיק ספרי תורה. נשא את מסעודה בת ישמעאל הדנפי.", "g":"1864–1920"},
+ "75א": {"t":"בת שלבי. נישאה לגור בן אברהם צדקה.", "g":"1902–1987"},
+ "76": {"t":"בן יעקב. כל העדה הצטערה כשמת לפתע בצעירותו, לפני שהספיק להעמיק בדת כאחיו.", "g":"1871–1891"},
+ "77": {"t":"בן יעקב. העתיק ספרים רבים ומכרם דרך אחיו שלבי; ידע פיוטים. נפטר בסלט ונקבר שם — השומרוני היחיד הקבור שם.", "g":"1877–1917"},
+ "78": {"t":"בן יעקב. גר שנים רבות בסלט ורוב שנותיו בשכם.", "g":"1878–1937"},
+ "79": {"t":"אבי ענף שלבי, בנו של עבד-חנונה ('אלמנעלם'=המורה, שבזכותו חודשה עליית השומרונים להר גריזים). היה פקיד בממשל הטורקי; נשא את מרים בת הכהן הגדול שלמה."},
+ "80": {"t":"בן ישראל. אישיות בממשל הטורקי. נשא את זינאב 'הצולעת' בת שלמה הדנפי; לא היו להם ילדים.", "g":"1835–1883"},
+ "81": {"t":"בת ישראל, סבתו של רצון צדקה (מחבר ההרחבות). נישאה לחובב הצפרי."},
+ "82": {"t":"בת ישראל. נישאה לאברהם המרחיבי וילדה לו את יששכר, אניס ורפיק.", "g":"1839–1916"},
+ "83": {"t":"בן ישראל. אישיות בבית הכנסת; ידע את ספרי בראשית ושמות בעל-פה וגם את 'חשבון קשטה' (החשבון השומרוני המסורתי). נפטר צעיר ולא הספיק לשאת אשה.", "g":"1841–"},
+
+ "84": {"t":"אבי משפחת משלמה (פרוגניטור), מצאצאי אבּ-ספֿוה. הוליד את שלח, טרחפה, אבּ-ספֿוה ('שהראן') ושמסה."},
+ "85": {"t":"חי חיים קצרים אך מילא תפקיד בממשלה. בקיא בשומרונות: ידע בראשית ושמות בעל-פה, כתב פיוטים, דרש, ולימד את קריאת התורה לשני הכהנים. נשא שלוש נשים.", "g":"1830–1862"},
+ "86": {"t":"בת שלח. נישאה ליעקב בן אהרן."},
+ "87": {"t":"בת שלח. נישאה לשלח (צאלח) הצפרי."},
+ "88": {"t":"בת אברהם בן שלח. נישאה לשלושה בעלים: יצחק בן שלמה הכהן, אבו סואתה, וסאלם בן עבד-אלה הדנפי.", "g":"1829–1900"},
+ "89": {"t":"כונה 'שהראן'. לא היה בקיא ולא קרא תורה; עסק במכירת כבשים והיה איש דתי. מת באופן יוצא דופן: בדרכו ברגל מטול-כרם לשכם נח ליד מעיין, שתה, נרדם, ובהרכינו ראשו למים נחנק וטבע. נשא את חפיזה בת אבּ-ספֿוה, ואחריה את נעאמה בת עבד-חנונה הסתרי.", "g":"1839–1917"},
+ "90": {"t":"כונה 'אלערגֿה הקטן'. היה חלש ומסכן; התחיל ללמוד לקרוא תורה רק בגיל 20; עסק ברוכלות בגדים בשכם וסביבותיה; אהב להתפלל.", "g":"1863–1947"},
+ "91": {"t":"כונה 'סאלם שהראן'. זילזל בדת; גר בחיפה; לא נשא אשה.", "g":"1877–1945"},
+ "92": {"t":"בת אבּ-ספֿוה. נישאה לסעד בן שלמה הצפרי וגרה עמו בטול-כרם; אחר כך נישאה לפתח-אלה בן חביב הצפרי.", "g":"1882–1944"},
+ "93": {"t":"הפיקח באחיו; שמר דת, למד תורה ותפילה והעתיק ספרים. נשא (אחרי 1909) את סרייה בת יעקב הצפרי.", "g":"1891–1971"},
+ "94": {"t":"בת אברהם בן שלח. נישאה ליהושע בן יוסף המרחיבי."},
+ "95": {"t":"פרוגניטור הענף השני של משפחת משלמה. אחיו של אברהם בן שלח."},
+ "96": {"t":"נשא את פאתבה בת יצחק 'יהושע' המרחיבי. בקיא בשומרונות.", "g":"1803–1871"},
+ "97": {"t":"בת שלח. נישאה לחובב המרחיבי."},
+ "98": {"t":"בן שלח. נשא את חפיזה בת שלמה הדנפי; ללא ילדים."},
+
+ "100": {"t":"ראש משפחת עבד-אלה, בנו של עבד-אלה. הוליד בנים ובנות רבים."},
+ "101": {"t":"ראש וראשון לקוראי בראשית ושמות בעל-פה; עסק באריגת בדים; איש פשוט שחי במחיצת הכהנים. נשא את פאתבה בת יצחק המרחיבי.", "g":"1838–1917"},
+ "102": {"t":"בת סעד. נישאה למצליח בן פינחס הכהן.", "g":"1871–1939"},
+ "103": {"t":"בן סעד. מת צעיר; סבל ממחלת נפילה; כונה 'אלחגֿירי'.", "g":"1882–1903"},
+ "104": {"t":"בן אבּ-ספֿוה. עבד כפקיד אצל סוחרי שכם. נשא את סרוגֿאד בת ישראל הסתרי.", "g":"1813–1889"},
+ "105": {"t":"בת שלמה. נישאה לחילמי בן יעקב אלשלבי."},
+ "106": {"t":"בת שלמה. נישאה לישמעאל בן שלח הדנפי."},
+ "107": {"t":"בת אבּ-ספֿוה. כונתה 'יאם אלאמעלי'. נישאה לישראל בן ישמעאל הסתרי.", "g":"1848–1920"},
+ "108": {"t":"בת אבּ-ספֿוה. נישאה לאבּ-ספֿוה 'שהראן' בן אברהם בן שלח.", "g":"1849–1877"},
+ "109": {"t":"בת אבּ-ספֿוה. נישאה לשת המרחיבי, אביו של אפרים.", "g":"1851–1907"},
+ "110": {"t":"בן אבּ-ספֿוה (בנה של לטיפה). היה חנווני — תחילה עבד אצל סוחר ואחר כך פתח חנות מכולת. נשא את לפיפה בת עארף הדנפי; בנם עארף מת צעיר. איש פשוט.", "g":"1853–1908"},
+ "111": {"t":"בת אבּ-ספֿוה. נישאה לאבּ-ספֿוה בן סעד הסתרי.", "g":"1860–1929"},
+ "112": {"t":"שוחט מוסמך של הקהילה; נמוך קומה; נולד ביפו ומת בשכם. נשא את טרחפה בת אברהם בן שלח. פרוגניטור הענף השני.", "g":"1812–1884"},
+ "113": {"t":"כונה 'סלים יאגי'. נולד בלידה קשה (תאומו מת). שוחט מוסמך ואיש דתי מאוד; העתיק ספרים ומכר לתיירים; אפה לחם ובישל בשר למכירה; היה זמר. אשתו חביבה, שאביה התאסלם, נטרפה דעתה ושרפה עצמה ב-1910.", "g":"1857–1939"},
+ "114": {"t":"בת סאלם. נישאה לאברהם בן אבּ-ספֿוה הדנפי; בנם עארף מת צעיר.", "g":"1859–1906"},
+ "115": {"t":"בת סאלם. נישאה לבנימים בן שלמה העזתי ממשפחת המטרי; ילדיה: אינמר (מת צעיר), וסילה וופֿיקה.", "g":"1861–1947"},
+ "116": {"t":"בת סעדה. נישאה לשלח בן אברהם המטרי, שעסק באריגת בדים וידע בראשית ושמות בעל-פה.", "g":"1880–1928"},
+ "117": {"t":"בת סעדה. נישאה לאברהם בן סעד המרחיבי, ואחריו לאברהם בן עבד-חנונה הסתרי."},
+ "118": {"t":"בת סאלם. נישאה לשת (מרזוק) המרחיבי.", "g":"1863–1900"},
+
+ "121": {"t":"פרוגניטור משפחת הסתרי. השורש: אברהם שבא מדמשק במאה ה-17 הוליד את ישמעאל 'אלפֿראגֿ' (סירי=סוד/סתר), שממנו יצאה משפחת הסתרי."},
+ "122": {"t":"בן ישמעאל. נשא שתי נשים והיה אב לילדים רבים.", "g":"1816–1882"},
+ "123": {"t":"בן ישראל. נשא שתי נשים ואב לשישה ילדים. בנו ישמעאל נולד ארבעה ימים לאחר מותו.", "g":"–1906"},
+ "124": {"t":"בת ישמעאל. נישאה לשלבי הדנפי.", "g":"1889–"},
+ "126": {"t":"בת ישמעאל. היתה עיוורת.", "g":"1893–"},
+ "129": {"t":"בן ישמעאל. נולד ארבעה ימים לאחר מות אביו ונקרא על שמו.", "g":"1906–"},
+ "130": {"t":"בת ישראל. כל בני הקהילה כיבדוה כי בעלה יעקב אלשלבי ובניו הטילו מורא. נישאה ליעקב השלבי.", "g":"1850–1910"},
+ "131": {"t":"כונתה גם 'סגֿאר'. ראתה בעין אחת. נישאה לשלושה: זבולן בן ישראל (ללא ילדים), יהושע בן יוסף המרחיבי, ושלמה בן אבּ-ספֿוה הדנפי — לאחרון ילדה את עפיפה וחפיזה.", "g":"1854–1908"},
+ "132": {"t":"כונתה 'מהריפה'. עקרת בית; נישאה לסעד בן שלמה הצפרי.", "g":"1863–1889"},
+ "133": {"t":"בן ישראל. נשא את פגעה=זינאב בת אברהם; שלושת ילדיהם מתו קטנים."},
+ "135": {"t":"כונה 'עבד אללטיף'. אישיות בממשל הטורקי. נשא את זינאב (פגעה) בת דודו ישראל.", "g":"1818–1887"},
+ "136": {"t":"כונה 'אלפֿיררגֿה' (=הפרעוש) על קמצנותו; שמר על כל גרוש. פקיד בממשל הטורקי בטול-כרם. נשא את אניסה בת מרחיב צדקה.", "g":"1845–1903"},
+ "137": {"t":"בן יוסף. בקיא בתפילות ובחשבונות; עבד אצל סוחרי שכם והעתיק כתבי-יד רבים. נשא את רסמיה בת אבּ-סכוה בן סעד."},
+ "138": {"t":"בן יוסף. פקיד אצל סוחרי שכם והעתיק ספרים. נשא את רשיאה בת אברהם הצפרי.", "g":"1872–1920"},
+ "139": {"t":"בת יוסף. נישאה ליצחק בן עמרם הכהן; בסוף ימיה לקתה בשיתוק.", "g":"1875–1937"},
+ "140": {"t":"בן עבד-חנונה. פקיד בממשל הטורקי שיצא לגמלאות; מעתיק ספרים מעולה. נשא את ופֿיקה בת בנימים המטרי.", "g":"1854–1926"},
+
+ "164": {"t":"פרוגניטור משפחת יהושע המרחיבי (מרחיב → יהושע)."},
+ "165": {"t":"נשא את לטיפה 'הצולעה'. ילדיו: יהושע, שת, בנימים, זבולן והבת ניגֿמה.", "g":"1807–1873"},
+ "166": {"t":"נשא שתי נשים: שמסה בת אברהם המשלמי וסעאד. ילדיו: שת, פאעגד ויצחק.", "g":"1823–1876"},
+ "167": {"t":"כונה 'מרזוק'. הביא כבשים, שוחט וקצב; העתיק ספרים. נשא את זוהרה בת סאלם המשלמי.", "g":"1856–1911"},
+ "168": {"t":"כונה 'מֻפֿארֵג''. לא ידע קרוא וכתוב; שירת בעבודות מזדמנות; לא נשא אשה.", "g":"1894–1974"},
+ "169": {"t":"כונה 'אורש'. אבד במלחמת העולם הראשונה — הגרמנים לקחוהו עמם ב-1917.", "g":"1900–"},
+ "170": {"t":"בת יוסף. נישאה לשני בעלים: סעד בן יעקב, ובנימים בן שלמה הצפרי."},
+ "171": {"t":"בן יהושע. נשאר רווק."},
+ "172": {"t":"כונה 'ריזק'. פקיד אצל סוחרי שכם. נשא את זהרה בת אבּ-ספֿוה בן עבד-אלה הדנפי.", "g":"1831–1905"},
+ "173": {"t":"בת שת. נישאה לצפר בן יהושע המרחיבי.", "g":"1865–1907"},
+ "174": {"t":"בן שת. פקיד אצל סוחר גדול ממשפחת אלנבלסי; ידע הנהלת חשבונות והעתיק כתבי-יד שומרוניים. נשא את קמרה בת חובב המרחיבי.", "g":"1870–1933"},
+ "175": {"t":"כונה 'אמין'. פקיד ומנהל חשבונות אצל סוחרי שכם; העתיק ספרים. נשא את עדילה בת מרחיב.", "g":"1840–1892"},
+ "176": {"t":"בת בנימים. נישאה לאריה הצפרי.", "g":"1871–1938"},
+ "176א": {"t":"בן בנימים. לא ידע קרוא וכתוב; עסק בשאיבת מים לבני הקהילה.", "g":"1879–1929"},
+ "177": {"t":"כונה 'פיאד'. נשא את פרוגֿה בת ישראל הסתרי.", "g":"1842–1889"},
+ "178": {"t":"בת יהושע. נישאה ליעקב בן מרחיב הצפרי."},
+ "179": {"t":"בן יהושע. פקיד אצל סוחרי שכם. נשא את ענברה בת יעקב הצפרי. ילדיו: חובב, צפר, נאסר ופאתחה.", "g":"1809–1872"},
+ "180": {"t":"כונה 'חכוב'. מנהל חשבונות אצל סוחרי שכם. נשא את זהרה בת שלח הדנפי. ילדיו: יוסף וקמרה.", "g":"1841–1889"},
+ "181": {"t":"בן חובב. עבד אצל סוחרי שכם. נשא את זפֿיקה בת צפר המרחיבי.", "g":"1868–1904"},
+ "184": {"t":"כונה 'סבאח'. פקיד אצל סוחרי שכם; לא היה זמר ולא העתיק ספרים. נשא את ניגֿרה בת שת המרחיבי.", "g":"1845–1905"},
+ "185": {"t":"כונתה 'זפֿיה'. נישאה ליוסף בן חביב המרחיבי, אחר כך ליעקב בן סעד, ולבסוף לסעד בן שלח הצפרי.", "g":"1881–1960"},
+ "186": {"t":"בת צפר. נישאה לסעד בן סעד המרחיבי וילדה אחרי 1909 את אברהם, ברור וסעדי; אחר כך נישאה לשלבי בן יעקב השלבי וליוסף בן חביב הצפרי.", "g":"1893–1968"},
+ "187": {"t":"בת צפר. נישאה לזבולן בן אברהם המרחיבי.", "g":"1900–1970"},
+ "188": {"t":"כונתה 'כלה'. בת צפר. נישאה לישמעאל בן בנימים המרחיבי.", "g":"1901–1981"},
+ "189": {"t":"כונה 'חופֿק'. בן צפר. עבד בחייטות רוב ימיו ואחר כך כחנווני; חי ביפו ובחולון.", "g":"1902–1971"},
+ "190": {"t":"כונה 'באֵר'. פקיד אצל סוחר בשכם. נשא את זוהרה; ללא ילדים.", "g":"1854–1908"},
+ "190א": {"t":"כונתה 'פאֻתֻפֿה'. נישאה לשלח בן יצחק הדנפי, ואחריו לסעד בן אבּ-ספֿוה הדנפי.", "g":"1839–1901"},
+
+ "192": {"t":"פרוגניטור משפחת מרחיב המרחיבי. רוכל בכפרים ליד שכם. אשתו ידועה בכינויה 'אם חלילי' (אמרו שחיה מאה שנה). ילדיו: אברהם, עדילה, סעדה ושלח אלע'ארב.", "g":"1810–1863"},
+ "193": {"t":"כונה 'חליל'. רוכל כאביו; לא כתב ספרים. נשא את שמסה בת ישראל השלבי. ילדיו: אנוש, חובב, רפיק ויששכר.", "g":"1834–1887"},
+ "194": {"t":"בן אברהם. נשאר רווק.", "g":"1892–"},
+ "195": {"t":"בן אברהם. עסק ברוכלות ובנגרות; חי שנים רבות בכפרים ליד שכם והעתיק ספרי תורה; הבקיא באחיו אחרי אנוש. נשא את רוזה בת עבד-הרחום הסתרי.", "g":"1878–1959"},
+ "196": {"t":"כונה 'חובב'. בעל עין אחת; לא ידע קרוא וכתוב; עבד בסבלות ובשאיבת מים.", "g":"1870–1918"},
+ "197": {"t":"כונה 'אנוש'. העתיק ספרים; היה עוזרו של הכהן הגדול יעקב בן אהרן בלימוד ילדי השומרונים; ידע בראשית ושמות בעל-פה; לא נשא אשה.", "g":"1863–1901"},
+ "198": {"t":"בת מרחיב. נישאה לבנימים בן יוסף המרחיבי.", "g":"–1911"},
+ "199": {"t":"כונתה 'אלטרמה' (=החרשת) כי בסוף ימיה איבדה שמיעה. נישאה לאברהם בן סעד המרחיבי (גורשה), ואחר כך לסעד בן שלמה הצפרי."},
+ "200": {"t":"כונה 'אלע'ארב'. עסק ברוכלות בכפרי חוף הים; תמיד היה אמיד ופיקח. נשא שלוש נשים: זוהרה (גורשה), זיזה (מתה במחלה), ועריפה בת בנימים הצפרי שילדה לו בן יחיד, מרחיב.", "g":"1854–1914"},
+ "201": {"t":"כונה 'פרג''. עסק בנגרות בין הכפרים; ידע תפילה; קרא מעט בתורה.", "g":"1901–1966"},
+ "202": {"t":"פרוגניטור, בנו השני של יעקב בן מרחיב. נשא שתי נשים; ילדיו: אברהם, זוהרה, יעקב, ברור וסעד.", "g":"–1868"},
+
+ "209": {"t":"פרוגניטור משפחת צדקה הצפרית. סוחר מוצלח שעשה כסף רב; החביא את כספו בשכונת השומרונים העתיקה והכסף נעלם. הוליד את מרחיב, חובב, ענברה וזוהרה."},
+ "210": {"t":"כונה 'פֻנֻגֿ''. סוחר מצליח שעסק בצמר גפן. בעקבות נדר ל'מכתב אבישע' עשה רווח עצום ממכירת צמר וקיים את נדרו — עשה ארון כסף ל'מכתב אבישע' בבית הכנסת בשכם. נשא את טרֻפֿה בת עבד-אלה הדנפי, ואחריה את זיגֿאב השלבי.", "g":"1823–1881"},
+ "211": {"t":"כונה 'יעקב אלעֻפֿאוי'. איש דתי מאוד שעזר למסכנים ולכהנים; תיקן והשלים את ספרי התורה העתיקים בבית הכנסת והעתיק ספרים רבים. נשא את ניגֿמה בת יוסף המרחיבי, ואת בהיה בת עבד-חנונה.", "g":"1841–1898"},
+ "212": {"t":"בת יעקב. נישאה לצדקה בן אברהם הצפרי.", "g":"1897–1976"},
+ "213": {"t":"בת מרחיב. נישאה ליוסף בן עבד-חנונה הדנפי.", "g":"1843–1889"},
+ "214": {"t":"נולד ביפו; משורר נחמד וזמר. נשא את קמרה (ירחה) בת סעד הדנפי. ילדיו: מרחיב, פועה, צדקה, נור, רשיאה, יפת, גואל וגמליאל.", "g":"1852–1928"},
+ "215": {"t":"כונה 'פרץ'. רוכל בדים ביפו ובתל-אביב בראשיתה; זמר ששנא להתבלט. נשא את סעדיה בת ספֿדה הדנפי; בנם יצחק.", "g":"1878–1937"},
+ "216": {"t":"בן פרץ. נפטר 1972 בחולון."},
+ "217": {"t":"כונתה 'פגעה'. נישאה לתמים בן ישראל הסתרי.", "g":"1882–"},
+ "218": {"t":"סוחר בדים; ניסה להימנע מהגיוס הכפוי לצבא הטורקי, אושפז, נדבק בטיפוס ומת ברמלה. נשא את סֻרֻריה בת יעקב הצפרי.", "g":"1883–1917"},
+ "219": {"t":"כונה 'מֻנֻסֻבֻח'. בעל כתב יד יפה; דתי מאוד; העתיק ספרים רבים; מנהל חשבונות בכיר אצל סוחרי יפו, חיפה ושכם; זמר בעל קול נעים.", "g":"1887–1940"},
+ "220": {"t":"בת אברהם. נישאה לנעמן בן יוסף הסתרי, ואחריו לסעד בן אבּ-סכוה הדנפי.", "g":"1890–1927"},
+ "221": {"t":"כונה 'חֻסֻני'. משנת 1928 ועד מותו היה ראש הקהילה השומרונית מחוץ לשכם; השומרוני הראשון שהקים משפחה מעורבת (1923), כשנשא את מרים חייקין מן העדה היהודית מרוסיה.", "g":"1894–1982"},
+ "222": {"t":"כונה 'בדיע'. אחרי 1909 נשא שתי נשים יהודיות.", "g":"1900–1985"},
+ "223": {"t":"כונה 'גבריאל'. נשא יהודייה, אסתר, בשנת 1931.", "g":"1903–1978"},
+ "224": {"t":"כונה 'חסן'. ניסה להינשא ליהודייה ואף הביאה לשכם אך קרוביו לקחוה; אחר כך נשא נשים אחרות. היתה לו חנות ממתקים בשכם; לבסוף התרושש; העתיק ספרים בעברית ובערבית; מת במלחמת העולם הראשונה.", "g":"1865–1917"},
+ "225": {"t":"בן יפת חסן. ילד פיקח; המצב הכלכלי היה קשה מאוד; פותה ללכת עם הגרמנים ב-1918 ומאז לא נודע עליו דבר.", "g":"1897–"},
+ "226": {"t":"כונה 'עֻאפֿד'. שירת במשטרה הבריטית (זכרון יעקב, נצרת, שפרעם), אחר כך עסק ברוכלות ופתח חנות מכולת; ב-1937 נשא את רחל מן העדה היהודית.", "g":"1902–1977"},
+ "227": {"t":"כונתה 'ג'ילה'. נישאה לאברהם בן פינחס הכהן.", "g":"1906–1986"},
+
+ "228": {"t":"ראש משפחת חובב הצפרי, אחיו של מרחיב הצפרי. לא ידע קרוא וכתוב; הצליח במסחר עד שירד מנכסיו; הסתובב בין הכפרים ולבסוף נלקח רכושו בידי ערבים. נשא את זוהרה בת ישראל אלמנעלם. ילדיו: שלח, פלֻחה, מרים, יוסף ופתח-אלה.", "g":"1826–1886"},
+ "229": {"t":"כונה 'צאלח'. לא עבד מימיו; התלבש כמו כהן והתפרסם בכתיבת קמעות לערבים; העתיק ספרים אך לא היה בקיא. נשא את מרים בת שלח הדנפי.", "g":"1855–1912"},
+ "230": {"t":"כונה 'אלאמין'. בן שלח. נשא את זינאב בת שמעון בן עבד-חנונה."},
+ "233": {"t":"בת חובב. נישאה לשמעון בן עבד-חנונה."},
+ "234": {"t":"בת חובב. נישאה לכמה בעלים — ביניהם יפת בן מרחיב ויוסף בן יוסף הדנפי (משניהם גורשה) — ולבסוף לעבד-הרחום בן סעד."},
+ "235": {"t":"בן חובב. נשא את בדיעה בת סעד."},
+ "236": {"t":"בן חובב. נשאר רווק."},
+ "237": {"t":"בת חובב. נישאה ליצחק בן יהושע המרחיבי."},
+ "238": {"t":"בת חובב. נישאה לסעד בן ישמעאל הסתרי."},
+
+ "239": {"t":"שלמה בן ישמעאל בן שלח בן אבּ-זהותה הצפרי. נשא שתי נשים: אספהאן ונשון בת ישמעאל. ילדיו: בנימים, אריה, סעד ואחרים."},
+ "240": {"t":"כונה 'אלאמין'. בן שלמה. נשא את סעוד בת יהושע.", "g":"1841–1902"},
+ "241": {"t":"בת בנימים. נישאה לשלח אלע'ארב המרחיבי וילדה לו בן יחיד, מרחיב.", "g":"1882–1904"},
+ "242": {"t":"בן שלמה. נשא את שפיקה בת בנימים."},
+ "243": {"t":"כונה 'זפי'. בן שלמה. נשא את חוסון בת סעד."},
+ "246": {"t":"בן שלמה. בעל עין אחת."},
+ "247": {"t":"פרוגניטור. נשא את מפרוקה בת ישראל בן ישמעאל, ואת זינאב בת אבּ-ספֿוה שהראן."},
+ "248": {"t":"בת סעד. נישאה ליוסף בן חביב."},
+ "249": {"t":"בת סעד. נישאה לזפאי בן אריה."}
+}
+;
+
+/* ---------- index building ---------- */
+const persons = {};
+const familyList = [];   // {house, name, no, ref, rootIds:[], allIds:[]}
+const houseNames = [];
+DATA.houses.forEach(h=>{
+  if(!houseNames.includes(h.house)) houseNames.push(h.house);
+  (h.families||[]).forEach(f=>{
+    const fam={house:h.house, name:f.family, no:f.family_no, ref:f.ref_code||'', rootIds:[], allIds:[]};
+    (f.persons||[]).forEach(p=>{
+      p._house=h.house; p._family=f.family;
+      persons[p.id]=p; fam.allIds.push(p.id);
+    });
+    familyList.push(fam);
+  });
+});
+const idSet=new Set(Object.keys(persons));
+
+// single-parent map: father_id is authoritative; children_ids only fills gaps.
+// guarantees every person appears exactly once in the tree.
+const parentOf={};
+Object.values(persons).forEach(p=>{ if(p.father_id && idSet.has(p.father_id)) parentOf[p.id]=p.father_id; });
+Object.values(persons).forEach(p=>{
+  (p.children_ids||[]).forEach(cid=>{ if(idSet.has(cid) && !parentOf[cid] && cid!==p.id) parentOf[cid]=p.id; });
+});
+const childMap={};
+idSet.forEach(id=>childMap[id]=[]);
+Object.keys(parentOf).forEach(cid=>{ childMap[parentOf[cid]].push(cid); });
+// roots per family = persons without an assigned parent
+familyList.forEach(fam=>{
+  fam.allIds.forEach(id=>{ if(!parentOf[id]) fam.rootIds.push(id); });
+});
+
+/* ---------- helpers ---------- */
+function norm(s){
+  if(s==null) return '';
+  return s.toString()
+    .replace(/[֑-ׇ]/g,'')
+    .replace(/[“”"'׳״()=\[\]?.,\/\\#־_-]/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+function numYear(v){ return (typeof v==='number') ? v : (typeof v==='string' && /^\d{3,4}$/.test(v.trim()) ? parseInt(v) : null); }
+function gregApprox(y){ const n=numYear(y); return n? (n+584) : null; }
+function yearStr(p){
+  const b=numYear(p.birth), d=numYear(p.death);
+  if(b==null && d==null) return '';
+  const bs=b!=null?b:'', ds=d!=null?d:'';
+  return '('+bs+(d!=null||b!=null?'–':'')+ds+')';
+}
+// Gregorian life-years from the prose (STORIES); format nicely
+function gregOf(id){ return (STORIES[id]&&STORIES[id].g)||''; }
+function fmtGreg(g){
+  if(!g) return '';
+  const parts=g.split('–'); const b=(parts[0]||'').trim(), d=(parts[1]||'').trim();
+  if(b&&d) return b+'–'+d;
+  if(b&&!d) return 'יליד '+b;
+  if(!b&&d) return 'נפ׳ '+d;
+  return g;
+}
+// the years label shown on a row: prefer the (meaningful) Gregorian span; fall back to the census Hijri years
+function displayYears(id,p){
+  const g=gregOf(id);
+  if(g) return '('+fmtGreg(g)+')';
+  return yearStr(p);
+}
+function fatherNameOf(p){
+  if(parentOf[p.id] && persons[parentOf[p.id]]) return persons[parentOf[p.id]].name||'';
+  return p.father||'';
+}
+function motherNamesOf(p){
+  if(parentOf[p.id] && persons[parentOf[p.id]]) return (persons[parentOf[p.id]].spouses||[]).map(s=>s.name||'');
+  return [];
+}
+// longest valid id prefix
+function resolveId(raw){
+  if(raw==null) return null;
+  raw=raw.toString().trim();
+  let best=null;
+  for(let i=1;i<=raw.length;i++){ const pre=raw.slice(0,i); if(idSet.has(pre)) best=pre; }
+  return best;
+}
+function spouseTargetId(sp){
+  const fields=[sp.note,sp.birth,sp.death].filter(x=>typeof x==='string');
+  for(const f of fields){
+    const m=f.match(/#\s*([0-9][0-9א-ת׳'']*)/);
+    if(m){ const id=resolveId(m[1]); if(id) return id; }
+  }
+  if(typeof sp.ref==='string'){ const id=resolveId(sp.ref); if(id) return id; }
+  return null;
+}
+
+/* ---------- graphical hierarchical tree (top-down, SVG connectors) ---------- */
+const SVGNS='http://www.w3.org/2000/svg';
+const NODE_W=124, NODE_H=56, COL_W=150, ROW_H=120, PADX=26, HOUSE_H=34, FAM_H=28, FAM_GAP=70;
+const domByPerson=new Map();      // id -> node box element
+const posByPerson=new Map();      // id -> {cx,cy} center px in canvas
+const treeHost=document.getElementById('treeHost');
+let zoom=1, marriageMode='selected', focusedBox=null, focusedPersonId=null;
+
+// tidy layout for one family: leaves get sequential columns, parents centered over children
+function layoutFamily(fam){
+  const pos=new Map(); let nextX=0, maxD=0; const guard=new Set();
+  function assign(id, depth){
+    if(guard.has(id)) return; guard.add(id);
+    if(depth>maxD) maxD=depth;
+    const kids=(childMap[id]||[]).slice().sort(byBirthIds).filter(c=>!guard.has(c));
+    if(!kids.length){ pos.set(id,{x:nextX,y:depth}); nextX+=1; return; }
+    kids.forEach(c=>assign(c,depth+1));
+    const xs=kids.map(c=>pos.get(c).x);
+    pos.set(id,{x:(Math.min(...xs)+Math.max(...xs))/2, y:depth});
+  }
+  fam.rootIds.slice().sort(byBirthIds).forEach(r=>assign(r,0));
+  return {pos, cols:Math.max(nextX,1), depth:maxD+1};
+}
+
+function makeNodeBox(id){
+  const p=persons[id];
+  const d=document.createElement('div');
+  d.className='node-box '+(p.sex==='M'?'male':p.sex==='F'?'female':'unk');
+  const gen=genOf(id);
+  const story=(STORIES[id]&&STORIES[id].t)?' <span class="nb-story" title="יש סיפור חיים">📖</span>':'';
+  const ys=displayYears(id,p);
+  d.innerHTML='<div class="nb-gen">דור '+gen+'</div>'+
+    '<div class="nb-name">'+esc(p.name||'(ללא שם)')+story+'</div>'+
+    (ys?'<div class="nb-years">'+ys+'</div>':'');
+  d.onclick=()=>openPerson(id);
+  return d;
+}
+function elbowPath(par,ch){
+  const pb=par.cy+NODE_H/2, ct=ch.cy-NODE_H/2, my=pb+(ct-pb)/2;
+  return 'M '+par.cx+' '+pb+' V '+my+' H '+ch.cx+' V '+ct;
+}
+function marriagePath(a,b){
+  const dx=b.cx-a.cx, dy=b.cy-a.cy, len=Math.hypot(dx,dy)||1;
+  const off=Math.min(70, Math.max(28,len*0.18));
+  const mx=(a.cx+b.cx)/2 + (-dy/len)*off, my=(a.cy+b.cy)/2 + (dx/len)*off;
+  return 'M '+a.cx+' '+a.cy+' Q '+mx+' '+my+' '+b.cx+' '+b.cy;
+}
+
+function renderTree(){
+  treeHost.innerHTML=''; domByPerson.clear(); posByPerson.clear(); focusedBox=null;
+  const active=getActiveHouses();
+  const canvas=document.createElement('div'); canvas.className='tree-canvas';
+  const svg=document.createElementNS(SVGNS,'svg'); svg.setAttribute('class','tree-svg');
+  const nodeLayer=document.createElement('div'); nodeLayer.className='node-layer';
+  canvas.appendChild(svg); canvas.appendChild(nodeLayer);
+
+  // pass A: collect visible houses/families + layouts, compute the widest family
+  const plan=[]; let maxW=600;
+  houseNames.forEach(hn=>{
+    if(active.size && !active.has(hn)) return;
+    const fams=familyList.filter(f=>f.house===hn);
+    if(!fams.length) return;
+    const entry={house:hn, fams:fams.map(fam=>{ const L=layoutFamily(fam); maxW=Math.max(maxW, PADX*2+L.cols*COL_W); return {fam,L}; })};
+    plan.push(entry);
+  });
+  if(!plan.length){ treeHost.innerHTML='<div class="empty-state">לא נבחר בית-אב להצגה.</div>'; return; }
+
+  // pass B: position everything, right-anchored (RTL) so all families align to the right edge
+  let cursorY=14; const connectors=[];
+  plan.forEach(entry=>{
+    const hl=document.createElement('div'); hl.className='canvas-house'; hl.style.top=cursorY+'px';
+    hl.textContent=entry.house; nodeLayer.appendChild(hl);
+    cursorY+=HOUSE_H;
+    entry.fams.forEach(({fam,L})=>{
+      const fl=document.createElement('div'); fl.className='canvas-family'; fl.style.top=cursorY+'px';
+      const finfo=document.createElement('span');
+      finfo.innerHTML='<span class="cf-name">'+esc(fam.name)+'</span> '+
+        '<span class="cf-meta">'+fam.allIds.length+' אנשים · '+L.depth+' דורות'+(fam.ref?' · קוד '+esc(fam.ref):'')+'</span>';
+      fl.appendChild(finfo);
+      const shb=document.createElement('button'); shb.className='share-btn'; shb.innerHTML='🔗 שתף עץ';
+      shb.onclick=(e)=>{ e.stopPropagation(); openShare(fam.rootIds, fam.name); };
+      fl.appendChild(shb);
+      nodeLayer.appendChild(fl);
+      const top0=cursorY+FAM_H;
+      L.pos.forEach((pp,id)=>{
+        const cx=maxW - (PADX + pp.x*COL_W + COL_W/2);   // right-anchored: first child (x=0) on the right
+        const cy=top0 + pp.y*ROW_H + NODE_H/2;
+        posByPerson.set(id,{cx,cy});
+        const box=makeNodeBox(id);
+        box.style.left=(cx-NODE_W/2)+'px'; box.style.top=(cy-NODE_H/2)+'px';
+        nodeLayer.appendChild(box); domByPerson.set(id,box);
+        (childMap[id]||[]).forEach(c=>{ if(L.pos.has(c)) connectors.push([id,c]); });
+      });
+      cursorY=top0 + L.depth*ROW_H + FAM_GAP;
+    });
+  });
+
+  const totalH=cursorY+10;
+  canvas.style.width=maxW+'px'; canvas.style.height=totalH+'px';
+  svg.setAttribute('width',maxW); svg.setAttribute('height',totalH);
+  svg.setAttribute('viewBox','0 0 '+maxW+' '+totalH);
+
+  // parent→child connectors
+  const frag=[];
+  connectors.forEach(([pid,cid])=>{
+    const a=posByPerson.get(pid), b=posByPerson.get(cid); if(!a||!b) return;
+    frag.push('<path class="conn" d="'+elbowPath(a,b)+'"/>');
+  });
+  // marriage links (always built; per-link data so visibility can follow the chosen mode)
+  let mCount=0; const drawn=new Set();
+  Object.values(persons).forEach(p=>{
+    (p.spouses||[]).forEach(sp=>{
+      const t=spouseTargetId(sp); if(!t) return;
+      if(!posByPerson.has(p.id)||!posByPerson.has(t)) return;
+      const key=[p.id,t].sort().join('~'); if(drawn.has(key)) return; drawn.add(key);
+      frag.push('<path class="marriage-link" data-a="'+esc(p.id)+'" data-b="'+esc(t)+'" d="'+marriagePath(posByPerson.get(p.id),posByPerson.get(t))+'"/>');
+      mCount++;
+    });
+  });
+  svg.innerHTML=frag.join('');
+  treeHost.appendChild(canvas);
+  marriageCountEl && (marriageCountEl.textContent=mCount);
+  applyZoom();
+  applyMarriageMode();
+}
+function applyZoom(){ const c=treeHost.querySelector('.tree-canvas'); if(c) c.style.zoom=zoom; }
+function applyMarriageMode(){
+  const svg=treeHost.querySelector('.tree-svg'); if(!svg) return;
+  svg.querySelectorAll('.marriage-link').forEach(l=>{
+    const a=l.getAttribute('data-a'), b=l.getAttribute('data-b');
+    const touches = focusedPersonId && (a===focusedPersonId || b===focusedPersonId);
+    if(marriageMode==='off'){ l.style.display='none'; l.classList.remove('active'); }
+    else if(marriageMode==='all'){ l.style.display=''; l.classList.toggle('active', !!touches); }
+    else { /* selected */ l.style.display=touches?'':'none'; l.classList.toggle('active', !!touches); }
+  });
+}
+function esc(s){ return (s==null?'':s.toString()).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ---------- house filter ---------- */
+const houseFilter=document.getElementById('houseFilter');
+houseNames.forEach(hn=>{
+  const lab=document.createElement('label'); lab.className='chip on';
+  const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=true; cb.value=hn;
+  cb.onchange=()=>{ lab.classList.toggle('on',cb.checked); renderTree(); };
+  lab.appendChild(cb);
+  const short=hn.replace(/^[א-ת]\.\s*/,'');
+  lab.appendChild(document.createTextNode(short));
+  houseFilter.appendChild(lab);
+});
+function getActiveHouses(){
+  const s=new Set();
+  houseFilter.querySelectorAll('input').forEach(cb=>{ if(cb.checked) s.add(cb.value); });
+  return s;
+}
+function ensureHouseVisible(hn){
+  houseFilter.querySelectorAll('input').forEach(cb=>{
+    if(cb.value===hn && !cb.checked){ cb.checked=true; cb.parentElement.classList.add('on'); }
+  });
+}
+
+/* ---------- detail panel ---------- */
+const panel=document.getElementById('panel');
+const pTitle=document.getElementById('pTitle'), pSub=document.getElementById('pSub'), pBody=document.getElementById('pBody');
+document.getElementById('pClose').onclick=()=>{ document.body.classList.remove('panel-open'); panel.setAttribute('aria-hidden','true'); clearFocus(); };
+
+function field(k,vHtml){ return '<div class="field"><div class="k">'+k+'</div><div class="v">'+vHtml+'</div></div>'; }
+function plink(id,label){ return '<button class="link" data-go="'+esc(id)+'">'+esc(label||persons[id].name||id)+'</button>'; }
+
+function openPerson(id){
+  const p=persons[id]; if(!p) return;
+  focusNode(id);
+  focusedPersonId=id; applyMarriageMode();
+  pTitle.textContent=p.name||'(ללא שם)';
+  pSub.textContent=p._house.replace(/^[א-ת]\.\s*/,'')+' · '+p._family;
+  let html='';
+
+  const meta=[];
+  meta.push('מזהה מיפקד: '+esc(p.id));
+  if(p.code) meta.push('קוד עץ: '+esc(p.code));
+  meta.push('מין: '+(p.sex==='M'?'זכר':p.sex==='F'?'נקבה':'לא ידוע'));
+  html+=field('פרטים', meta.join(' · '));
+
+  // life-years (Gregorian, from the prose) — shown prominently
+  const g=gregOf(id);
+  if(g){
+    const parts=g.split('–'); const bb=(parts[0]||'').trim(), dd=(parts[1]||'').trim();
+    let span=fmtGreg(g);
+    if(bb&&dd && /^\d{3,4}$/.test(bb) && /^\d{3,4}$/.test(dd)) span+=' <span class="years">(חי כ-'+(parseInt(dd)-parseInt(bb))+' שנים)</span>';
+    html+=field('שנות חיים (לועזי)', span);
+  }
+  // census dates (Hijri)
+  const dates=[];
+  if(p.birth!=null){ const ga=gregApprox(p.birth); dates.push('לידה: '+esc(p.birth)+(ga?' <span class="years">(≈'+ga+' לסה״נ)</span>':'')); }
+  if(p.death!=null){ const ga=gregApprox(p.death); dates.push('פטירה: '+esc(p.death)+(ga?' <span class="years">(≈'+ga+' לסה״נ)</span>':'')); }
+  if(dates.length) html+=field('שנים לפי המיפקד (לוח הג׳רי)', dates.join('<br>'));
+
+  // life story (simplified prose)
+  if(STORIES[id] && STORIES[id].t){
+    html+=field('סיפור חיים', '<div class="story-box">'+esc(STORIES[id].t)+'</div>');
+  }
+
+  // parents
+  let par='';
+  if(parentOf[id] && persons[parentOf[id]]) par='אב: '+plink(parentOf[id]);
+  else if(p.father) par='אב: '+esc(p.father);
+  const moms=motherNamesOf(p);
+  if(moms.length){ par+=(par?'<br>':'')+'<span class="years">אם (מבין נשות האב): '+moms.map(esc).join(' / ')+'</span>'; }
+  if(par) html+=field('הורים', par);
+
+  // children
+  const kids=childMap[id]||[];
+  if(kids.length){
+    html+=field('צאצאים ('+kids.length+')',
+      kids.map(cid=>'<span class="pill">'+plink(cid)+(displayYears(cid,persons[cid])?' <span class="years">'+displayYears(cid,persons[cid])+'</span>':'')+'</span>').join(''));
+  }
+
+  // spouses
+  if((p.spouses||[]).length){
+    let sh='';
+    p.spouses.forEach(sp=>{
+      const tid=spouseTargetId(sp);
+      let line='<div class="sp"><div class="sp-name">'+(tid?plink(tid,sp.name):esc(sp.name||'(בן/בת זוג)'))+'</div>';
+      const m=[];
+      if(sp.ref) m.push('הפניה: '+esc(sp.ref));
+      if(typeof sp.birth==='string'&&!/^\d/.test(sp.birth)) m.push(esc(sp.birth));
+      else if(sp.birth!=null) m.push('לידה '+esc(sp.birth));
+      if(typeof sp.death==='string'&&!/^\d/.test(sp.death)) m.push(esc(sp.death));
+      else if(sp.death!=null) m.push('פטירה '+esc(sp.death));
+      if(sp.note) m.push(esc(sp.note));
+      if(m.length) line+='<div class="sp-meta">'+m.join(' · ')+'</div>';
+      line+='</div>'; sh+=line;
+    });
+    html+=field('נישואין', sh);
+  }
+
+  if(p.note) html+=field('הערה','<div class="note-box">'+esc(p.note)+'</div>');
+
+  // generation in family
+  const gen=genOf(id);
+  if(gen) html+=field('דור','דור '+gen+' במשפחת '+esc(p._family));
+
+  pBody.innerHTML=html;
+  pBody.querySelectorAll('[data-go]').forEach(b=> b.onclick=()=>openPerson(b.getAttribute('data-go')) );
+  const shareBtn=document.createElement('button'); shareBtn.className='share-btn full';
+  shareBtn.innerHTML=(childMap[id]||[]).length ? '🔗 שתף את הענף של '+(p.name||'אדם זה') : '🔗 שתף אדם זה';
+  shareBtn.onclick=()=>openShare([id], (childMap[id]||[]).length?('הענף של '+(p.name||'אדם זה')):(p.name||'אדם זה'));
+  pBody.appendChild(shareBtn);
+  document.body.classList.add('panel-open'); panel.setAttribute('aria-hidden','false');
+}
+
+function genOf(id){
+  let g=1, cur=id, guard=0;
+  while(parentOf[cur] && guard++<100){ g++; cur=parentOf[cur]; }
+  return g;
+}
+
+/* ---------- focus / locate ---------- */
+function clearFocus(){ if(focusedBox){ focusedBox.classList.remove('focus'); focusedBox=null; } }
+function focusNode(id){
+  if(persons[id]) ensureHouseVisible(persons[id]._house);
+  if(!domByPerson.has(id)) renderTree();
+  const box=domByPerson.get(id);
+  if(!box) return;
+  clearFocus();
+  box.classList.add('focus'); focusedBox=box;
+  box.scrollIntoView({behavior:'smooth', block:'center', inline:'center'});
+}
+
+/* ---------- search ---------- */
+const search=document.getElementById('search'), results=document.getElementById('results');
+function searchPersons(q){
+  const toks=norm(q).split(' ').filter(Boolean);
+  if(!toks.length) return [];
+  const out=[];
+  Object.values(persons).forEach(p=>{
+    const own=norm(p.name); if(!own) return;
+    const fath=norm(fatherNameOf(p));
+    const moth=norm(motherNamesOf(p).join(' '));
+    const combined=own+' '+fath+' '+moth;
+    const ownHits=toks.filter(t=>own.includes(t)).length;
+    if(!ownHits) return;
+    if(!toks.every(t=>combined.includes(t))) return;
+    out.push({p,ownHits});
+  });
+  out.sort((a,b)=> b.ownHits-a.ownHits || (numYear(a.p.birth)||9999)-(numYear(b.p.birth)||9999));
+  return out.slice(0,40);
+}
+function showResults(list){
+  if(!list.length){ results.innerHTML='<div class="r-empty">לא נמצאו תוצאות</div>'; results.classList.add('open'); return; }
+  results.innerHTML='';
+  list.forEach(({p})=>{
+    const d=document.createElement('div'); d.className='res';
+    const fa=fatherNameOf(p);
+    d.innerHTML='<div class="r-name">'+esc(p.name||'(ללא שם)')+' <span class="years">'+displayYears(p.id,p)+'</span></div>'+
+      '<div class="r-meta">'+esc(p._family)+(fa?' · אב: '+esc(fa):'')+'</div>';
+    d.onclick=()=>{ results.classList.remove('open'); search.value=p.name||''; openPerson(p.id); };
+    results.appendChild(d);
+  });
+  results.classList.add('open');
+}
+let activeIdx=-1;
+search.addEventListener('input',()=>{
+  const q=search.value.trim();
+  activeIdx=-1;
+  if(!q){ results.classList.remove('open'); return; }
+  showResults(searchPersons(q));
+});
+search.addEventListener('keydown',e=>{
+  const items=[...results.querySelectorAll('.res')];
+  if(e.key==='ArrowDown'){ e.preventDefault(); activeIdx=Math.min(activeIdx+1,items.length-1); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); activeIdx=Math.max(activeIdx-1,0); }
+  else if(e.key==='Enter'){ if(items[activeIdx]) items[activeIdx].click(); return; }
+  else return;
+  items.forEach((it,i)=>it.classList.toggle('active',i===activeIdx));
+  if(items[activeIdx]) items[activeIdx].scrollIntoView({block:'nearest'});
+});
+document.addEventListener('click',e=>{ if(!e.target.closest('.search-wrap')) results.classList.remove('open'); });
+
+/* ---------- apex / root genealogy ---------- */
+function renderApex(){
+  const rg=DATA.root_genealogy; if(!rg) return;
+  const host=document.getElementById('apexHost');
+  let inner='';
+  if(rg.danfi_apex){ const a=rg.danfi_apex;
+    inner+='<div><b>בית אב הדנפים — אב קדמון:</b> '+esc(a.founder||'')+'</div>';
+    if(a.sons) inner+='<div>בנים: '+a.sons.map(esc).join(' · ')+'</div>';
+    if(a.via_yitzhak) inner+='<div>'+esc(a.via_yitzhak)+'</div>';
+    if(a.shalabi_root) inner+='<div>'+esc(a.shalabi_root)+'</div>';
+  }
+  if(rg.marhibi_apex) inner+='<div><b>בית אב המרחיבים:</b> '+esc(rg.marhibi_apex)+'</div>';
+  if(rg.tsfari_apex) inner+='<div><b>בית אב הצפרים:</b> '+esc(rg.tsfari_apex)+'</div>';
+  if(rg.note) inner+='<div class="years">'+esc(rg.note)+'</div>';
+  host.innerHTML='<details class="apex"><summary>אילן-השורש הקדום (האבות הקדמונים — מעל המיפקד)</summary><div class="apex-body">'+inner+'</div></details>';
+}
+
+/* ---------- share ---------- */
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),1900);
+}
+function byBirthIds(a,b){ return (numYear(persons[a].birth)||9999)-(numYear(persons[b].birth)||9999); }
+function buildTreeText(rootIds, title){
+  const lines=[];
+  lines.push(title);
+  lines.push('— אילן יוחסין שומרוני · מיפקד 1909 (רשימות פאול קאהלה, הרחבות רצון צדקה) —');
+  lines.push('');
+  const seen=new Set();
+  function rec(id, depth){
+    if(seen.has(id)) return; seen.add(id);
+    const p=persons[id]; if(!p) return;
+    const indent=depth>0 ? '   '.repeat(depth)+'└ ' : '';
+    const g=gregOf(id); const yr=g?(' ('+fmtGreg(g)+')'):(yearStr(p)?(' '+yearStr(p)):'');
+    lines.push(indent+'דור '+(depth+1)+': '+(p.name||'(ללא שם)')+yr);
+    (childMap[id]||[]).slice().sort(byBirthIds).forEach(c=>rec(c,depth+1));
+  }
+  rootIds.forEach(r=>rec(r,0));
+  lines.push('');
+  lines.push('נוצר באפליקציית אילן היוחסין השומרוני.');
+  return lines.join('\n');
+}
+let currentShareText='';
+function openShare(rootIds, title){
+  currentShareText=buildTreeText(rootIds, title);
+  document.getElementById('shareTitle').textContent='שיתוף: '+title;
+  document.getElementById('shareText').value=currentShareText;
+  document.getElementById('shareModal').classList.add('open');
+}
+function shareVia(method){
+  const text=currentShareText;
+  const capped = text.length>1600 ? text.slice(0,1580)+'\n… (הרשימה קוצרה לשיתוף — ראו את העץ המלא באפליקציה)' : text;
+  if(method==='whatsapp'){ window.open('https://wa.me/?text='+encodeURIComponent(capped),'_blank'); }
+  else if(method==='email'){ window.location.href='mailto:?subject='+encodeURIComponent('אילן יוחסין שומרוני')+'&body='+encodeURIComponent(capped); }
+  else if(method==='copy'){
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(()=>toast('הועתק ללוח ✓'),()=>fallbackCopy()); }
+    else fallbackCopy();
+  }
+}
+function fallbackCopy(){ const ta=document.getElementById('shareText'); ta.focus(); ta.select(); try{document.execCommand('copy'); toast('הועתק ללוח ✓');}catch(e){ toast('בחרו והעתיקו ידנית'); } }
+document.getElementById('shareClose').onclick=()=>document.getElementById('shareModal').classList.remove('open');
+document.getElementById('shareModal').addEventListener('click',e=>{ if(e.target.id==='shareModal') e.currentTarget.classList.remove('open'); });
+document.querySelectorAll('.share-actions button').forEach(b=> b.onclick=()=>shareVia(b.getAttribute('data-m')) );
+
+/* ---------- controls ---------- */
+const marriageCountEl=document.getElementById('marriageCount');
+function setZoom(z){ zoom=Math.min(1.6, Math.max(0.35, Math.round(z*100)/100)); document.getElementById('zoomReset').textContent=Math.round(zoom*100)+'%'; applyZoom(); }
+document.getElementById('zoomIn').onclick=()=>setZoom(zoom+0.15);
+document.getElementById('zoomOut').onclick=()=>setZoom(zoom-0.15);
+document.getElementById('zoomReset').onclick=()=>setZoom(1);
+// marriage-line mode buttons
+document.querySelectorAll('#marriageMode .mode-btn').forEach(b=>{
+  b.onclick=()=>{
+    marriageMode=b.getAttribute('data-mode');
+    document.querySelectorAll('#marriageMode .mode-btn').forEach(x=>x.classList.toggle('on', x===b));
+    applyMarriageMode();
+  };
+});
+// "center on family" dropdown
+const familyJump=document.getElementById('familyJump');
+familyList.forEach((fam,i)=>{
+  const o=document.createElement('option'); o.value=i;
+  o.textContent=fam.name+' ('+fam.house.replace(/^[א-ת]\.\s*/,'')+')';
+  familyJump.appendChild(o);
+});
+familyJump.onchange=()=>{
+  const i=familyJump.value; if(i==='') return;
+  const fam=familyList[+i]; if(!fam||!fam.rootIds.length) return;
+  ensureHouseVisible(fam.house);
+  renderTree();
+  const target=domByPerson.get(fam.rootIds[0]);
+  if(target){ clearFocus(); target.classList.add('focus'); focusedBox=target; target.scrollIntoView({behavior:'smooth', block:'center', inline:'center'}); }
+  familyJump.value='';
+};
+
+/* ---------- init ---------- */
+document.getElementById('count').textContent=Object.keys(persons).length+' אנשים · '+houseNames.length+' בתי-אב · '+familyList.length+' משפחות';
+renderApex();
+renderTree();
+</script>
+</body>
+</html>
