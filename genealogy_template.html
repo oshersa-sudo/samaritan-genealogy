@@ -60,8 +60,7 @@
     border-radius:7px; cursor:pointer; color:var(--ink);
   }
   button.act:hover{background:var(--hl)}
-  main{padding:16px; padding-inline-end:16px; transition:padding-inline-start .2s}
-  body.panel-open main{padding-inline-start:380px}
+  main{padding:16px}
   .legend{font-size:12px; color:var(--muted); margin-bottom:12px; display:flex; gap:16px; flex-wrap:wrap; align-items:center}
   .legend .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-inline-end:4px}
   .apex{
@@ -121,14 +120,16 @@
   #familyJump{padding:7px 10px; border:1px solid var(--line); border-radius:8px; background:#fff; font:inherit; font-size:13px; color:var(--ink); max-width:250px}
   #familyJump:focus{outline:none; border-color:var(--accent2)}
 
-  /* detail panel */
+  /* detail panel — split view: in-flow column beside the tree */
+  .workspace{display:flex; gap:14px; align-items:flex-start}
+  .workspace #treeHost{flex:1 1 auto; min-width:0}
   #panel{
-    position:fixed; top:0; inset-inline-start:0; height:100vh; width:370px; background:var(--panel);
-    border-inline-end:2px solid var(--accent2); box-shadow:var(--shadow); z-index:50;
-    transform:translateX(-100%); transition:transform .2s; overflow:auto; padding:0;
+    flex:0 0 360px; align-self:flex-start; position:sticky; top:8px;
+    background:var(--panel); border:1px solid var(--accent2); border-radius:10px;
+    box-shadow:var(--shadow); overflow:auto; max-height:calc(100vh - 120px);
   }
-  body.panel-open #panel{transform:translateX(0)}
-  .p-head{position:sticky; top:0; background:var(--accent); color:#fff; padding:14px 16px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px}
+  body:not(.panel-open) #panel{display:none}
+  .p-head{position:sticky; top:0; background:var(--accent); color:#fff; padding:14px 16px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px; border-radius:10px 10px 0 0}
   .p-head .p-title{font-size:19px; font-weight:bold}
   .p-head .p-sub{font-size:12px; opacity:.85; margin-top:2px}
   .p-close{background:rgba(255,255,255,.2); border:none; color:#fff; font-size:18px; width:30px; height:30px; border-radius:6px; cursor:pointer; flex:0 0 auto}
@@ -170,9 +171,9 @@
   .share-hint{font-size:11.5px; color:var(--muted); margin-top:8px}
   #toast{position:fixed; bottom:20px; inset-inline-start:50%; transform:translateX(50%); background:var(--ink); color:#fff; padding:10px 18px; border-radius:20px; font-size:14px; z-index:90; opacity:0; transition:opacity .2s; pointer-events:none}
   #toast.show{opacity:1}
-  @media (max-width:640px){
-    body.panel-open main{padding-inline-start:16px}
-    #panel{width:100%}
+  @media (max-width:760px){
+    .workspace{flex-direction:column}
+    #panel{flex:1 1 auto; width:auto; position:static; max-height:70vh}
   }
 </style>
 </head>
@@ -226,19 +227,20 @@
     <span>📖 יש סיפור חיים · שנים: לועזי או ג'רי</span>
   </div>
   <div id="apexHost"></div>
-  <div id="treeHost"></div>
-</main>
-
-<aside id="panel" aria-hidden="true">
-  <div class="p-head">
-    <div>
-      <div class="p-title" id="pTitle"></div>
-      <div class="p-sub" id="pSub"></div>
-    </div>
-    <button class="p-close" id="pClose" title="סגור">✕</button>
+  <div class="workspace">
+    <div id="treeHost"></div>
+    <aside id="panel" aria-hidden="true">
+      <div class="p-head">
+        <div>
+          <div class="p-title" id="pTitle"></div>
+          <div class="p-sub" id="pSub"></div>
+        </div>
+        <button class="p-close" id="pClose" title="סגור">✕</button>
+      </div>
+      <div class="p-body" id="pBody"></div>
+    </aside>
   </div>
-  <div class="p-body" id="pBody"></div>
-</aside>
+</main>
 
 <div class="share-modal" id="shareModal">
   <div class="share-card">
