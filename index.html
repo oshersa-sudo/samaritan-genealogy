@@ -113,6 +113,20 @@
   .node-box .nb-years{font-size:10.5px; color:var(--muted); margin-top:1px}
   .node-box .nb-story{font-size:10px}
   .node-box.focus{box-shadow:0 0 0 3px var(--hl-border); border-color:var(--hl-border)}
+  .node-box.vnode{border-width:2px}
+  .node-box.vroot{background:var(--accent); border-color:var(--accent)}
+  .node-box.vroot .nb-name{color:#fff}
+  .node-box.vroot .nb-years{color:#f1e6cf}
+  .node-box.vhouse{background:#efe7d4; border-color:var(--accent2)}
+  .node-box.vhouse .nb-name{color:var(--accent); font-size:14px}
+  .node-box.vhouse .nb-years{color:var(--muted)}
+  .node-toggle{
+    position:absolute; width:18px; height:18px; border-radius:50%; border:1.5px solid var(--accent);
+    background:#fff; color:var(--accent); font-size:13px; line-height:15px; text-align:center;
+    cursor:pointer; padding:0; z-index:6; font-weight:bold; box-shadow:0 1px 2px rgba(60,45,20,.2)
+  }
+  .node-toggle:hover{background:var(--accent); color:#fff}
+  .node-toggle.closed{background:var(--accent); color:#fff}
   .conn{fill:none; stroke:#cbb88f; stroke-width:1.6}
   .marriage-link{fill:none; stroke:var(--female); stroke-width:1.5; stroke-dasharray:5 4; opacity:.55}
   .marriage-link.active{stroke:#d23f7d; stroke-width:2.6; opacity:.95; stroke-dasharray:none}
@@ -212,8 +226,8 @@
       </div>
     </div>
     <div class="ctl">
-      <label>מרכז על משפחה</label>
-      <select id="familyJump"><option value="">— בחרו משפחה לקפיצה —</option></select>
+      <label>הצג משפחה בלבד</label>
+      <select id="familyJump"><option value="">🌳 כל אילן השורש</option></select>
     </div>
   </div>
 </header>
@@ -222,7 +236,8 @@
   <div class="legend">
     <span><span class="dot" style="background:var(--male)"></span>זכר</span>
     <span><span class="dot" style="background:var(--female)"></span>נקבה</span>
-    <span><span class="gen" style="background:var(--accent2)">דור N</span> מספר הדור (כל שכבה = דור)</span>
+    <span><span class="gen" style="background:var(--accent2)">דור N</span> מספר הדור</span>
+    <span><b style="color:var(--accent)">＋</b> לחצן מתחת לצומת — פותח/סוגר את הצאצאים</span>
     <span><svg width="34" height="10" style="vertical-align:middle"><line x1="0" y1="5" x2="34" y2="5" stroke="var(--female)" stroke-width="1.5" stroke-dasharray="5 4"/></svg> קו נישואין / קישור בין משפחות</span>
     <span>📖 יש סיפור חיים · שנים: לועזי או ג'רי</span>
   </div>
@@ -3603,26 +3618,80 @@ const domByPerson=new Map();      // id -> node box element
 const posByPerson=new Map();      // id -> {cx,cy} center px in canvas
 const treeHost=document.getElementById('treeHost');
 let zoom=1, marriageMode='selected', focusedBox=null, focusedPersonId=null;
+let viewMode='root', selectedFamilyIdx=null;          // 'root' = whole super-tree; 'family' = one family
+const collapsed=new Set();                            // ids whose children are hidden
 
-// tidy layout for one family: leaves get sequential columns, parents centered over children
-function layoutFamily(fam){
+/* ----- virtual super-tree: ROOT → houses → family progenitors → real descendants ----- */
+const VROOT='__root__', HPREFIX='__house__';
+const houseNodeId = hn => HPREFIX+hn;
+function isVirtual(id){ return id===VROOT || (typeof id==='string' && id.indexOf(HPREFIX)===0); }
+function vHouseName(id){ return id.slice(HPREFIX.length); }
+const rootFounder = (DATA.root_genealogy && DATA.root_genealogy.danfi_apex && DATA.root_genealogy.danfi_apex.founder) || 'אב קדמון';
+
+function rawChildren(id){
+  if(id===VROOT){
+    const active=getActiveHouses();
+    return houseNames.filter(hn=>(!active.size||active.has(hn)) && familyList.some(f=>f.house===hn)).map(houseNodeId);
+  }
+  if(isVirtual(id)){
+    const hn=vHouseName(id); let kids=[];
+    familyList.filter(f=>f.house===hn).forEach(f=>{ kids=kids.concat(f.rootIds); });
+    return kids.slice().sort(byBirthIds);
+  }
+  return (childMap[id]||[]).slice().sort(byBirthIds);
+}
+function uChildren(id){ return collapsed.has(id) ? [] : rawChildren(id); }
+function uHasChildren(id){ return rawChildren(id).length>0; }
+function vParentOf(id){
+  if(id===VROOT) return null;
+  if(isVirtual(id)) return VROOT;
+  if(parentOf[id]) return parentOf[id];
+  return persons[id] ? houseNodeId(persons[id]._house) : null;
+}
+function initCollapse(){
+  collapsed.clear();
+  houseNames.forEach(hn=>collapsed.add(houseNodeId(hn)));          // houses closed by default
+  Object.keys(persons).forEach(id=>{ if((childMap[id]||[]).length) collapsed.add(id); }); // people closed
+  // VROOT stays open → first level (root + houses) is visible
+}
+function toggleCollapse(id){
+  if(collapsed.has(id)) collapsed.delete(id); else collapsed.add(id);
+  renderTree();
+}
+
+// tidy layout over the (possibly collapsed) virtual tree
+function layoutForest(rootIds){
   const pos=new Map(); let nextX=0, maxD=0; const guard=new Set();
   function assign(id, depth){
     if(guard.has(id)) return; guard.add(id);
     if(depth>maxD) maxD=depth;
-    const kids=(childMap[id]||[]).slice().sort(byBirthIds).filter(c=>!guard.has(c));
+    const kids=uChildren(id).filter(c=>!guard.has(c));
     if(!kids.length){ pos.set(id,{x:nextX,y:depth}); nextX+=1; return; }
     kids.forEach(c=>assign(c,depth+1));
     const xs=kids.map(c=>pos.get(c).x);
     pos.set(id,{x:(Math.min(...xs)+Math.max(...xs))/2, y:depth});
   }
-  fam.rootIds.slice().sort(byBirthIds).forEach(r=>assign(r,0));
+  rootIds.forEach(r=>assign(r,0));
   return {pos, cols:Math.max(nextX,1), depth:maxD+1};
 }
 
 function makeNodeBox(id){
-  const p=persons[id];
   const d=document.createElement('div');
+  if(id===VROOT){
+    d.className='node-box vnode vroot';
+    d.innerHTML='<div class="nb-name">🌳 אב קדמון</div><div class="nb-years">'+esc(rootFounder)+'</div>';
+    d.onclick=()=>{ const ap=document.querySelector('.apex'); if(ap){ ap.open=true; ap.scrollIntoView({behavior:'smooth',block:'center'}); } };
+    return d;
+  }
+  if(isVirtual(id)){
+    const hn=vHouseName(id);
+    const cnt=familyList.filter(f=>f.house===hn).reduce((a,f)=>a+f.allIds.length,0);
+    d.className='node-box vnode vhouse';
+    d.innerHTML='<div class="nb-name">'+esc(hn.replace(/^[א-ת]\.\s*/,''))+'</div><div class="nb-years">'+cnt+' אנשים</div>';
+    d.onclick=()=>toggleCollapse(id);
+    return d;
+  }
+  const p=persons[id];
   d.className='node-box '+(p.sex==='M'?'male':p.sex==='F'?'female':'unk');
   const gen=genOf(id);
   const story=(STORIES[id]&&STORIES[id].t)?' <span class="nb-story" title="יש סיפור חיים">📖</span>':'';
@@ -3646,65 +3715,58 @@ function marriagePath(a,b){
 
 function renderTree(){
   treeHost.innerHTML=''; domByPerson.clear(); posByPerson.clear(); focusedBox=null;
-  const active=getActiveHouses();
   const canvas=document.createElement('div'); canvas.className='tree-canvas';
   const svg=document.createElementNS(SVGNS,'svg'); svg.setAttribute('class','tree-svg');
   const nodeLayer=document.createElement('div'); nodeLayer.className='node-layer';
   canvas.appendChild(svg); canvas.appendChild(nodeLayer);
 
-  // pass A: collect visible houses/families + layouts, compute the widest family
-  const plan=[]; let maxW=600;
-  houseNames.forEach(hn=>{
-    if(active.size && !active.has(hn)) return;
-    const fams=familyList.filter(f=>f.house===hn);
-    if(!fams.length) return;
-    const entry={house:hn, fams:fams.map(fam=>{ const L=layoutFamily(fam); maxW=Math.max(maxW, PADX*2+L.cols*COL_W); return {fam,L}; })};
-    plan.push(entry);
-  });
-  if(!plan.length){ treeHost.innerHTML='<div class="empty-state">לא נבחר בית-אב להצגה.</div>'; return; }
+  // choose roots: whole super-tree, or a single selected family
+  let rootIds, topY=14, famForHeader=null;
+  if(viewMode==='family' && selectedFamilyIdx!=null && familyList[selectedFamilyIdx]){
+    famForHeader=familyList[selectedFamilyIdx];
+    rootIds=famForHeader.rootIds.slice();
+  } else { rootIds=[VROOT]; }
 
-  // pass B: position everything, right-anchored (RTL) so all families align to the right edge
-  let cursorY=14; const connectors=[];
-  plan.forEach(entry=>{
-    const hl=document.createElement('div'); hl.className='canvas-house'; hl.style.top=cursorY+'px';
-    hl.textContent=entry.house; nodeLayer.appendChild(hl);
-    cursorY+=HOUSE_H;
-    entry.fams.forEach(({fam,L})=>{
-      const fl=document.createElement('div'); fl.className='canvas-family'; fl.style.top=cursorY+'px';
-      const finfo=document.createElement('span');
-      finfo.innerHTML='<span class="cf-name">'+esc(fam.name)+'</span> '+
-        '<span class="cf-meta">'+fam.allIds.length+' אנשים · '+L.depth+' דורות'+(fam.ref?' · קוד '+esc(fam.ref):'')+'</span>';
-      fl.appendChild(finfo);
-      const shb=document.createElement('button'); shb.className='share-btn'; shb.innerHTML='🔗 שתף עץ';
-      shb.onclick=(e)=>{ e.stopPropagation(); openShare(fam.rootIds, fam.name); };
-      fl.appendChild(shb);
-      nodeLayer.appendChild(fl);
-      const top0=cursorY+FAM_H;
-      L.pos.forEach((pp,id)=>{
-        const cx=maxW - (PADX + pp.x*COL_W + COL_W/2);   // right-anchored: first child (x=0) on the right
-        const cy=top0 + pp.y*ROW_H + NODE_H/2;
-        posByPerson.set(id,{cx,cy});
-        const box=makeNodeBox(id);
-        box.style.left=(cx-NODE_W/2)+'px'; box.style.top=(cy-NODE_H/2)+'px';
-        nodeLayer.appendChild(box); domByPerson.set(id,box);
-        (childMap[id]||[]).forEach(c=>{ if(L.pos.has(c)) connectors.push([id,c]); });
-      });
-      cursorY=top0 + L.depth*ROW_H + FAM_GAP;
-    });
+  const L=layoutForest(rootIds);
+  const maxW=Math.max(560, PADX*2 + L.cols*COL_W);
+
+  if(famForHeader){
+    const fl=document.createElement('div'); fl.className='canvas-family'; fl.style.top='0px';
+    fl.innerHTML='<span class="cf-name">'+esc(famForHeader.name)+'</span> <span class="cf-meta">'+famForHeader.allIds.length+' אנשים · '+L.depth+' דורות</span>';
+    const shb=document.createElement('button'); shb.className='share-btn'; shb.innerHTML='🔗 שתף עץ';
+    shb.onclick=(e)=>{ e.stopPropagation(); openShare(famForHeader.rootIds, famForHeader.name); };
+    fl.appendChild(shb); nodeLayer.appendChild(fl); topY=40;
+  }
+
+  const connectors=[];
+  L.pos.forEach((pp,id)=>{
+    const cx=maxW-(PADX+pp.x*COL_W+COL_W/2);          // right-anchored (RTL)
+    const cy=topY + pp.y*ROW_H + NODE_H/2;
+    posByPerson.set(id,{cx,cy});
+    const box=makeNodeBox(id);
+    box.style.left=(cx-NODE_W/2)+'px'; box.style.top=(cy-NODE_H/2)+'px';
+    nodeLayer.appendChild(box); domByPerson.set(id,box);
+    // expand/collapse button under any node that has children
+    if(uHasChildren(id)){
+      const closed=collapsed.has(id);
+      const tg=document.createElement('button');
+      tg.className='node-toggle'+(closed?' closed':'');
+      tg.textContent=closed?'+':'−';
+      tg.title=closed?'הצג צאצאים':'הסתר צאצאים';
+      tg.style.left=(cx-9)+'px'; tg.style.top=(cy+NODE_H/2-1)+'px';
+      tg.onclick=(e)=>{ e.stopPropagation(); toggleCollapse(id); };
+      nodeLayer.appendChild(tg);
+    }
+    uChildren(id).forEach(c=>{ if(L.pos.has(c)) connectors.push([id,c]); });
   });
 
-  const totalH=cursorY+10;
+  const totalH=topY + L.depth*ROW_H + 46;
   canvas.style.width=maxW+'px'; canvas.style.height=totalH+'px';
   svg.setAttribute('width',maxW); svg.setAttribute('height',totalH);
   svg.setAttribute('viewBox','0 0 '+maxW+' '+totalH);
 
-  // parent→child connectors
   const frag=[];
-  connectors.forEach(([pid,cid])=>{
-    const a=posByPerson.get(pid), b=posByPerson.get(cid); if(!a||!b) return;
-    frag.push('<path class="conn" d="'+elbowPath(a,b)+'"/>');
-  });
-  // marriage links (always built; per-link data so visibility can follow the chosen mode)
+  connectors.forEach(([pid,cid])=>{ const a=posByPerson.get(pid), b=posByPerson.get(cid); if(a&&b) frag.push('<path class="conn" d="'+elbowPath(a,b)+'"/>'); });
   let mCount=0; const drawn=new Set();
   Object.values(persons).forEach(p=>{
     (p.spouses||[]).forEach(sp=>{
@@ -3866,8 +3928,14 @@ function genOf(id){
 /* ---------- focus / locate ---------- */
 function clearFocus(){ if(focusedBox){ focusedBox.classList.remove('focus'); focusedBox=null; } }
 function focusNode(id){
-  if(persons[id]) ensureHouseVisible(persons[id]._house);
-  if(!domByPerson.has(id)) renderTree();
+  if(!persons[id]) return;
+  ensureHouseVisible(persons[id]._house);
+  // show the full super-tree and expand every ancestor up to the root so the node is reachable
+  viewMode='root'; selectedFamilyIdx=null; const fj=document.getElementById('familyJump'); if(fj) fj.value='';
+  let cur=id, guard=0;
+  while(cur && guard++<300){ const par=vParentOf(cur); if(par==null) break; collapsed.delete(par); cur=par; }
+  collapsed.delete(VROOT);
+  renderTree();
   const box=domByPerson.get(id);
   if(!box) return;
   clearFocus();
@@ -4003,7 +4071,7 @@ document.querySelectorAll('#marriageMode .mode-btn').forEach(b=>{
     applyMarriageMode();
   };
 });
-// "center on family" dropdown
+// family selector: pick a family to show ONLY its tree; the first option returns to the full root tree
 const familyJump=document.getElementById('familyJump');
 familyList.forEach((fam,i)=>{
   const o=document.createElement('option'); o.value=i;
@@ -4011,18 +4079,18 @@ familyList.forEach((fam,i)=>{
   familyJump.appendChild(o);
 });
 familyJump.onchange=()=>{
-  const i=familyJump.value; if(i==='') return;
-  const fam=familyList[+i]; if(!fam||!fam.rootIds.length) return;
-  ensureHouseVisible(fam.house);
-  renderTree();
-  const target=domByPerson.get(fam.rootIds[0]);
-  if(target){ clearFocus(); target.classList.add('focus'); focusedBox=target; target.scrollIntoView({behavior:'smooth', block:'center', inline:'center'}); }
-  familyJump.value='';
+  const v=familyJump.value;
+  if(v===''){ viewMode='root'; selectedFamilyIdx=null; renderTree(); treeHost.scrollTop=0; treeHost.scrollLeft=0; return; }
+  const i=+v, fam=familyList[i]; if(!fam||!fam.rootIds.length) return;
+  viewMode='family'; selectedFamilyIdx=i;
+  fam.allIds.forEach(id=>collapsed.delete(id));   // show the whole family expanded
+  renderTree(); treeHost.scrollTop=0; treeHost.scrollLeft=0;
 };
 
 /* ---------- init ---------- */
 document.getElementById('count').textContent=Object.keys(persons).length+' אנשים · '+houseNames.length+' בתי-אב · '+familyList.length+' משפחות';
 renderApex();
+initCollapse();
 renderTree();
 </script>
 </body>
