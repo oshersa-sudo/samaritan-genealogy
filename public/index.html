@@ -185,9 +185,47 @@
   .share-hint{font-size:11.5px; color:var(--muted); margin-top:8px}
   #toast{position:fixed; bottom:20px; inset-inline-start:50%; transform:translateX(50%); background:var(--ink); color:#fff; padding:10px 18px; border-radius:20px; font-size:14px; z-index:90; opacity:0; transition:opacity .2s; pointer-events:none}
   #toast.show{opacity:1}
+  #panelBackdrop{display:none}
   @media (max-width:760px){
-    .workspace{flex-direction:column}
-    #panel{flex:1 1 auto; width:auto; position:static; max-height:70vh}
+    header{padding:8px 10px}
+    h1{font-size:17px}
+    .sub{font-size:11px}
+    .controls{gap:9px}
+    .ctl{width:100%}
+    .ctl label{font-size:10px}
+    .search-wrap{min-width:0; width:100%; flex:1 1 100%}
+    #search{font-size:16px}            /* 16px stops iOS auto-zoom on focus */
+    .hint{font-size:10px}
+    .houses{gap:6px}
+    .chip{font-size:12px; padding:5px 9px}
+    .btns{flex-wrap:wrap; gap:6px}
+    button.act{padding:7px 11px}
+    #familyJump{max-width:100%; width:100%}
+    .legend{font-size:11px; gap:8px 14px; margin-bottom:8px}
+    main{padding:10px}
+    .apex-body{font-size:12.5px}
+    /* tree fills the screen and scrolls inside itself */
+    .workspace{display:block}
+    #treeHost{max-height:none; height:60vh; min-height:300px}
+    /* bigger touch target for expand/collapse */
+    .node-toggle{width:26px; height:26px; font-size:17px; line-height:23px}
+    /* detail panel becomes a bottom sheet overlay (always visible, easy to close) */
+    #panel{
+      position:fixed; left:0; right:0; bottom:0; top:auto; width:auto; align-self:auto;
+      max-height:85vh; z-index:60; border:none; border-top:3px solid var(--accent2);
+      border-radius:16px 16px 0 0; box-shadow:0 -6px 24px rgba(40,30,15,.4);
+    }
+    body.panel-open #panelBackdrop{display:block; position:fixed; inset:0; background:rgba(40,30,15,.45); z-index:59}
+    .p-head{border-radius:16px 16px 0 0}
+    .p-close{width:38px; height:38px; font-size:20px}
+    /* share modal full-width sheet */
+    .share-card{width:100%; max-height:85vh}
+    .share-body textarea{height:150px}
+  }
+  @media (max-width:430px){
+    .title-row{gap:6px}
+    h1{font-size:16px}
+    .legend span:nth-child(n+4){display:none}   /* keep legend short on phones */
   }
 </style>
 </head>
@@ -255,6 +293,7 @@
       <div class="p-body" id="pBody"></div>
     </aside>
   </div>
+  <div id="panelBackdrop"></div>
 </main>
 
 <div class="share-modal" id="shareModal">
@@ -3753,7 +3792,7 @@ function renderTree(){
       tg.className='node-toggle'+(closed?' closed':'');
       tg.textContent=closed?'+':'−';
       tg.title=closed?'הצג צאצאים':'הסתר צאצאים';
-      tg.style.left=(cx-9)+'px'; tg.style.top=(cy+NODE_H/2-1)+'px';
+      tg.style.left=cx+'px'; tg.style.transform='translateX(-50%)'; tg.style.top=(cy+NODE_H/2-1)+'px';
       tg.onclick=(e)=>{ e.stopPropagation(); toggleCollapse(id); };
       nodeLayer.appendChild(tg);
     }
@@ -3823,6 +3862,7 @@ const panel=document.getElementById('panel');
 const pTitle=document.getElementById('pTitle'), pSub=document.getElementById('pSub'), pBody=document.getElementById('pBody');
 function closePanel(){ document.body.classList.remove('panel-open'); panel.setAttribute('aria-hidden','true'); clearFocus(); }
 document.getElementById('pClose').onclick=closePanel;
+document.getElementById('panelBackdrop').onclick=closePanel;
 // safety nets so no pop-up can ever trap the user:
 // Esc closes the share window or the detail panel
 document.addEventListener('keydown',e=>{
@@ -4091,6 +4131,7 @@ familyJump.onchange=()=>{
 document.getElementById('count').textContent=Object.keys(persons).length+' אנשים · '+houseNames.length+' בתי-אב · '+familyList.length+' משפחות';
 renderApex();
 initCollapse();
+if(window.innerWidth<=760){ zoom=0.8; document.getElementById('zoomReset').textContent='80%'; }
 renderTree();
 </script>
 </body>
