@@ -2402,7 +2402,8 @@ const DATA = {
        "death": 1307,
        "father_id": "179",
        "children_ids": [
-        "181"
+        "181",
+        "מר-קמרה180"
        ],
        "spouses": [
         {
@@ -2459,7 +2460,8 @@ const DATA = {
        "birth": 1262,
        "father_id": "179",
        "children_ids": [
-        "185"
+        "185",
+        "מר-אברהם184"
        ],
        "spouses": [
         {
@@ -2570,6 +2572,18 @@ const DATA = {
          "birth": "= אדם #101"
         }
        ]
+      },
+      {
+       "id": "מר-קמרה180",
+       "name": "קמרה (ירחה)",
+       "sex": "F",
+       "father_id": "180"
+      },
+      {
+       "id": "מר-אברהם184",
+       "name": "אברהם המרחיבי",
+       "sex": "M",
+       "father_id": "184"
       }
      ]
     },
@@ -2739,7 +2753,46 @@ const DATA = {
          "note": "אם ילדים 4-5"
         }
        ],
-       "note": "פרוגניטור ב'"
+       "note": "פרוגניטור ב'",
+       "children_ids": [
+        "מר-אברהם202",
+        "מר-יעקב202",
+        "מר-ברור202",
+        "מר-סעוד202"
+       ]
+      },
+      {
+       "id": "מר-אברהם202",
+       "name": "אברהם (בן סעד)",
+       "sex": "M",
+       "father_id": "202",
+       "children_ids": [
+        "מר-זבולן"
+       ]
+      },
+      {
+       "id": "מר-זבולן",
+       "name": "זבולן (פיאד)",
+       "sex": "M",
+       "father_id": "מר-אברהם202"
+      },
+      {
+       "id": "מר-יעקב202",
+       "name": "יעקב (בן סעד)",
+       "sex": "M",
+       "father_id": "202"
+      },
+      {
+       "id": "מר-ברור202",
+       "name": "ברור (בן סעד)",
+       "sex": "M",
+       "father_id": "202"
+      },
+      {
+       "id": "מר-סעוד202",
+       "name": "סֻעֻד (בן סעד)",
+       "sex": "M",
+       "father_id": "202"
       }
      ]
     }
@@ -5368,6 +5421,34 @@ const STORIES = {
  "הס-סלים140": {
   "t": "בן אברהם בן עבד-חנונה.",
   "g": ""
+ },
+ "מר-אברהם202": {
+  "t": "בנו בכורו של סעד. סופר ומעתיק בכתב יפה; פקיד אצל סוחרי שכם. נשא את סעדה (\"אלטרמה\") בת מרחיב, ואחריה את זפֿיקה בת בנימים המטרי.",
+  "g": "1846–1902"
+ },
+ "מר-זבולן": {
+  "t": "בן אברהם. נגר; חי בשכם ועבר לחולון; מעריץ הכה\"ג מצליח בן פינחס. נשא ב-1919 את פהֶימה בת צפר המרחיבי.",
+  "g": "1886–1967"
+ },
+ "מר-יעקב202": {
+  "t": "בן סעד (מאשתו אלפֻלֻה).",
+  "g": ""
+ },
+ "מר-ברור202": {
+  "t": "בן סעד (מאשתו סעֻדֶה בת יהושע).",
+  "g": ""
+ },
+ "מר-סעוד202": {
+  "t": "בן סעד; נקרא כך כי נולד אחרי מות אביו.",
+  "g": "1868–1919"
+ },
+ "מר-קמרה180": {
+  "t": "בת חובב. נישאה לאפרים בן שת המרחיבי.",
+  "g": "1870–1950"
+ },
+ "מר-אברהם184": {
+  "t": "בן צפר.",
+  "g": "1886–1967"
  }
 };
 const MODERN = {
@@ -5718,7 +5799,7 @@ const MODERN = {
    "id": "M32",
    "name": "רבקה",
    "sex": "F",
-   "parent": "F7",
+   "parent": "#מר-יעקב202",
    "g": "1909–1990",
    "byear": 1909,
    "bmonth": null,
@@ -5733,28 +5814,10 @@ const MODERN = {
    "notes": "נישאה לכהן אשר"
   },
   {
-   "id": "M33",
-   "name": "אברהם",
-   "sex": "M",
-   "parent": "#202",
-   "g": "1909–1994",
-   "byear": 1909,
-   "bmonth": null,
-   "bday": null,
-   "dyear": "1994",
-   "age": "85",
-   "family": "מרחיב",
-   "father": "סעד",
-   "job": null,
-   "bplace": "שכם",
-   "mother": "מלכה",
-   "notes": "נשוי לוג'הה יעקב מרחיב"
-  },
-  {
    "id": "M34",
    "name": "נזמי",
    "sex": "M",
-   "parent": "F8",
+   "parent": "F7",
    "g": "1910–1993",
    "byear": 1910,
    "bmonth": null,
@@ -5790,7 +5853,7 @@ const MODERN = {
    "id": "M36",
    "name": "ורדה",
    "sex": "F",
-   "parent": "F9",
+   "parent": "F8",
    "g": "1912–1989",
    "byear": 1912,
    "bmonth": null,
@@ -5826,7 +5889,7 @@ const MODERN = {
    "id": "M38",
    "name": "נג'לא",
    "sex": "F",
-   "parent": "F9",
+   "parent": "F8",
    "g": "1913–1993",
    "byear": 1913,
    "bmonth": null,
@@ -5844,7 +5907,7 @@ const MODERN = {
    "id": "M39",
    "name": "כוסר",
    "sex": "M",
-   "parent": "F7",
+   "parent": "#מר-יעקב202",
    "g": "1913",
    "byear": 1913,
    "bmonth": null,
@@ -5898,7 +5961,7 @@ const MODERN = {
    "id": "M42",
    "name": "סלים",
    "sex": "M",
-   "parent": "F10",
+   "parent": "F9",
    "g": "1914–1997",
    "byear": 1914,
    "bmonth": null,
@@ -5916,7 +5979,7 @@ const MODERN = {
    "id": "M43",
    "name": "ברוך",
    "sex": "M",
-   "parent": "#202",
+   "parent": "F10",
    "g": "1914–2001",
    "byear": 1914,
    "bmonth": null,
@@ -6096,7 +6159,7 @@ const MODERN = {
    "id": "M53",
    "name": "וג'יה",
    "sex": "F",
-   "parent": "F7",
+   "parent": "#מר-יעקב202",
    "g": "1919–1994",
    "byear": 1919,
    "bmonth": null,
@@ -6204,7 +6267,7 @@ const MODERN = {
    "id": "M59",
    "name": "נהלה",
    "sex": "F",
-   "parent": "F10",
+   "parent": "F9",
    "g": "1921–1987",
    "byear": 1921,
    "bmonth": null,
@@ -6276,7 +6339,7 @@ const MODERN = {
    "id": "M63",
    "name": "מורגן (אב סיכוה)",
    "sex": "M",
-   "parent": "F9",
+   "parent": "F8",
    "g": "1922–1986",
    "byear": 1922,
    "bmonth": null,
@@ -6888,7 +6951,7 @@ const MODERN = {
    "id": "M97",
    "name": "נעימה",
    "sex": "F",
-   "parent": "#202",
+   "parent": "F29",
    "g": "1928",
    "byear": 1928,
    "bmonth": null,
@@ -6924,7 +6987,7 @@ const MODERN = {
    "id": "M99",
    "name": "פואד",
    "sex": "M",
-   "parent": "F29",
+   "parent": "F30",
    "g": "1928–2000",
    "byear": 1928,
    "bmonth": null,
@@ -6978,7 +7041,7 @@ const MODERN = {
    "id": "M102",
    "name": "פיאד   (זבולן)",
    "sex": "M",
-   "parent": "F30",
+   "parent": "F31",
    "g": "1929",
    "byear": 1929,
    "bmonth": 3,
@@ -7050,7 +7113,7 @@ const MODERN = {
    "id": "M106",
    "name": "הדיה",
    "sex": "F",
-   "parent": "F31",
+   "parent": "F32",
    "g": "1929",
    "byear": 1929,
    "bmonth": null,
@@ -7068,7 +7131,7 @@ const MODERN = {
    "id": "M107",
    "name": "נתנ אל   (עטללה)",
    "sex": "M",
-   "parent": "F32",
+   "parent": "F33",
    "g": "1930",
    "byear": 1930,
    "bmonth": 3,
@@ -7104,7 +7167,7 @@ const MODERN = {
    "id": "M109",
    "name": "אהובה   (ודאד)",
    "sex": "M",
-   "parent": "F33",
+   "parent": "F34",
    "g": "1931",
    "byear": 1931,
    "bmonth": null,
@@ -7122,7 +7185,7 @@ const MODERN = {
    "id": "M110",
    "name": "שוכרי",
    "sex": "M",
-   "parent": "F30",
+   "parent": "F31",
    "g": "1931",
    "byear": 1931,
    "bmonth": 12,
@@ -7230,7 +7293,7 @@ const MODERN = {
    "id": "M116",
    "name": "ישראל",
    "sex": "M",
-   "parent": "F34",
+   "parent": "F35",
    "g": "1932",
    "byear": 1932,
    "bmonth": 6,
@@ -7248,7 +7311,7 @@ const MODERN = {
    "id": "M117",
    "name": "שפיקה",
    "sex": "F",
-   "parent": "F35",
+   "parent": "F36",
    "g": "1932",
    "byear": 1932,
    "bmonth": 7,
@@ -7338,7 +7401,7 @@ const MODERN = {
    "id": "M122",
    "name": "נעמת",
    "sex": "F",
-   "parent": "F32",
+   "parent": "F33",
    "g": "1933",
    "byear": 1933,
    "bmonth": null,
@@ -7428,7 +7491,7 @@ const MODERN = {
    "id": "M127",
    "name": "פרידה",
    "sex": "F",
-   "parent": "F36",
+   "parent": "#מר-זבולן",
    "g": "1933",
    "byear": 1933,
    "bmonth": null,
@@ -7518,7 +7581,7 @@ const MODERN = {
    "id": "M132",
    "name": "מזל",
    "sex": "F",
-   "parent": "F33",
+   "parent": "F34",
    "g": "1935–1991",
    "byear": 1935,
    "bmonth": 6,
@@ -7536,7 +7599,7 @@ const MODERN = {
    "id": "M133",
    "name": "רחל",
    "sex": "F",
-   "parent": "F35",
+   "parent": "F36",
    "g": "1935",
    "byear": 1935,
    "bmonth": null,
@@ -7554,7 +7617,7 @@ const MODERN = {
    "id": "M134",
    "name": "רבקה",
    "sex": "F",
-   "parent": "F30",
+   "parent": "F31",
    "g": "1935",
    "byear": 1935,
    "bmonth": 9,
@@ -7572,7 +7635,7 @@ const MODERN = {
    "id": "M135",
    "name": "בוסיינה",
    "sex": "F",
-   "parent": "F29",
+   "parent": "F30",
    "g": "1935",
    "byear": 1935,
    "bmonth": null,
@@ -7626,7 +7689,7 @@ const MODERN = {
    "id": "M138",
    "name": "איתמר   (פדיל)",
    "sex": "M",
-   "parent": "F32",
+   "parent": "F33",
    "g": "1936",
    "byear": 1936,
    "bmonth": 3,
@@ -7644,7 +7707,7 @@ const MODERN = {
    "id": "M139",
    "name": "יצחק",
    "sex": "M",
-   "parent": "F35",
+   "parent": "F36",
    "g": "1936",
    "byear": 1936,
    "bmonth": null,
@@ -7734,7 +7797,7 @@ const MODERN = {
    "id": "M144",
    "name": "יעקב",
    "sex": "M",
-   "parent": "F36",
+   "parent": "#מר-זבולן",
    "g": "1936",
    "byear": 1936,
    "bmonth": null,
@@ -7806,7 +7869,7 @@ const MODERN = {
    "id": "M148",
    "name": "טובה",
    "sex": "F",
-   "parent": "F33",
+   "parent": "F34",
    "g": "1938",
    "byear": 1938,
    "bmonth": 4,
@@ -8040,7 +8103,7 @@ const MODERN = {
    "id": "M161",
    "name": "בדרי",
    "sex": "F",
-   "parent": "F32",
+   "parent": "F33",
    "g": "1939",
    "byear": 1939,
    "bmonth": 2,
@@ -8058,7 +8121,7 @@ const MODERN = {
    "id": "M162",
    "name": "אביבה",
    "sex": "F",
-   "parent": "F34",
+   "parent": "F35",
    "g": "1939",
    "byear": 1939,
    "bmonth": 5,
@@ -8076,7 +8139,7 @@ const MODERN = {
    "id": "M163",
    "name": "מנשה",
    "sex": "M",
-   "parent": "M33",
+   "parent": "#מר-אברהם202",
    "g": "1939–1988",
    "byear": 1939,
    "bmonth": 4,
@@ -8634,7 +8697,7 @@ const MODERN = {
    "id": "M194",
    "name": "נעמת",
    "sex": "F",
-   "parent": "F29",
+   "parent": "F30",
    "g": "1943",
    "byear": 1943,
    "bmonth": 2,
@@ -8724,7 +8787,7 @@ const MODERN = {
    "id": "M199",
    "name": "יצחק     (ריבחי)",
    "sex": "M",
-   "parent": "M33",
+   "parent": "#מר-אברהם202",
    "g": "1944–2000",
    "byear": 1944,
    "bmonth": 7,
@@ -8976,7 +9039,7 @@ const MODERN = {
    "id": "M213",
    "name": "ניסים",
    "sex": "M",
-   "parent": "M33",
+   "parent": "#מר-אברהם202",
    "g": "1946",
    "byear": 1946,
    "bmonth": null,
@@ -9102,7 +9165,7 @@ const MODERN = {
    "id": "M221",
    "name": "נביה",
    "sex": "M",
-   "parent": "F30",
+   "parent": "F31",
    "g": "1947",
    "byear": 1947,
    "bmonth": 2,
@@ -9390,7 +9453,7 @@ const MODERN = {
    "id": "M237",
    "name": "ברוך",
    "sex": "M",
-   "parent": "M33",
+   "parent": "#מר-אברהם202",
    "g": "1950",
    "byear": 1950,
    "bmonth": 10,
@@ -10038,7 +10101,7 @@ const MODERN = {
    "id": "M273",
    "name": "רצון",
    "sex": "M",
-   "parent": "M33",
+   "parent": "#מר-אברהם202",
    "g": "1956",
    "byear": 1956,
    "bmonth": null,
@@ -11280,7 +11343,7 @@ const MODERN = {
    "id": "M342",
    "name": "דרור",
    "sex": "M",
-   "parent": "M33",
+   "parent": "#מר-אברהם202",
    "g": "1964",
    "byear": 1964,
    "bmonth": 3,
@@ -11424,7 +11487,7 @@ const MODERN = {
    "id": "M350",
    "name": "מרים",
    "sex": "F",
-   "parent": "M33",
+   "parent": "#מר-אברהם202",
    "g": "1965",
    "byear": 1965,
    "bmonth": 6,
@@ -16248,7 +16311,7 @@ const MODERN = {
    "id": "M618",
    "name": "ברק",
    "sex": "M",
-   "parent": "#202",
+   "parent": "F108",
    "g": "1992",
    "byear": 1992,
    "bmonth": 7,
@@ -16554,7 +16617,7 @@ const MODERN = {
    "id": "M635",
    "name": "נופר",
    "sex": "F",
-   "parent": "F108",
+   "parent": "F109",
    "g": "1994",
    "byear": 1994,
    "bmonth": 9,
@@ -16590,7 +16653,7 @@ const MODERN = {
    "id": "M637",
    "name": "אור",
    "sex": "M",
-   "parent": "F109",
+   "parent": "F110",
    "g": "1994",
    "byear": 1994,
    "bmonth": 6,
@@ -16626,7 +16689,7 @@ const MODERN = {
    "id": "M639",
    "name": "יוסף",
    "sex": "M",
-   "parent": "#202",
+   "parent": "F108",
    "g": "1994",
    "byear": 1994,
    "bmonth": 10,
@@ -16734,7 +16797,7 @@ const MODERN = {
    "id": "M645",
    "name": "שורוק",
    "sex": "F",
-   "parent": "F110",
+   "parent": "F111",
    "g": "1995",
    "byear": 1995,
    "bmonth": null,
@@ -16752,7 +16815,7 @@ const MODERN = {
    "id": "M646",
    "name": "איתאי",
    "sex": "M",
-   "parent": "F111",
+   "parent": "F112",
    "g": "1995",
    "byear": 1995,
    "bmonth": 1,
@@ -16896,7 +16959,7 @@ const MODERN = {
    "id": "M654",
    "name": "מיתר",
    "sex": "F",
-   "parent": "F112",
+   "parent": "F113",
    "g": "1996",
    "byear": 1996,
    "bmonth": 9,
@@ -17004,7 +17067,7 @@ const MODERN = {
    "id": "M660",
    "name": "יעקב",
    "sex": "M",
-   "parent": "F113",
+   "parent": "F114",
    "g": "1996",
    "byear": 1996,
    "bmonth": 6,
@@ -17130,7 +17193,7 @@ const MODERN = {
    "id": "M667",
    "name": "יזן",
    "sex": "M",
-   "parent": "F114",
+   "parent": "F115",
    "g": "1997",
    "byear": 1997,
    "bmonth": 6,
@@ -17166,7 +17229,7 @@ const MODERN = {
    "id": "M669",
    "name": "עדן",
    "sex": "M",
-   "parent": "F109",
+   "parent": "F110",
    "g": "1997",
    "byear": 1997,
    "bmonth": 8,
@@ -17184,7 +17247,7 @@ const MODERN = {
    "id": "M670",
    "name": "שיר",
    "sex": "M",
-   "parent": "F109",
+   "parent": "F110",
    "g": "1997",
    "byear": 1997,
    "bmonth": 8,
@@ -17220,7 +17283,7 @@ const MODERN = {
    "id": "M672",
    "name": "גזל",
    "sex": "F",
-   "parent": "F113",
+   "parent": "F114",
    "g": "1997",
    "byear": 1997,
    "bmonth": 9,
@@ -17292,7 +17355,7 @@ const MODERN = {
    "id": "M676",
    "name": "אלון",
    "sex": "M",
-   "parent": "F115",
+   "parent": "F116",
    "g": "1997",
    "byear": 1997,
    "bmonth": 8,
@@ -17310,7 +17373,7 @@ const MODERN = {
    "id": "M677",
    "name": "שלום",
    "sex": "M",
-   "parent": "F110",
+   "parent": "F111",
    "g": "1998",
    "byear": 1998,
    "bmonth": 7,
@@ -17328,7 +17391,7 @@ const MODERN = {
    "id": "M678",
    "name": "עמרם",
    "sex": "M",
-   "parent": "F110",
+   "parent": "F111",
    "g": "1998",
    "byear": 1998,
    "bmonth": 7,
@@ -17346,7 +17409,7 @@ const MODERN = {
    "id": "M679",
    "name": "ישראל",
    "sex": "M",
-   "parent": "F111",
+   "parent": "F112",
    "g": "1998",
    "byear": 1998,
    "bmonth": 3,
@@ -17364,7 +17427,7 @@ const MODERN = {
    "id": "M680",
    "name": "לינור",
    "sex": "F",
-   "parent": "F112",
+   "parent": "F113",
    "g": "1998",
    "byear": 1998,
    "bmonth": 12,
@@ -17436,7 +17499,7 @@ const MODERN = {
    "id": "M684",
    "name": "אברהם",
    "sex": "M",
-   "parent": "F116",
+   "parent": "F117",
    "g": "1998",
    "byear": 1998,
    "bmonth": 8,
@@ -17454,7 +17517,7 @@ const MODERN = {
    "id": "M685",
    "name": "יעל",
    "sex": "F",
-   "parent": "F117",
+   "parent": "F118",
    "g": "1998",
    "byear": 1998,
    "bmonth": 10,
@@ -17562,7 +17625,7 @@ const MODERN = {
    "id": "M691",
    "name": "יוסף",
    "sex": "M",
-   "parent": "F114",
+   "parent": "F115",
    "g": "1999",
    "byear": 1999,
    "bmonth": 2,
@@ -17634,7 +17697,7 @@ const MODERN = {
    "id": "M695",
    "name": "ליאל",
    "sex": "F",
-   "parent": "F118",
+   "parent": "F119",
    "g": "1999",
    "byear": 1999,
    "bmonth": 9,
@@ -17652,7 +17715,7 @@ const MODERN = {
    "id": "M696",
    "name": "מיכאל",
    "sex": "M",
-   "parent": "F119",
+   "parent": "F120",
    "g": "1999",
    "byear": 1999,
    "bmonth": 10,
@@ -17670,7 +17733,7 @@ const MODERN = {
    "id": "M697",
    "name": "יוסף",
    "sex": "F",
-   "parent": "F114",
+   "parent": "F115",
    "g": "2000",
    "byear": 2000,
    "bmonth": 9,
@@ -17796,7 +17859,7 @@ const MODERN = {
    "id": "M704",
    "name": "יוסף",
    "sex": "M",
-   "parent": "F116",
+   "parent": "F117",
    "g": "2000",
    "byear": 2000,
    "bmonth": 4,
@@ -17958,7 +18021,7 @@ const MODERN = {
    "id": "M713",
    "name": "אדם",
    "sex": "M",
-   "parent": "F120",
+   "parent": "F121",
    "g": "2001",
    "byear": 2001,
    "bmonth": 2,
@@ -18012,7 +18075,7 @@ const MODERN = {
    "id": "M716",
    "name": "עזי",
    "sex": "M",
-   "parent": "F113",
+   "parent": "F114",
    "g": "2002",
    "byear": 2002,
    "bmonth": 2,
@@ -18066,7 +18129,7 @@ const MODERN = {
    "id": "M719",
    "name": "שי",
    "sex": "M",
-   "parent": "F115",
+   "parent": "F116",
    "g": "2002",
    "byear": 2002,
    "bmonth": 5,
@@ -18102,7 +18165,7 @@ const MODERN = {
    "id": "M721",
    "name": "אפיק",
    "sex": "M",
-   "parent": "F121",
+   "parent": "F122",
    "g": "2002",
    "byear": 2002,
    "bmonth": 7,
@@ -18358,25 +18421,6 @@ const MODERN = {
   },
   {
    "id": "F7",
-   "name": "יעקב",
-   "sex": "M",
-   "parent": "@H:מרחיבים",
-   "g": "",
-   "byear": null,
-   "bmonth": null,
-   "bday": null,
-   "dyear": null,
-   "age": null,
-   "family": "מרחיב",
-   "father": null,
-   "job": null,
-   "bplace": null,
-   "mother": null,
-   "notes": "אב משוחזר מקבוצת-אחים במרשם (3 ילדים)",
-   "synth": true
-  },
-  {
-   "id": "F8",
    "name": "פארס",
    "sex": "M",
    "parent": "@H:צפרים",
@@ -18395,7 +18439,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F9",
+   "id": "F8",
    "name": "ג'מיל",
    "sex": "M",
    "parent": "@H:דנפים",
@@ -18414,7 +18458,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F10",
+   "id": "F9",
    "name": "אברהם",
    "sex": "M",
    "parent": "@H:דנפים",
@@ -18430,6 +18474,25 @@ const MODERN = {
    "bplace": null,
    "mother": null,
    "notes": "אב משוחזר מקבוצת-אחים במרשם (2 ילדים)",
+   "synth": true
+  },
+  {
+   "id": "F10",
+   "name": "סעד",
+   "sex": "M",
+   "parent": "@H:מרחיבים",
+   "g": "",
+   "byear": null,
+   "bmonth": null,
+   "bday": null,
+   "dyear": null,
+   "age": null,
+   "family": "מרחיב",
+   "father": null,
+   "job": null,
+   "bplace": null,
+   "mother": null,
+   "notes": "אב משוחזר מקבוצת-אחים במרשם (1 ילדים)",
    "synth": true
   },
   {
@@ -18776,6 +18839,25 @@ const MODERN = {
   },
   {
    "id": "F29",
+   "name": "סעיד",
+   "sex": "M",
+   "parent": "@H:מרחיבים",
+   "g": "",
+   "byear": null,
+   "bmonth": null,
+   "bday": null,
+   "dyear": null,
+   "age": null,
+   "family": "מרחיב",
+   "father": null,
+   "job": null,
+   "bplace": null,
+   "mother": null,
+   "notes": "אב משוחזר מקבוצת-אחים במרשם (1 ילדים)",
+   "synth": true
+  },
+  {
+   "id": "F30",
    "name": "מוניר",
    "sex": "M",
    "parent": "@H:דנפים",
@@ -18794,7 +18876,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F30",
+   "id": "F31",
    "name": "לוטפי",
    "sex": "M",
    "parent": "@H:דנפים",
@@ -18813,7 +18895,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F31",
+   "id": "F32",
    "name": "פיאד",
    "sex": "M",
    "parent": "@H:דנפים",
@@ -18832,7 +18914,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F32",
+   "id": "F33",
    "name": "אברהם",
    "sex": "M",
    "parent": "@H:כהונה",
@@ -18851,7 +18933,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F33",
+   "id": "F34",
    "name": "מוסבאח",
    "sex": "M",
    "parent": "@H:צפרים",
@@ -18870,7 +18952,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F34",
+   "id": "F35",
    "name": "גבריאל",
    "sex": "M",
    "parent": "@H:צפרים",
@@ -18889,7 +18971,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F35",
+   "id": "F36",
    "name": "עמרם",
    "sex": "M",
    "parent": "@H:כהונה",
@@ -18905,25 +18987,6 @@ const MODERN = {
    "bplace": null,
    "mother": null,
    "notes": "אב משוחזר מקבוצת-אחים במרשם (3 ילדים)",
-   "synth": true
-  },
-  {
-   "id": "F36",
-   "name": "זבולון",
-   "sex": "M",
-   "parent": "@H:מרחיבים",
-   "g": "",
-   "byear": null,
-   "bmonth": null,
-   "bday": null,
-   "dyear": null,
-   "age": null,
-   "family": "מרחיב",
-   "father": null,
-   "job": null,
-   "bplace": null,
-   "mother": null,
-   "notes": "אב משוחזר מקבוצת-אחים במרשם (2 ילדים)",
    "synth": true
   },
   {
@@ -20277,6 +20340,25 @@ const MODERN = {
   },
   {
    "id": "F108",
+   "name": "סעד",
+   "sex": "M",
+   "parent": "@H:מרחיבים",
+   "g": "",
+   "byear": null,
+   "bmonth": null,
+   "bday": null,
+   "dyear": null,
+   "age": null,
+   "family": "מרחיב",
+   "father": null,
+   "job": null,
+   "bplace": null,
+   "mother": null,
+   "notes": "אב משוחזר מקבוצת-אחים במרשם (2 ילדים)",
+   "synth": true
+  },
+  {
+   "id": "F109",
    "name": "נעמן",
    "sex": "M",
    "parent": "@H:דנפים",
@@ -20295,27 +20377,8 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F109",
-   "name": "צביא",
-   "sex": "M",
-   "parent": "@H:כהונה",
-   "g": "",
-   "byear": null,
-   "bmonth": null,
-   "bday": null,
-   "dyear": null,
-   "age": null,
-   "family": "לוי",
-   "father": null,
-   "job": null,
-   "bplace": null,
-   "mother": null,
-   "notes": "אב משוחזר מקבוצת-אחים במרשם (3 ילדים)",
-   "synth": true
-  },
-  {
    "id": "F110",
-   "name": "אהרן",
+   "name": "צביא",
    "sex": "M",
    "parent": "@H:כהונה",
    "g": "",
@@ -20334,6 +20397,25 @@ const MODERN = {
   },
   {
    "id": "F111",
+   "name": "אהרן",
+   "sex": "M",
+   "parent": "@H:כהונה",
+   "g": "",
+   "byear": null,
+   "bmonth": null,
+   "bday": null,
+   "dyear": null,
+   "age": null,
+   "family": "לוי",
+   "father": null,
+   "job": null,
+   "bplace": null,
+   "mother": null,
+   "notes": "אב משוחזר מקבוצת-אחים במרשם (3 ילדים)",
+   "synth": true
+  },
+  {
+   "id": "F112",
    "name": "נור",
    "sex": "M",
    "parent": "@H:צפרים",
@@ -20352,7 +20434,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F112",
+   "id": "F113",
    "name": "יצחק",
    "sex": "M",
    "parent": "@H:כהונה",
@@ -20371,7 +20453,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F113",
+   "id": "F114",
    "name": "צביא",
    "sex": "M",
    "parent": "@H:כהונה",
@@ -20390,7 +20472,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F114",
+   "id": "F115",
    "name": "נעמן",
    "sex": "M",
    "parent": "@H:דנפים",
@@ -20409,7 +20491,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F115",
+   "id": "F116",
    "name": "יעקב",
    "sex": "M",
    "parent": "@H:צפרים",
@@ -20428,7 +20510,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F116",
+   "id": "F117",
    "name": "יעקב",
    "sex": "M",
    "parent": "@H:כהונה",
@@ -20447,7 +20529,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F117",
+   "id": "F118",
    "name": "רפי",
    "sex": "M",
    "parent": "@H:צפרים",
@@ -20466,7 +20548,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F118",
+   "id": "F119",
    "name": "חנן",
    "sex": "M",
    "parent": "@H:צפרים",
@@ -20485,7 +20567,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F119",
+   "id": "F120",
    "name": "גבריאל",
    "sex": "M",
    "parent": "@H:צפרים",
@@ -20504,7 +20586,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F120",
+   "id": "F121",
    "name": "יעקב",
    "sex": "M",
    "parent": "@H:כהונה",
@@ -20523,7 +20605,7 @@ const MODERN = {
    "synth": true
   },
   {
-   "id": "F121",
+   "id": "F122",
    "name": "אייל",
    "sex": "M",
    "parent": "@H:צפרים",
@@ -20632,6 +20714,15 @@ const MODERN = {
    "dyear": "1990",
    "age": "82",
    "g": "1908–1990"
+  },
+  {
+   "cid": "מר-אברהם202",
+   "byear": 1909,
+   "bmonth": null,
+   "bday": null,
+   "dyear": "1994",
+   "age": "85",
+   "g": "1909–1994"
   }
  ]
 };
