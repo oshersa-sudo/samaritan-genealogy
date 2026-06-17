@@ -8,7 +8,7 @@ master = json.load(io.open('master_v2.json', encoding='utf-8'))
 stories = json.load(io.open('stories.json', encoding='utf-8'))
 allp = {p['id']: p for h in master['houses'] for f in h['families'] for p in f['persons']}
 
-PREFIXES = ('הס-', 'מר-', 'כ-', 'שכם', 'קהיר')
+PREFIXES = ('הס-', 'מר-', 'ר-', 'כ-', 'שכם', 'קהיר')
 def is_added(pid): return any(str(pid).startswith(pfx) for pfx in PREFIXES)
 
 def fname(pid):

@@ -1,0 +1,59 @@
+# -*- coding: utf-8 -*-
+# Fills the (modest) missing bridge-generation people of the remaining families from
+# the transcripts (page_74–98). Each gap-person is added to the same family as their
+# census father, with a father_id link. Prefer the transcript over the registry.
+import json, io
+
+master = json.load(io.open('master_v2.json', encoding='utf-8'))
+stories = json.load(io.open('stories.json', encoding='utf-8'))
+fam_of = {}
+node = {}
+for h in master['houses']:
+    for f in h['families']:
+        for p in f['persons']:
+            node[p['id']] = p
+            fam_of[p['id']] = f
+
+# idempotent: drop previously added
+for h in master['houses']:
+    for f in h['families']:
+        f['persons'] = [p for p in f['persons'] if not str(p['id']).startswith('ר-')]
+
+def P(pid, name, sex, father, gy, t):
+    fam = fam_of.get(father)
+    if fam is None:
+        print('  ! father missing for', name, father); return
+    p = {"id": pid, "name": name, "sex": sex, "father_id": father}
+    fam['persons'].append(p)
+    fam_of[pid] = fam; node[pid] = p
+    par = node[father]; par.setdefault('children_ids', [])
+    if pid not in par['children_ids']: par['children_ids'].append(pid)
+    if t or gy: stories[pid] = {"t": t, "g": gy}
+
+# ===== אלטיף: ילדי עבד-אלה הטאבו (#58) — page_78 =====
+P('ר-מנגיר', 'מנגיר', 'M', '58', '1891–1945', 'בן עבד-אלה. ירש את משרת אביו במשרד הטאבו לאחר שפרש; בעל כתב יפה בערבית; בעל מעמד בעדה.')
+P('ר-שלום58', 'שלום (סלים)', 'M', '58', '1894–1927', 'בן עבד-אלה. בעל חנות לסדקית ובדים; נהרג ברעידת האדמה של 1927.')
+P('ר-זהרה58', 'זהרה (בדיר)', 'M', '58', '1897–1968', 'בן עבד-אלה. חי בעוני; עבד כשליח במשרד הטאבו בשנותיו האחרונות.')
+P('ר-בדריה58', 'בַּדְרִיֶה', 'F', '58', '1900–1979', 'בת עבד-אלה. עקרת בית; נישאה לתמים בן אפרים הדנפי.')
+P('ר-אבסכוה58', 'אבּ-סְכֻּוָה (רגֿ\'יה)', 'M', '58', '1902–1976', 'בן עבד-אלה. עבד בטאבו לאחר מות אחיו מנגיר.')
+P('ר-טובה58', 'טובה (חֲרִיֶה)', 'F', '58', '1906–', 'בת עבד-אלה.')
+P('ר-רצון58', 'רצון (רדי)', 'M', '58', '1908–1911', 'בן עבד-אלה; נפטר בגיל 3.')
+P('ר-נזמיה58', 'נזְמְיֶה', 'F', '58', '–1967', 'בת הזקונים של עבד-אלה (נולדה אחרי 1909); נישאה לעפיף בן זבולן הדנפי.')
+P('ר-עבדאללטיף58', 'עבד-אלה (עבד אללטיף)', 'M', '58', '1903–', 'בן עבד-אלה. חייט; יצא לגמלאות והחל להעתיק ספרים.')
+# שלום (#65בּ') -> עיפאת
+P('ר-עיפאת', 'עיפאת', 'F', "65בּ'", '1907–1982', 'בת שלום. עקרת בית; ידעה קרוא עברית וערבית; למדה בבית הספר.')
+# רבקה (#49) -> סלגֿח
+P('ר-סלגח49', 'סַלֻגִֿח', 'F', '49', '', 'בת רבקה. אשת הכהן הגדול יעקב בן אהרן.')
+
+# ===== שלבי: בת שלבי (#75) =====
+P('ר-שלביה', 'שלבְֿיֶה', 'F', '75', '', 'בת שלבי (נולדה אחרי 1909).')
+
+# ===== עבד-אלה/משלמה: בן סעדה (#115) =====
+P('ר-אינמר', 'אינמר (פצֿיל)', 'M', '115', '', 'בן סעדה; מת צעיר.')
+
+# ===== צפרים: בת יעקב אלעֻפֿאוי (#211) =====
+P('ר-סרוריה', 'סֻרֻריה', 'F', '211', '1897–1976', 'בת יעקב. נישאה לצדקה בן אברהם הצפרי, ואחריו למשלמה בן אבּ-ספֿוה הדנפי.')
+
+io.open('master_v2.json', 'w', encoding='utf-8').write(json.dumps(master, ensure_ascii=False, indent=1))
+io.open('stories.json', 'w', encoding='utf-8').write(json.dumps(stories, ensure_ascii=False, indent=1))
+print('added remaining bridge people:', sum(1 for h in master['houses'] for f in h['families'] for p in f['persons'] if str(p['id']).startswith('ר-')))
