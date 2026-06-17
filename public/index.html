@@ -186,9 +186,17 @@
   #toast{position:fixed; bottom:20px; inset-inline-start:50%; transform:translateX(50%); background:var(--ink); color:#fff; padding:10px 18px; border-radius:20px; font-size:14px; z-index:90; opacity:0; transition:opacity .2s; pointer-events:none}
   #toast.show{opacity:1}
   #panelBackdrop{display:none}
+  .opt-toggle{display:none; width:100%; background:var(--panel); border:1px solid var(--accent2);
+    color:var(--accent); border-radius:8px; padding:9px; font:inherit; font-size:13px; font-weight:bold; cursor:pointer}
   @media (max-width:760px){
     header{padding:8px 10px}
     h1{font-size:17px}
+    .opt-toggle{display:block}
+    .controls.collapsed .ctl:not(.search-wrap){display:none}
+    .controls.collapsed .search-wrap .hint{display:none}
+    .sub{display:none}
+    #apexHost{display:none}
+    #treeHost{max-height:none; height:66vh; min-height:320px}
     .sub{font-size:11px}
     .controls{gap:9px}
     .ctl{width:100%}
@@ -243,6 +251,7 @@
       <div class="hint">אפשר לחפש שם בלבד, או שם + שם האב / האם להבחנה. לחיצה על תוצאה תאתר את האדם בעץ.</div>
       <div id="results"></div>
     </div>
+    <button id="optionsToggle" class="opt-toggle" type="button">⚙ אפשרויות תצוגה ▾</button>
     <div class="ctl">
       <label>סינון לפי בית-אב</label>
       <div class="houses" id="houseFilter"></div>
@@ -4131,7 +4140,12 @@ familyJump.onchange=()=>{
 document.getElementById('count').textContent=Object.keys(persons).length+' אנשים · '+houseNames.length+' בתי-אב · '+familyList.length+' משפחות';
 renderApex();
 initCollapse();
-if(window.innerWidth<=760){ zoom=0.8; document.getElementById('zoomReset').textContent='80%'; }
+// mobile: collapse the controls behind an "options" button so the tree gets the screen
+const optToggle=document.getElementById('optionsToggle');
+const controlsEl=document.querySelector('.controls');
+function setOptions(open){ controlsEl.classList.toggle('collapsed', !open); optToggle.textContent=(open?'⚙ אפשרויות תצוגה ▴':'⚙ אפשרויות תצוגה ▾'); }
+optToggle.onclick=()=>setOptions(controlsEl.classList.contains('collapsed'));
+if(window.innerWidth<=760){ zoom=0.8; document.getElementById('zoomReset').textContent='80%'; setOptions(false); }
 renderTree();
 </script>
 </body>
