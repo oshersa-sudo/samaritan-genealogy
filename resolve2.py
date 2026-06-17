@@ -166,7 +166,11 @@ for mp in modern:
     if not tag:
         continue
     par = mp.get('_parent')
-    mp['_finalparent'] = par if par else ('@H:' + tag)
+    # priestly people all descend from טביה בן יצחק; when we can't place them precisely
+    # (registry uses Arabic nicknames), group them under his "descendants" node instead
+    # of floating them at house level.
+    fallback = '#כ-צאצאים' if tag == 'כהונה' else ('@H:' + tag)
+    mp['_finalparent'] = par if par else fallback
     final.append(mp)
 
 # Group floating sibling-sets (same father+mother+family, attached at house level)
@@ -177,7 +181,7 @@ import collections as _c
 def _sibkey(m): return (given_loose(m.get('father', '')), given_loose(m.get('mother', '')), basic(m['family']))
 _groups = _c.OrderedDict()
 for mp in final:
-    if mp['_finalparent'].startswith('@H') and given_loose(mp.get('father', '')):
+    if (mp['_finalparent'].startswith('@H') or mp['_finalparent'] == '#כ-צאצאים') and given_loose(mp.get('father', '')):
         _groups.setdefault(_sibkey(mp), []).append(mp)
 def _name_tokens(nm):
     return set(loose(t) for t in basic(nm).split() if loose(t))
@@ -209,7 +213,8 @@ for key, members in _groups.items():
     _si += 1; fid = 'F%d' % _si
     fcand = [p for p in persons.values() if p['_house'] == tag and nmatch(p['name'], fa) and p.get('sex') != 'F'
              and (_est is None or bgreg(p) is None or abs(bgreg(p) - _est) <= 35)]
-    fparent = ('#' + fcand[0]['id']) if len(fcand) == 1 else ('@H:' + tag)
+    _fb = '#כ-צאצאים' if tag == 'כהונה' else ('@H:' + tag)
+    fparent = ('#' + fcand[0]['id']) if len(fcand) == 1 else _fb
     synth_people.append({'id': fid, 'name': fa, 'family': fam, 'parent': fparent, 'sex': 'M',
                          'g': '', 'father': None, 'mother': None,
                          'note': 'אב משוחזר מקבוצת-אחים במרשם (' + str(len(members)) + ' ילדים)'})
