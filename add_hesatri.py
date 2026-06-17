@@ -74,14 +74,13 @@ if getp('134'):
 if getp('129'):
     getp('129')['name'] = 'ישמעאל (חיכמת)'
     stories['129'] = {'t': 'נקרא על שם אביו ישמעאל, שמת ארבעה ימים לפני לידתו. חייט; למד תורה; ידע על-פה ספרי בראשית ושמות; משירה; העתיק כתבי-יד רבים.', 'g': '1904–1985'}
-# עבד-חנונה (עבד אללטיף) החייט — בן עצמאי של #135, נקרא על שם סבו (page_88 שו' 32)
+# NOTE: the tailor "עבד-חנונה (עבד אללטיף, 1903)" of page_88 line 32 is NOT a direct
+# son of #135 (born 1818 — an 85y gap is impossible). He is a later descendant named
+# after his ancestor #135; the prose doesn't give his father, so per "no uncertain
+# links" he is NOT added. (Was wrongly added as הס-עבדחנונה135; removed.)
 if has('135'):
     g135 = getp('135'); g135.setdefault('children_ids', [])
-    g135['children_ids'] = [c for c in g135['children_ids'] if c != 'הס-תמים']
-    if 'הס-עבדחנונה135' not in g135['children_ids']:
-        g135['children_ids'].append('הס-עבדחנונה135')
-P('הס-עבדחנונה135', 'עבד-חנונה (עבד אללטיף)', 'M', '135', '1903–',
-  'בן עבד-חנונה (נקרא על שם סבו). חייט כל חייו; יצא לגימלאות והחל להעתיק ספרים.')
+    g135['children_ids'] = [c for c in g135['children_ids'] if c not in ('הס-תמים', 'הס-עבדחנונה135')]
 # אברהם #140 -> עבד-אלה, סלים (נולדו אחרי 1909)
 if has('140'):
     getp('140')['children_ids'] = ['הס-עבדאלה140', 'הס-סלים140']
