@@ -114,9 +114,12 @@ def resolve_parent(mp):
     house = FAM2HOUSE.get(fam)
     my = myear(mp)
     moth = given_loose(mp.get('mother', ''))
+    # a father candidate must be male (exclude females with similar names, e.g. סעוד vs סעד)
     ccand = [p for p in persons.values() if house and p['_house'] == house and nmatch(p['name'], fa)
+             and p.get('sex') != 'F'
              and not (my and bgreg(p) and bgreg(p) > my - 12)]
     mcand = [q for q in mod_by_fam.get(fam, []) if q is not mp and nmatch(q['name'], fa)
+             and not basic(q.get('sex', '')).startswith('נ')
              and not (my and myear(q) and myear(q) > my - 12)]
     if moth and len(ccand) > 1:
         f = [c for c in ccand if moth in cspouses(c)]

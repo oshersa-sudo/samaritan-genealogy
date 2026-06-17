@@ -544,7 +544,7 @@ function makeNodeBox(id){
   const d=document.createElement('div');
   if(id===VROOT){
     d.className='node-box vnode vroot';
-    d.innerHTML='<div class="nb-name">🌳 אב קדמון</div><div class="nb-years">'+esc(rootFounder)+'</div>';
+    d.innerHTML='<div class="nb-name">🌳 בתי האב</div><div class="nb-years">השומרונים · לכל בית-אב שורש קדום משלו</div>';
     d.onclick=()=>{ const ap=document.querySelector('.apex'); if(ap){ ap.open=true; ap.scrollIntoView({behavior:'smooth',block:'center'}); } };
     return d;
   }
