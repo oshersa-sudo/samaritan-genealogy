@@ -41,7 +41,7 @@ master = json.load(io.open('master_v2.json', encoding='utf-8'))
 modern = json.load(io.open('modern_people.json', encoding='utf-8'))
 
 def htag(h):
-    for k in ('דנפים', 'מרחיבים', 'צפרים'):
+    for k in ('דנפים', 'מרחיבים', 'צפרים', 'כהונה'):
         if k in h:
             return k
     return 'בודדים'
@@ -66,7 +66,8 @@ def cspouses(p):
 
 # Excel family -> census house
 FAM2HOUSE = {'דינפי': 'דנפים', 'סראוי': 'דנפים',
-             'צדקה': 'צפרים', 'מרחיב': 'מרחיבים'}
+             'צדקה': 'צפרים', 'מרחיב': 'מרחיבים',
+             'כהן': 'כהונה', 'לוי': 'כהונה'}
 
 for i, mp in enumerate(modern):
     mp['mid'] = 'M%d' % (i + 1)

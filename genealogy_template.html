@@ -371,7 +371,7 @@ const overlapEnrich={};
 (MODERN.overlap||[]).forEach(o=>{ overlapEnrich[o.cid]=o; });
 const modernHouseRoots={};   // full house name -> [mids] attached at family/house level
 const tagToHouse={};
-houseNames.forEach(hn=>{ ['דנפים','מרחיבים','צפרים'].forEach(t=>{ if(hn.indexOf(t)>=0) tagToHouse[t]=hn; }); });
+houseNames.forEach(hn=>{ ['דנפים','מרחיבים','צפרים','כהונה'].forEach(t=>{ if(hn.indexOf(t)>=0) tagToHouse[t]=hn; }); });
 (MODERN.modern||[]).forEach(m=>{
   persons[m.id]={ id:m.id, name:m.name, sex:m.sex, _modern:true, g:m.g, byear:m.byear,
     bmonth:m.bmonth, bday:m.bday, dyear:m.dyear, age:m.age, family:m.family, father:m.father,
