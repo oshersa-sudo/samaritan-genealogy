@@ -213,6 +213,14 @@ def gstr(mp):
         return '%d' % by
     return ''
 
+# Manual overrides — user-confirmed corrections that name-matching cannot infer.
+# אלעד (M582) is NOT the son of M301 (אברהם בן חיכמת); float him under his house
+# (uncertain father) instead of making a wrong link. (user-confirmed, 2026-06)
+MANUAL_FLOAT = {'M582'}
+for mp in final:
+    if mp['mid'] in MANUAL_FLOAT:
+        mp['_finalparent'] = '@H:' + (FAM2HOUSE.get(basic(mp['family'])) or 'דנפים')
+
 out_people = []
 for mp in final:
     out_people.append(dict(id=mp['mid'], name=mp['name'], sex=sexMF(mp['sex']), parent=mp['_finalparent'],
