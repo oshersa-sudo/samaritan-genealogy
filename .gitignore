@@ -7,3 +7,6 @@ deploy/
 # OS junk
 Thumbs.db
 .DS_Store
+resolve2_report.txt
+parse_summary.txt
+*_report.txt

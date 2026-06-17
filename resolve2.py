@@ -148,24 +148,19 @@ for mp in modern:
     res[why] += 1
 
 mid2mp = {mp['mid']: mp for mp in modern}
-def reaches_census(mp):
-    seen = set()
-    cur = mp.get('_parent')
-    guard = 0
-    while cur and guard < 300:
-        guard += 1
-        if cur.startswith('#'):
-            return True
-        if cur in seen:
-            return False
-        seen.add(cur)
-        nx = mid2mp.get(cur)
-        if not nx or not nx.get('_parent'):
-            return False
-        cur = nx['_parent']
-    return False
-
-final = [mp for mp in modern if mp.get('_parent') and reaches_census(mp)]
+# Include EVERY person in a mapped family (not priestly, not an overlap duplicate).
+# Use the confident parent where we found one; otherwise attach the branch root under
+# its house node (@H:<tag>) — a certain family-level link, never a guessed parent.
+final = []
+for mp in modern:
+    if mp['mid'] in overlap:
+        continue
+    tag = FAM2HOUSE.get(basic(mp['family']))
+    if not tag:
+        continue
+    par = mp.get('_parent')
+    mp['_finalparent'] = par if par else ('@H:' + tag)
+    final.append(mp)
 
 def sexMF(s):
     s = basic(s)
@@ -183,9 +178,10 @@ def gstr(mp):
 
 out_people = []
 for mp in final:
-    out_people.append(dict(id=mp['mid'], name=mp['name'], sex=sexMF(mp['sex']), parent=mp['_parent'],
+    out_people.append(dict(id=mp['mid'], name=mp['name'], sex=sexMF(mp['sex']), parent=mp['_finalparent'],
         g=gstr(mp), byear=myear(mp), bmonth=mp.get('bmonth'), bday=mp.get('bday'),
         dyear=mp.get('dyear') or None, age=mp.get('age') or None, family=mp['family'],
+        father=mp.get('father') or None,
         job=mp.get('job') or None, bplace=mp.get('bplace') or None, mother=mp.get('mother') or None,
         notes=mp.get('notes') or None))
 
@@ -202,8 +198,10 @@ out = io.open('resolve2_report.txt', 'w', encoding='utf-8')
 out.write('resolution: %s\n' % json.dumps(dict(res), ensure_ascii=False))
 out.write('overlap (merge into census): %d\n' % len(overlap))
 out.write('final modern nodes added: %d\n' % len(final))
-gc = sum(1 for m in final if m['_parent'].startswith('#'))
-out.write('  grafted onto census: %d ; under modern: %d\n' % (gc, len(final) - gc))
+gc = sum(1 for m in final if m['_finalparent'].startswith('#'))
+mc = sum(1 for m in final if m['_finalparent'].startswith('M'))
+hc = sum(1 for m in final if m['_finalparent'].startswith('@H'))
+out.write('  -> onto census: %d ; under modern: %d ; under house (uncertain graft): %d\n' % (gc, mc, hc))
 out.write('tree total after merge: %d\n' % (193 + len(final)))
 out.close()
 print('final', len(final), 'overlap', len(overlap), 'res', dict(res))

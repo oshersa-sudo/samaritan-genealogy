@@ -122,6 +122,9 @@
   .node-box.vhouse{background:#efe7d4; border-color:var(--accent2)}
   .node-box.vhouse .nb-name{color:var(--accent); font-size:14px}
   .node-box.vhouse .nb-years{color:var(--muted)}
+  .node-box.vextras{background:#eef3f7; border-color:#9bb3c6; border-style:dashed}
+  .node-box.vextras .nb-name{color:#556f86; font-size:12.5px}
+  .node-box.vextras .nb-years{color:#7a93ad; font-size:9px}
   .node-toggle{
     position:absolute; width:18px; height:18px; border-radius:50%; border:1.5px solid var(--accent);
     background:#fff; color:var(--accent); font-size:13px; line-height:15px; text-align:center;
@@ -366,23 +369,35 @@ familyList.forEach(fam=>{
 /* ---------- merge modern descendants (from the community birth registry, mapped to the tree) ---------- */
 const overlapEnrich={};
 (MODERN.overlap||[]).forEach(o=>{ overlapEnrich[o.cid]=o; });
+const modernHouseRoots={};   // full house name -> [mids] attached at family/house level
+const tagToHouse={};
+houseNames.forEach(hn=>{ ['דנפים','מרחיבים','צפרים'].forEach(t=>{ if(hn.indexOf(t)>=0) tagToHouse[t]=hn; }); });
 (MODERN.modern||[]).forEach(m=>{
   persons[m.id]={ id:m.id, name:m.name, sex:m.sex, _modern:true, g:m.g, byear:m.byear,
-    bmonth:m.bmonth, bday:m.bday, dyear:m.dyear, age:m.age, family:m.family,
+    bmonth:m.bmonth, bday:m.bday, dyear:m.dyear, age:m.age, family:m.family, father:m.father,
     job:m.job, bplace:m.bplace, mother:m.mother, note:m.notes, _parentRaw:m.parent };
 });
 (MODERN.modern||[]).forEach(m=>{
-  const par = (m.parent && m.parent[0]==='#') ? m.parent.slice(1) : m.parent;
   if(!childMap[m.id]) childMap[m.id]=[];
-  if(persons[par]){ parentOf[m.id]=par; if(!childMap[par]) childMap[par]=[]; childMap[par].push(m.id); }
+  const par=m.parent;
+  if(par && par.indexOf('@H:')===0){               // attach branch-root under its house node
+    const hn=tagToHouse[par.slice(3)];
+    if(hn){ (modernHouseRoots[hn]=modernHouseRoots[hn]||[]).push(m.id); persons[m.id]._house=hn; persons[m.id]._houseRoot=hn; }
+  } else {                                          // confident parent: census #id or modern mid
+    const pid = (par && par[0]==='#') ? par.slice(1) : par;
+    if(persons[pid]){ parentOf[m.id]=pid; (childMap[pid]=childMap[pid]||[]).push(m.id); }
+  }
 });
-// inherit house/family from the census ancestor
+// inherit house/family (people with a confident parent climb to the census ancestor; @H roots already set)
 (MODERN.modern||[]).forEach(m=>{
-  let cur=m.id, guard=0;
-  while(parentOf[cur] && guard++<300) cur=parentOf[cur];
-  const anc=persons[cur];
-  persons[m.id]._house = (anc && anc._house) || '';
-  persons[m.id]._family = persons[m.id].family || (anc && anc._family) || '';
+  const me=persons[m.id];
+  if(!me._house){
+    let cur=m.id, guard=0;
+    while(parentOf[cur] && guard++<400) cur=parentOf[cur];
+    const anc=persons[cur];
+    me._house=(anc&&anc._house)||'';
+  }
+  me._family=me.family||me._family||'';
 });
 
 /* ---------- helpers ---------- */
@@ -461,9 +476,13 @@ const collapsed=new Set();                            // ids whose children are 
 
 /* ----- virtual super-tree: ROOT → houses → family progenitors → real descendants ----- */
 const VROOT='__root__', HPREFIX='__house__';
+const EPREFIX='__extras__';
 const houseNodeId = hn => HPREFIX+hn;
-function isVirtual(id){ return id===VROOT || (typeof id==='string' && id.indexOf(HPREFIX)===0); }
-function vHouseName(id){ return id.slice(HPREFIX.length); }
+const extrasNodeId = hn => EPREFIX+hn;
+function isHouse(id){ return typeof id==='string' && id.indexOf(HPREFIX)===0; }
+function isExtras(id){ return typeof id==='string' && id.indexOf(EPREFIX)===0; }
+function isVirtual(id){ return id===VROOT || isHouse(id) || isExtras(id); }
+function vHouseName(id){ return id.indexOf(EPREFIX)===0 ? id.slice(EPREFIX.length) : id.slice(HPREFIX.length); }
 const rootFounder = (DATA.root_genealogy && DATA.root_genealogy.danfi_apex && DATA.root_genealogy.danfi_apex.founder) || 'אב קדמון';
 
 function rawChildren(id){
@@ -471,10 +490,16 @@ function rawChildren(id){
     const active=getActiveHouses();
     return houseNames.filter(hn=>(!active.size||active.has(hn)) && familyList.some(f=>f.house===hn)).map(houseNodeId);
   }
-  if(isVirtual(id)){
-    const hn=vHouseName(id); let kids=[];
+  if(isExtras(id)){
+    return (modernHouseRoots[vHouseName(id)]||[]).slice().sort(byBirthIds);
+  }
+  if(isHouse(id)){
+    const hn=vHouseName(id);
+    let kids=[];
     familyList.filter(f=>f.house===hn).forEach(f=>{ kids=kids.concat(f.rootIds); });
-    return kids.slice().sort(byBirthIds);
+    kids=kids.slice().sort(byBirthIds);
+    if((modernHouseRoots[hn]||[]).length) kids.push(extrasNodeId(hn));   // grouped extras node, last
+    return kids;
   }
   return (childMap[id]||[]).slice().sort(byBirthIds);
 }
@@ -482,13 +507,15 @@ function uChildren(id){ return collapsed.has(id) ? [] : rawChildren(id); }
 function uHasChildren(id){ return rawChildren(id).length>0; }
 function vParentOf(id){
   if(id===VROOT) return null;
-  if(isVirtual(id)) return VROOT;
+  if(isExtras(id)) return houseNodeId(vHouseName(id));
+  if(isHouse(id)) return VROOT;
   if(parentOf[id]) return parentOf[id];
+  if(persons[id] && persons[id]._houseRoot) return extrasNodeId(persons[id]._houseRoot);
   return persons[id] ? houseNodeId(persons[id]._house) : null;
 }
 function initCollapse(){
   collapsed.clear();
-  houseNames.forEach(hn=>collapsed.add(houseNodeId(hn)));          // houses closed by default
+  houseNames.forEach(hn=>{ collapsed.add(houseNodeId(hn)); collapsed.add(extrasNodeId(hn)); }); // houses + extras closed
   Object.keys(persons).forEach(id=>{ if((childMap[id]||[]).length) collapsed.add(id); }); // people closed
   // VROOT stays open → first level (root + houses) is visible
 }
@@ -521,7 +548,14 @@ function makeNodeBox(id){
     d.onclick=()=>{ const ap=document.querySelector('.apex'); if(ap){ ap.open=true; ap.scrollIntoView({behavior:'smooth',block:'center'}); } };
     return d;
   }
-  if(isVirtual(id)){
+  if(isExtras(id)){
+    const hn=vHouseName(id); const n=(modernHouseRoots[hn]||[]).length;
+    d.className='node-box vnode vextras';
+    d.innerHTML='<div class="nb-name">📋 צאצאים נוספים</div><div class="nb-years">'+n+' ענפים · חיבור ברמת-משפחה</div>';
+    d.onclick=()=>toggleCollapse(id);
+    return d;
+  }
+  if(isHouse(id)){
     const hn=vHouseName(id);
     const cnt=familyList.filter(f=>f.house===hn).reduce((a,f)=>a+f.allIds.length,0);
     d.className='node-box vnode vhouse';
@@ -865,7 +899,8 @@ function toast(msg){
   const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
   clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),1900);
 }
-function byBirthIds(a,b){ return (numYear(persons[a].birth)||9999)-(numYear(persons[b].birth)||9999); }
+function birthSortKey(id){ const p=persons[id]; if(!p) return 99999; if(p._modern) return p.byear||99999; return numYear(p.birth)||99999; }
+function byBirthIds(a,b){ return birthSortKey(a)-birthSortKey(b); }
 function buildTreeText(rootIds, title){
   const lines=[];
   lines.push(title);
