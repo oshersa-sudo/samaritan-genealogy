@@ -166,6 +166,31 @@ for mp in modern:
     mp['_finalparent'] = par if par else ('@H:' + tag)
     final.append(mp)
 
+# Group floating sibling-sets (same father+mother+family, attached at house level)
+# under a reconstructed father node, so each branch shows under its named father
+# instead of many disconnected leaves. The father node grafts to a census/spine
+# person of the same house if his name matches uniquely, else sits under the house.
+import collections as _c
+def _sibkey(m): return (given_loose(m.get('father', '')), given_loose(m.get('mother', '')), basic(m['family']))
+_groups = _c.OrderedDict()
+for mp in final:
+    if mp['_finalparent'].startswith('@H') and given_loose(mp.get('father', '')):
+        _groups.setdefault(_sibkey(mp), []).append(mp)
+synth_people = []
+_si = 0
+for key, members in _groups.items():
+    fa = members[0]['father']; fam = members[0]['family']; tag = FAM2HOUSE.get(basic(fam))
+    if not tag:
+        continue
+    _si += 1; fid = 'F%d' % _si
+    fcand = [p for p in persons.values() if p['_house'] == tag and nmatch(p['name'], fa) and p.get('sex') != 'F']
+    fparent = ('#' + fcand[0]['id']) if len(fcand) == 1 else ('@H:' + tag)
+    synth_people.append({'id': fid, 'name': fa, 'family': fam, 'parent': fparent, 'sex': 'M',
+                         'g': '', 'father': None, 'mother': None,
+                         'note': 'אב משוחזר מקבוצת-אחים במרשם (' + str(len(members)) + ' ילדים)'})
+    for mp in members:
+        mp['_finalparent'] = fid
+
 def sexMF(s):
     s = basic(s)
     return 'M' if s.startswith('ז') else ('F' if s.startswith('נ') else None)
@@ -188,6 +213,11 @@ for mp in final:
         father=mp.get('father') or None,
         job=mp.get('job') or None, bplace=mp.get('bplace') or None, mother=mp.get('mother') or None,
         notes=mp.get('notes') or None))
+# reconstructed father nodes
+for s in synth_people:
+    out_people.append(dict(id=s['id'], name=s['name'], sex='M', parent=s['parent'],
+        g='', byear=None, bmonth=None, bday=None, dyear=None, age=None, family=s['family'],
+        father=None, job=None, bplace=None, mother=None, notes=s['note'], synth=True))
 
 ovl_en = []
 for mid, cidv in overlap.items():
