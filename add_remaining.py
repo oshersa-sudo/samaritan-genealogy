@@ -46,8 +46,7 @@ P('ר-שלביה', 'שלבְֿיֶה', 'F', '75', '', 'בת שלבי (נולדה
 # ===== עבד-אלה/משלמה: בן סעדה (#115) =====
 P('ר-אינמר', 'אינמר (פצֿיל)', 'M', '115', '', 'בן סעדה; מת צעיר.')
 
-# ===== צפרים: בת יעקב אלעֻפֿאוי (#211) =====
-P('ר-סרוריה', 'סֻרֻריה', 'F', '211', '1897–1976', 'בת יעקב. נישאה לצדקה בן אברהם הצפרי, ואחריו למשלמה בן אבּ-ספֿוה הדנפי.')
+# ===== צפרים: סֻרֻריה בת יעקב #211 is ALREADY census #212 (סֻדריה) — enriched in fix_tsfari =====
 
 io.open('master_v2.json', 'w', encoding='utf-8').write(json.dumps(master, ensure_ascii=False, indent=1))
 io.open('stories.json', 'w', encoding='utf-8').write(json.dumps(stories, ensure_ascii=False, indent=1))
