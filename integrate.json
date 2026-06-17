@@ -13730,7 +13730,7 @@
    "id": "F47",
    "name": "רצון",
    "sex": "M",
-   "parent": "@H:דנפים",
+   "parent": "#64",
    "g": "",
    "byear": null,
    "bmonth": null,
