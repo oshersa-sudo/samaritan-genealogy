@@ -106,6 +106,8 @@
   .node-box.male{border-color:var(--male)}
   .node-box.female{border-color:var(--female)}
   .node-box.unk{border-color:var(--muted)}
+  .node-box.modern{background:#f3f8fc}
+  .node-box.modern::after{content:'·דור חדש'; position:absolute; bottom:1px; inset-inline-start:4px; font-size:7.5px; color:#7a93ad}
   .node-box .nb-gen{font-size:9px; color:#fff; background:var(--accent2); border-radius:8px; padding:0 6px;
                     position:absolute; top:3px; inset-inline-end:4px}
   .node-box .nb-name{font-size:13px; font-weight:700; line-height:1.15; margin-top:7px; color:var(--ink)}
@@ -241,7 +243,7 @@
 <header>
   <div class="title-row">
     <h1>אילן יוחסין שומרוני</h1>
-    <span class="sub">מיפקד השומרונים 1909 · רשימות פאול קאהלה · הרחבות רצון צדקה · <span id="count"></span></span>
+    <span class="sub">מיפקד 1909 + מרשם הקהילה (עד 2002) · <span id="count"></span></span>
   </div>
   <div class="controls">
     <div class="ctl search-wrap">
@@ -327,6 +329,7 @@
 <script>
 const DATA = /*__DATA__*/null;
 const STORIES = /*__STORIES__*/{};
+const MODERN = /*__MODERN__*/{"modern":[],"overlap":[]};
 
 /* ---------- index building ---------- */
 const persons = {};
@@ -360,6 +363,28 @@ familyList.forEach(fam=>{
   fam.allIds.forEach(id=>{ if(!parentOf[id]) fam.rootIds.push(id); });
 });
 
+/* ---------- merge modern descendants (from the community birth registry, mapped to the tree) ---------- */
+const overlapEnrich={};
+(MODERN.overlap||[]).forEach(o=>{ overlapEnrich[o.cid]=o; });
+(MODERN.modern||[]).forEach(m=>{
+  persons[m.id]={ id:m.id, name:m.name, sex:m.sex, _modern:true, g:m.g, byear:m.byear,
+    bmonth:m.bmonth, bday:m.bday, dyear:m.dyear, age:m.age, family:m.family,
+    job:m.job, bplace:m.bplace, mother:m.mother, note:m.notes, _parentRaw:m.parent };
+});
+(MODERN.modern||[]).forEach(m=>{
+  const par = (m.parent && m.parent[0]==='#') ? m.parent.slice(1) : m.parent;
+  if(!childMap[m.id]) childMap[m.id]=[];
+  if(persons[par]){ parentOf[m.id]=par; if(!childMap[par]) childMap[par]=[]; childMap[par].push(m.id); }
+});
+// inherit house/family from the census ancestor
+(MODERN.modern||[]).forEach(m=>{
+  let cur=m.id, guard=0;
+  while(parentOf[cur] && guard++<300) cur=parentOf[cur];
+  const anc=persons[cur];
+  persons[m.id]._house = (anc && anc._house) || '';
+  persons[m.id]._family = persons[m.id].family || (anc && anc._family) || '';
+});
+
 /* ---------- helpers ---------- */
 function norm(s){
   if(s==null) return '';
@@ -376,8 +401,13 @@ function yearStr(p){
   const bs=b!=null?b:'', ds=d!=null?d:'';
   return '('+bs+(d!=null||b!=null?'–':'')+ds+')';
 }
-// Gregorian life-years from the prose (STORIES); format nicely
-function gregOf(id){ return (STORIES[id]&&STORIES[id].g)||''; }
+// Gregorian life-years: prose (STORIES), overlap enrichment, or modern registry
+function gregOf(id){
+  if(overlapEnrich[id]) return overlapEnrich[id].g||'';
+  const p=persons[id];
+  if(p&&p._modern) return p.g||'';
+  return (STORIES[id]&&STORIES[id].g)||'';
+}
 function fmtGreg(g){
   if(!g) return '';
   const parts=g.split('–'); const b=(parts[0]||'').trim(), d=(parts[1]||'').trim();
@@ -397,6 +427,7 @@ function fatherNameOf(p){
   return p.father||'';
 }
 function motherNamesOf(p){
+  if(p._modern && p.mother) return [p.mother];
   if(parentOf[p.id] && persons[parentOf[p.id]]) return (persons[parentOf[p.id]].spouses||[]).map(s=>s.name||'');
   return [];
 }
@@ -499,7 +530,7 @@ function makeNodeBox(id){
     return d;
   }
   const p=persons[id];
-  d.className='node-box '+(p.sex==='M'?'male':p.sex==='F'?'female':'unk');
+  d.className='node-box '+(p.sex==='M'?'male':p.sex==='F'?'female':'unk')+(p._modern?' modern':'');
   const gen=genOf(id);
   const story=(STORIES[id]&&STORIES[id].t)?' <span class="nb-story" title="יש סיפור חיים">📖</span>':'';
   const ys=displayYears(id,p);
@@ -654,18 +685,28 @@ function openPerson(id){
   let html='';
 
   const meta=[];
-  meta.push('מזהה מיפקד: '+esc(p.id));
-  if(p.code) meta.push('קוד עץ: '+esc(p.code));
+  if(p._modern) meta.push('מקור: מרשם הקהילה');
+  else { meta.push('מזהה מיפקד: '+esc(p.id)); if(p.code) meta.push('קוד עץ: '+esc(p.code)); }
   meta.push('מין: '+(p.sex==='M'?'זכר':p.sex==='F'?'נקבה':'לא ידוע'));
+  if(p._modern && p.family) meta.push('משפחה: '+esc(p.family));
   html+=field('פרטים', meta.join(' · '));
 
-  // life-years (Gregorian, from the prose) — shown prominently
+  // life-years (Gregorian) — shown prominently
   const g=gregOf(id);
   if(g){
     const parts=g.split('–'); const bb=(parts[0]||'').trim(), dd=(parts[1]||'').trim();
     let span=fmtGreg(g);
     if(bb&&dd && /^\d{3,4}$/.test(bb) && /^\d{3,4}$/.test(dd)) span+=' <span class="years">(חי כ-'+(parseInt(dd)-parseInt(bb))+' שנים)</span>';
     html+=field('שנות חיים (לועזי)', span);
+  }
+  // modern registry details (exact birth date, occupation, birthplace)
+  if(p._modern){
+    const d2=[];
+    if(p.byear){ let bd=''+p.byear; if(p.bmonth&&p.bday) bd=p.bday+'.'+p.bmonth+'.'+p.byear; d2.push('לידה: '+esc(bd)); }
+    if(p.dyear) d2.push('פטירה: '+esc(p.dyear)+(p.age?' (גיל '+esc(p.age)+')':''));
+    if(p.bplace) d2.push('מקום לידה: '+esc(p.bplace));
+    if(p.job) d2.push('עיסוק: '+esc(p.job));
+    if(d2.length) html+=field('פרטי מרשם', d2.join(' · '));
   }
   // census dates (Hijri)
   const dates=[];
@@ -682,8 +723,9 @@ function openPerson(id){
   let par='';
   if(parentOf[id] && persons[parentOf[id]]) par='אב: '+plink(parentOf[id]);
   else if(p.father) par='אב: '+esc(p.father);
-  const moms=motherNamesOf(p);
-  if(moms.length){ par+=(par?'<br>':'')+'<span class="years">אם (מבין נשות האב): '+moms.map(esc).join(' / ')+'</span>'; }
+  if(p._modern && p.mother){ par+=(par?'<br>':'')+'אם: '+esc(p.mother); }
+  else { const moms=motherNamesOf(p);
+    if(moms.length) par+=(par?'<br>':'')+'<span class="years">אם (מבין נשות האב): '+moms.map(esc).join(' / ')+'</span>'; }
   if(par) html+=field('הורים', par);
 
   // children
@@ -896,7 +938,7 @@ familyJump.onchange=()=>{
 };
 
 /* ---------- init ---------- */
-document.getElementById('count').textContent=Object.keys(persons).length+' אנשים · '+houseNames.length+' בתי-אב · '+familyList.length+' משפחות';
+document.getElementById('count').textContent=Object.keys(persons).length+' אנשים ('+(DATA.houses.reduce((a,h)=>a+h.families.reduce((b,f)=>b+f.persons.length,0),0))+' מיפקד + '+(MODERN.modern||[]).length+' צאצאים)';
 renderApex();
 initCollapse();
 // mobile: collapse the controls behind an "options" button so the tree gets the screen

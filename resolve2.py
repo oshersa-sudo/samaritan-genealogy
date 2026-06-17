@@ -1,0 +1,209 @@
+# -*- coding: utf-8 -*-
+import json, io, re
+from collections import Counter, defaultdict
+
+NIQQUD = ''.join(chr(c) for c in range(0x0591, 0x05C8))
+FINAL = {'ם': 'מ', 'ן': 'נ', 'ץ': 'צ', 'ף': 'פ', 'ך': 'כ'}
+
+def sn(s):
+    return ''.join(ch for ch in str(s or '') if ch not in NIQQUD)
+
+def basic(s):
+    s = sn(s)
+    s = re.sub(r'[׳״"\'`./\\\-]', ' ', s)
+    return re.sub(r'\s+', ' ', s).strip()
+
+def loose(s):
+    s = basic(s)
+    s = ''.join(FINAL.get(c, c) for c in s)
+    return s.replace('ו', '').replace('י', '').replace(' ', '')
+
+def variants(s):
+    vs = set()
+    for part in re.split(r'[=()]', sn(s)):
+        b = basic(part)
+        if b and len(loose(b)) >= 2:
+            vs.add(loose(b))
+    return vs
+
+def nmatch(a, b):
+    return bool(variants(a) & variants(b))
+
+SKIP = set(['בת', 'בן', 'אל', 'אבו', 'אבּ'])
+def given_loose(s):
+    b = basic(re.split(r'[=()]', sn(s))[0])
+    for t in b.split():
+        if t not in SKIP:
+            return loose(t)
+    return loose(b)
+
+master = json.load(io.open('master_v2.json', encoding='utf-8'))
+modern = json.load(io.open('modern_people.json', encoding='utf-8'))
+
+def htag(h):
+    for k in ('דנפים', 'מרחיבים', 'צפרים'):
+        if k in h:
+            return k
+    return 'בודדים'
+
+persons = {}
+for h in master['houses']:
+    for fam in h['families']:
+        for p in fam['persons']:
+            p['_house'] = htag(h['house'])
+            persons[p['id']] = p
+
+def bgreg(p):
+    b = p.get('birth')
+    return (b + 584) if isinstance(b, int) else None
+
+def cfather(p):
+    fid = p.get('father_id')
+    return persons[fid]['name'] if (fid and fid in persons) else p.get('father', '')
+
+def cspouses(p):
+    return set(given_loose(s.get('name', '')) for s in (p.get('spouses') or []) if s.get('name'))
+
+# Excel family -> census house
+FAM2HOUSE = {'דינפי': 'דנפים', 'סראוי': 'דנפים',
+             'צדקה': 'צפרים', 'מרחיב': 'מרחיבים'}
+
+for i, mp in enumerate(modern):
+    mp['mid'] = 'M%d' % (i + 1)
+
+def myear(mp):
+    y = mp.get('byear', '')
+    return int(y) if re.match(r'^\d{4}$', y) else None
+
+MARRY = re.compile(r'(?:נשוי|נישא|נישאה|נשואה|נשא|מאורס)\s+ל([^,]+)')
+def mspouse(mp):
+    n = sn(mp.get('notes', ''))
+    m = MARRY.search(n)
+    if not m:
+        m = re.search(r'\bל([א-ת]{2,})', n)
+    return given_loose(m.group(1)) if m else None
+
+mod_by_fam = defaultdict(list)
+for mp in modern:
+    mod_by_fam[basic(mp['family'])].append(mp)
+
+# overlap identity: same individual already present in the 1909 census
+overlap = {}
+for mp in modern:
+    my = myear(mp)
+    if not my or my > 1912:
+        continue
+    house = FAM2HOUSE.get(basic(mp['family']))
+    if not house:
+        continue
+    cands = [p for p in persons.values() if p['_house'] == house and nmatch(p['name'], mp['name'])
+             and (bgreg(p) is None or abs(bgreg(p) - my) <= 9)]
+    fm = [p for p in cands if mp['father'] and nmatch(cfather(p), mp['father'])]
+    if len(fm) == 1:
+        overlap[mp['mid']] = fm[0]['id']
+
+def mid_or_alias(q):
+    return ('#' + overlap[q['mid']]) if q['mid'] in overlap else q['mid']
+
+def resolve_parent(mp):
+    fa = mp.get('father', '')
+    if not fa:
+        return (None, 'no-father-name')
+    fam = basic(mp['family'])
+    house = FAM2HOUSE.get(fam)
+    my = myear(mp)
+    moth = given_loose(mp.get('mother', ''))
+    ccand = [p for p in persons.values() if house and p['_house'] == house and nmatch(p['name'], fa)
+             and not (my and bgreg(p) and bgreg(p) > my - 12)]
+    mcand = [q for q in mod_by_fam.get(fam, []) if q is not mp and nmatch(q['name'], fa)
+             and not (my and myear(q) and myear(q) > my - 12)]
+    if moth and len(ccand) > 1:
+        f = [c for c in ccand if moth in cspouses(c)]
+        if f:
+            ccand = f
+    if moth and len(mcand) > 1:
+        f = [c for c in mcand if mspouse(c) == moth]
+        if f:
+            mcand = f
+    if len(mcand) == 1 and len(ccand) == 0:
+        return (mid_or_alias(mcand[0]), 'modern')
+    if len(ccand) == 1 and len(mcand) == 0:
+        return ('#' + ccand[0]['id'], 'census')
+    if len(mcand) == 1 and len(ccand) == 1:
+        return (mid_or_alias(mcand[0]), 'modern>census')
+    if len(mcand) + len(ccand) == 0:
+        return (None, 'root-no-candidate')
+    return (None, 'ambiguous')
+
+res = Counter()
+for mp in modern:
+    if mp['mid'] in overlap:
+        mp['_parent'] = None
+        mp['_why'] = 'overlap'
+        res['overlap'] += 1
+        continue
+    pid, why = resolve_parent(mp)
+    mp['_parent'] = pid
+    mp['_why'] = why
+    res[why] += 1
+
+mid2mp = {mp['mid']: mp for mp in modern}
+def reaches_census(mp):
+    seen = set()
+    cur = mp.get('_parent')
+    guard = 0
+    while cur and guard < 300:
+        guard += 1
+        if cur.startswith('#'):
+            return True
+        if cur in seen:
+            return False
+        seen.add(cur)
+        nx = mid2mp.get(cur)
+        if not nx or not nx.get('_parent'):
+            return False
+        cur = nx['_parent']
+    return False
+
+final = [mp for mp in modern if mp.get('_parent') and reaches_census(mp)]
+
+def sexMF(s):
+    s = basic(s)
+    return 'M' if s.startswith('ז') else ('F' if s.startswith('נ') else None)
+
+def gstr(mp):
+    by = myear(mp)
+    dy = mp.get('dyear', '')
+    dy = int(dy) if re.match(r'^\d{4}$', dy or '') else None
+    if by and dy:
+        return '%d–%d' % (by, dy)
+    if by:
+        return '%d' % by
+    return ''
+
+out_people = []
+for mp in final:
+    out_people.append(dict(id=mp['mid'], name=mp['name'], sex=sexMF(mp['sex']), parent=mp['_parent'],
+        g=gstr(mp), byear=myear(mp), bmonth=mp.get('bmonth'), bday=mp.get('bday'),
+        dyear=mp.get('dyear') or None, age=mp.get('age') or None, family=mp['family'],
+        job=mp.get('job') or None, bplace=mp.get('bplace') or None, mother=mp.get('mother') or None,
+        notes=mp.get('notes') or None))
+
+ovl_en = []
+for mid, cidv in overlap.items():
+    mp = mid2mp[mid]
+    ovl_en.append(dict(cid=cidv, byear=myear(mp), bmonth=mp.get('bmonth'), bday=mp.get('bday'),
+        dyear=mp.get('dyear') or None, age=mp.get('age') or None, g=gstr(mp)))
+
+json.dump(dict(modern=out_people, overlap=ovl_en),
+          io.open('integrate.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+
+out = io.open('resolve2_report.txt', 'w', encoding='utf-8')
+out.write('resolution: %s\n' % json.dumps(dict(res), ensure_ascii=False))
+out.write('overlap (merge into census): %d\n' % len(overlap))
+out.write('final modern nodes added: %d\n' % len(final))
+gc = sum(1 for m in final if m['_parent'].startswith('#'))
+out.write('  grafted onto census: %d ; under modern: %d\n' % (gc, len(final) - gc))
+out.write('tree total after merge: %d\n' % (193 + len(final)))
+out.close()
+print('final', len(final), 'overlap', len(overlap), 'res', dict(res))
