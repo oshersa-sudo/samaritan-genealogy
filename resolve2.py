@@ -179,17 +179,34 @@ _groups = _c.OrderedDict()
 for mp in final:
     if mp['_finalparent'].startswith('@H') and given_loose(mp.get('father', '')):
         _groups.setdefault(_sibkey(mp), []).append(mp)
+def _name_tokens(nm):
+    return set(loose(t) for t in basic(nm).split() if loose(t))
+def _name_has(nm, fa):
+    # father-name matches a candidate whose display name CONTAINS it as a token
+    # (e.g. children of "שוהם" whose real father is the modern "מורגן שוהם")
+    return (loose(fa) in _name_tokens(nm)) or nmatch(nm, fa)
+
 synth_people = []
 _si = 0
 for key, members in _groups.items():
     fa = members[0]['father']; fam = members[0]['family']; tag = FAM2HOUSE.get(basic(fam))
     if not tag:
         continue
-    _si += 1; fid = 'F%d' % _si
-    # estimate the reconstructed father's birth (~30y before his oldest child) so we don't
-    # identify him with a same-named ANCIENT census ancestor
+    # estimate the father's birth (~30y before his oldest child) so we never identify
+    # him with a same-named ANCIENT census ancestor
     _cy = [myear(m) for m in members if myear(m)]
     _est = (min(_cy) - 30) if _cy else None
+    # (a) PREFER an already-resolved MODERN person whose name matches the father —
+    # link the children directly to him instead of inventing a synthetic node.
+    mf = [q for q in final if q not in members and FAM2HOUSE.get(basic(q['family'])) == tag
+          and not basic(q.get('sex', '')).startswith('נ') and _name_has(q['name'], fa)
+          and (_est is None or myear(q) is None or abs(myear(q) - _est) <= 35)]
+    if len(mf) == 1:
+        for mp in members:
+            mp['_finalparent'] = mf[0]['mid']
+        continue
+    # (b) else reconstruct a synthetic father node grouping the siblings
+    _si += 1; fid = 'F%d' % _si
     fcand = [p for p in persons.values() if p['_house'] == tag and nmatch(p['name'], fa) and p.get('sex') != 'F'
              and (_est is None or bgreg(p) is None or abs(bgreg(p) - _est) <= 35)]
     fparent = ('#' + fcand[0]['id']) if len(fcand) == 1 else ('@H:' + tag)
