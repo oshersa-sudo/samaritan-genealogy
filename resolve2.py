@@ -14,9 +14,11 @@ def basic(s):
     return re.sub(r'\s+', ' ', s).strip()
 
 def loose(s):
+    # drop the weak/mater letters א/ו/י so spelling variants collapse
+    # (e.g. אסעד == סעד, which the source uses interchangeably)
     s = basic(s)
     s = ''.join(FINAL.get(c, c) for c in s)
-    return s.replace('ו', '').replace('י', '').replace(' ', '')
+    return s.replace('ו', '').replace('י', '').replace('א', '').replace(' ', '')
 
 def variants(s):
     vs = set()
@@ -114,13 +116,14 @@ def resolve_parent(mp):
     house = FAM2HOUSE.get(fam)
     my = myear(mp)
     moth = given_loose(mp.get('mother', ''))
-    # a father candidate must be male (exclude females with similar names, e.g. סעוד vs סעד)
+    # a father candidate must be male AND within one generation (12–70y older) — so a
+    # modern person is never grafted onto a same-named ANCIENT ancestor.
+    def age_ok(g):
+        return (not my) or (g is None) or (my - 70 <= g <= my - 12)
     ccand = [p for p in persons.values() if house and p['_house'] == house and nmatch(p['name'], fa)
-             and p.get('sex') != 'F'
-             and not (my and bgreg(p) and bgreg(p) > my - 12)]
+             and p.get('sex') != 'F' and age_ok(bgreg(p))]
     mcand = [q for q in mod_by_fam.get(fam, []) if q is not mp and nmatch(q['name'], fa)
-             and not basic(q.get('sex', '')).startswith('נ')
-             and not (my and myear(q) and myear(q) > my - 12)]
+             and not basic(q.get('sex', '')).startswith('נ') and age_ok(myear(q))]
     if moth and len(ccand) > 1:
         f = [c for c in ccand if moth in cspouses(c)]
         if f:
@@ -183,7 +186,12 @@ for key, members in _groups.items():
     if not tag:
         continue
     _si += 1; fid = 'F%d' % _si
-    fcand = [p for p in persons.values() if p['_house'] == tag and nmatch(p['name'], fa) and p.get('sex') != 'F']
+    # estimate the reconstructed father's birth (~30y before his oldest child) so we don't
+    # identify him with a same-named ANCIENT census ancestor
+    _cy = [myear(m) for m in members if myear(m)]
+    _est = (min(_cy) - 30) if _cy else None
+    fcand = [p for p in persons.values() if p['_house'] == tag and nmatch(p['name'], fa) and p.get('sex') != 'F'
+             and (_est is None or bgreg(p) is None or abs(bgreg(p) - _est) <= 35)]
     fparent = ('#' + fcand[0]['id']) if len(fcand) == 1 else ('@H:' + tag)
     synth_people.append({'id': fid, 'name': fa, 'family': fam, 'parent': fparent, 'sex': 'M',
                          'g': '', 'father': None, 'mother': None,
