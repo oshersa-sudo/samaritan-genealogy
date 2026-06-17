@@ -125,6 +125,13 @@
   .node-box.vextras{background:#eef3f7; border-color:#9bb3c6; border-style:dashed}
   .node-box.vextras .nb-name{color:#556f86; font-size:12.5px}
   .node-box.vextras .nb-years{color:#7a93ad; font-size:9px}
+  /* per-house colour coding: a stripe on the inline-start edge of every card */
+  .hc-dan{--hc:#2e7d6b} .hc-mar{--hc:#7a4f9e} .hc-tsf{--hc:#c2722a} .hc-koh{--hc:#b0392f} .hc-bod{--hc:#8a8a8a}
+  .node-box[class*="hc-"]::before{content:''; position:absolute; inset-block:0; inset-inline-start:0;
+    width:5px; border-start-start-radius:9px; border-end-start-radius:9px; background:var(--hc)}
+  .node-box.vhouse[class*="hc-"]{border-color:var(--hc)}
+  .node-box.vhouse[class*="hc-"] .nb-name{color:var(--hc)}
+  .chip[class*="hc-"]{border-inline-start:5px solid var(--hc)}
   .node-toggle{
     position:absolute; width:18px; height:18px; border-radius:50%; border:1.5px solid var(--accent);
     background:#fff; color:var(--accent); font-size:13px; line-height:15px; text-align:center;
@@ -540,6 +547,15 @@ function layoutForest(rootIds){
   return {pos, cols:Math.max(nextX,1), depth:maxD+1};
 }
 
+function houseClass(hn){
+  hn=hn||'';
+  if(hn.indexOf('דנפים')>=0)return 'hc-dan';
+  if(hn.indexOf('מרחיבים')>=0)return 'hc-mar';
+  if(hn.indexOf('צפרים')>=0)return 'hc-tsf';
+  if(hn.indexOf('כהונה')>=0)return 'hc-koh';
+  if(hn.indexOf('בודד')>=0||hn.indexOf('נמצאו')>=0)return 'hc-bod';
+  return '';
+}
 function makeNodeBox(id){
   const d=document.createElement('div');
   if(id===VROOT){
@@ -558,13 +574,13 @@ function makeNodeBox(id){
   if(isHouse(id)){
     const hn=vHouseName(id);
     const cnt=familyList.filter(f=>f.house===hn).reduce((a,f)=>a+f.allIds.length,0);
-    d.className='node-box vnode vhouse';
+    d.className='node-box vnode vhouse '+houseClass(hn);
     d.innerHTML='<div class="nb-name">'+esc(hn.replace(/^[א-ת]\.\s*/,''))+'</div><div class="nb-years">'+cnt+' אנשים</div>';
     d.onclick=()=>toggleCollapse(id);
     return d;
   }
   const p=persons[id];
-  d.className='node-box '+(p.sex==='M'?'male':p.sex==='F'?'female':'unk')+(p._modern?' modern':'');
+  d.className='node-box '+(p.sex==='M'?'male':p.sex==='F'?'female':'unk')+(p._modern?' modern':'')+' '+houseClass(p._house);
   const gen=genOf(id);
   const story=(STORIES[id]&&STORIES[id].t)?' <span class="nb-story" title="יש סיפור חיים">📖</span>':'';
   const ys=displayYears(id,p);
@@ -671,7 +687,7 @@ function esc(s){ return (s==null?'':s.toString()).replace(/[&<>"]/g,c=>({'&':'&a
 /* ---------- house filter ---------- */
 const houseFilter=document.getElementById('houseFilter');
 houseNames.forEach(hn=>{
-  const lab=document.createElement('label'); lab.className='chip on';
+  const lab=document.createElement('label'); lab.className='chip on '+houseClass(hn);
   const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=true; cb.value=hn;
   cb.onchange=()=>{ lab.classList.toggle('on',cb.checked); renderTree(); };
   lab.appendChild(cb);
