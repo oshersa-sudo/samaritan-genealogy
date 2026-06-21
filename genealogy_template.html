@@ -132,6 +132,13 @@
   .node-box.vhouse[class*="hc-"]{border-color:var(--hc)}
   .node-box.vhouse[class*="hc-"] .nb-name{color:var(--hc)}
   .chip[class*="hc-"]{border-inline-start:5px solid var(--hc)}
+  .house-legend{margin-top:-2px; margin-bottom:10px}
+  .house-legend .hk{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; color:var(--muted)}
+  .house-legend .hk i{width:12px; height:12px; border-radius:3px; background:var(--hc); display:inline-block}
+  #panel[class*="hc-"] .p-head{border-top:4px solid var(--hc)}
+  .lineage{font-size:12px; line-height:1.7}
+  .lineage .link{font-size:12px}
+  .lineage .sep{color:var(--muted); margin:0 2px}
   .node-toggle{
     position:absolute; width:18px; height:18px; border-radius:50%; border:1.5px solid var(--accent);
     background:#fff; color:var(--accent); font-size:13px; line-height:15px; text-align:center;
@@ -300,6 +307,7 @@
     <span><svg width="34" height="10" style="vertical-align:middle"><line x1="0" y1="5" x2="34" y2="5" stroke="var(--female)" stroke-width="1.5" stroke-dasharray="5 4"/></svg> קו נישואין / קישור בין משפחות</span>
     <span>📖 יש סיפור חיים · שנים: לועזי או ג'רי</span>
   </div>
+  <div class="legend house-legend" id="houseKey"></div>
   <div id="apexHost"></div>
   <div class="workspace">
     <div id="treeHost"></div>
@@ -477,7 +485,14 @@ const NODE_W=124, NODE_H=56, COL_W=150, ROW_H=120, PADX=26, HOUSE_H=34, FAM_H=28
 const domByPerson=new Map();      // id -> node box element
 const posByPerson=new Map();      // id -> {cx,cy} center px in canvas
 const treeHost=document.getElementById('treeHost');
-let zoom=1, marriageMode='selected', focusedBox=null, focusedPersonId=null;
+let zoom=1, marriageMode='selected', focusedBox=null, focusedPersonId=null, lastCanvasW=0;
+function fitToWidth(){
+  if(!lastCanvasW) return;
+  const avail=treeHost.clientWidth-22;
+  if(avail<=0) return;
+  // only shrink to fit (never enlarge past 100%); keep a readable floor
+  setZoom(Math.max(0.5, Math.min(1, avail/lastCanvasW)));
+}
 let viewMode='root', selectedFamilyIdx=null;          // 'root' = whole super-tree; 'family' = one family
 const collapsed=new Set();                            // ids whose children are hidden
 
@@ -649,6 +664,7 @@ function renderTree(){
   });
 
   const totalH=topY + L.depth*ROW_H + 46;
+  lastCanvasW=maxW;
   canvas.style.width=maxW+'px'; canvas.style.height=totalH+'px';
   svg.setAttribute('width',maxW); svg.setAttribute('height',totalH);
   svg.setAttribute('viewBox','0 0 '+maxW+' '+totalH);
@@ -732,7 +748,16 @@ function openPerson(id){
   focusedPersonId=id; applyMarriageMode();
   pTitle.textContent=p.name||'(ללא שם)';
   pSub.textContent=p._house.replace(/^[א-ת]\.\s*/,'')+' · '+p._family;
+  panel.className=houseClass(p._house);            // house-colour accent on the panel head
   let html='';
+
+  // lineage breadcrumb: chain of real ancestors from the house root down to this person
+  const anc=[]; let ac=parentOf[id], ag=0;
+  while(ac && persons[ac] && ag++<100){ anc.unshift(ac); ac=parentOf[ac]; }
+  if(anc.length){
+    html+=field('שושלת', '<div class="lineage">'+anc.map(a=>plink(a)).join('<span class="sep">‹</span>')+
+      '<span class="sep">‹</span><b>'+esc(p.name||'')+'</b></div>');
+  }
 
   const meta=[];
   if(p._modern) meta.push('מקור: מרשם הקהילה');
@@ -921,6 +946,14 @@ function buildTreeText(rootIds, title){
   const lines=[];
   lines.push(title);
   lines.push('— אילן יוחסין שומרוני · מיפקד 1909 (רשימות פאול קאהלה, הרחבות רצון צדקה) —');
+  // lineage of the shared root (who he/she descends from)
+  if(rootIds.length===1){
+    const p0=persons[rootIds[0]];
+    if(p0) lines.push('בית-אב: '+(p0._house||'').replace(/^[א-ת]\.\s*/,''));
+    const anc=[]; let c=parentOf[rootIds[0]], g=0;
+    while(c && persons[c] && g++<100){ anc.unshift(persons[c].name||c); c=parentOf[c]; }
+    if(anc.length) lines.push('שושלת: '+anc.join(' ‹ '));
+  }
   lines.push('');
   const seen=new Set();
   function rec(id, depth){
@@ -933,7 +966,8 @@ function buildTreeText(rootIds, title){
   }
   rootIds.forEach(r=>rec(r,0));
   lines.push('');
-  lines.push('נוצר באפליקציית אילן היוחסין השומרוני.');
+  lines.push('סך הכל בענף: '+seen.size+' אנשים.');
+  lines.push('נוצר באפליקציית אילן היוחסין השומרוני · ' + location.origin + location.pathname);
   return lines.join('\n');
 }
 let currentShareText='';
@@ -997,8 +1031,20 @@ const optToggle=document.getElementById('optionsToggle');
 const controlsEl=document.querySelector('.controls');
 function setOptions(open){ controlsEl.classList.toggle('collapsed', !open); optToggle.textContent=(open?'⚙ אפשרויות תצוגה ▴':'⚙ אפשרויות תצוגה ▾'); }
 optToggle.onclick=()=>setOptions(controlsEl.classList.contains('collapsed'));
-if(window.innerWidth<=760){ zoom=0.8; document.getElementById('zoomReset').textContent='80%'; setOptions(false); }
+if(window.innerWidth<=760){ setOptions(false); }
+// house colour key (matches the per-house node colours)
+(function(){
+  const hk=document.getElementById('houseKey');
+  houseNames.forEach(hn=>{
+    const c=houseClass(hn); if(!c) return;
+    const s=document.createElement('span'); s.className='hk '+c;
+    s.innerHTML='<i></i>'+esc(hn.replace(/^[א-ת]\.\s*/,''));
+    hk.appendChild(s);
+  });
+})();
 renderTree();
+// fit the whole root level (all houses) to the screen width on first load
+fitToWidth();
 </script>
 </body>
 </html>
