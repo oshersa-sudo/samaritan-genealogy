@@ -1,0 +1,20 @@
+# Cloudflare Worker config — serves the static site AND the edit API.
+# After creating the KV namespace (see DEPLOY.md), paste its id below.
+name = "samaritan-genealogy"
+main = "src/worker.js"
+compatibility_date = "2024-09-23"
+
+# the built static site (build.ps1 writes it here)
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# Workers KV — stores the admin "overrides" JSON. Create it once, then paste the id:
+#   npx wrangler kv namespace create GENEALOGY_KV
+[[kv_namespaces]]
+binding = "GENEALOGY_KV"
+id = "PUT_YOUR_KV_NAMESPACE_ID_HERE"
+
+# ADMIN_PASSWORD is a SECRET — do NOT put it here. Set it with:
+#   npx wrangler secret put ADMIN_PASSWORD
+# (or in the Cloudflare dashboard: Worker → Settings → Variables and Secrets)

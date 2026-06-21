@@ -139,6 +139,29 @@
   .lineage{font-size:12px; line-height:1.7}
   .lineage .link{font-size:12px}
   .lineage .sep{color:var(--muted); margin:0 2px}
+  /* admin editing */
+  .admin-btn{margin-inline-start:auto; background:#fff; border:1px solid var(--line); color:var(--accent);
+    border-radius:8px; padding:5px 10px; font:inherit; font-size:12px; cursor:pointer; font-weight:700}
+  .admin-btn:hover{background:var(--accent); color:#fff}
+  body.is-admin .admin-btn{background:#2e7d6b; color:#fff; border-color:#2e7d6b}
+  .login-card{max-width:360px}
+  .login-body{padding:16px; display:flex; flex-direction:column; gap:10px}
+  .login-body p{margin:0; font-size:13px; color:var(--muted)}
+  .login-body input{padding:10px; border:1px solid var(--line); border-radius:8px; font:inherit; font-size:16px}
+  .login-go{padding:10px; border:none; border-radius:8px; background:var(--accent); color:#fff; font:inherit; font-weight:700; cursor:pointer}
+  .edit-box{margin-top:14px; padding:12px; border:2px solid #2e7d6b; border-radius:12px; background:#f3faf7}
+  .edit-title{font-weight:800; color:#236553; margin-bottom:8px}
+  .edit-box .ef{display:block; font-size:11.5px; color:var(--muted); margin-bottom:9px}
+  .edit-box .ef input,.edit-box .ef select,.edit-box .ef textarea{display:block; width:100%; box-sizing:border-box;
+    margin-top:3px; padding:7px 9px; border:1px solid var(--line); border-radius:7px; font:inherit; font-size:14px; color:var(--ink)}
+  .edit-box .ef textarea{resize:vertical; min-height:70px; line-height:1.5}
+  .ef-cur{color:#236553; font-weight:700}
+  .edit-actions{display:flex; gap:7px; flex-wrap:wrap; margin-top:4px}
+  .eb{padding:8px 12px; border:none; border-radius:8px; font:inherit; font-size:13px; font-weight:700; cursor:pointer; color:#fff}
+  .eb-save{background:#2e7d6b} .eb-add{background:var(--accent2)} .eb-del{background:#b0392f}
+  .eb:hover{filter:brightness(1.07)}
+  .ef-hint{margin-top:9px; font-size:10.5px; color:var(--muted); line-height:1.5}
+  .ef-hint code{background:#e7f2ee; padding:1px 5px; border-radius:4px; color:#236553; user-select:all}
   .node-toggle{
     position:absolute; width:18px; height:18px; border-radius:50%; border:1.5px solid var(--accent);
     background:#fff; color:var(--accent); font-size:13px; line-height:15px; text-align:center;
@@ -261,6 +284,7 @@
   <div class="title-row">
     <h1>אילן יוחסין שומרוני</h1>
     <span class="sub">מיפקד 1909 + מרשם הקהילה (עד 2002) · <span id="count"></span></span>
+    <button id="adminBtn" class="admin-btn" type="button" onclick="openLogin()">🔧 מנהל</button>
   </div>
   <div class="controls">
     <div class="ctl search-wrap">
@@ -343,6 +367,20 @@
   </div>
 </div>
 <div id="toast"></div>
+
+<div class="share-modal" id="loginModal">
+  <div class="share-card login-card">
+    <div class="share-head">
+      <span class="sh-title">🔧 כניסת מנהל</span>
+      <button onclick="document.getElementById('loginModal').classList.remove('open')" title="סגור">✕</button>
+    </div>
+    <div class="login-body">
+      <p>הזינו סיסמת-מנהל כדי לערוך טקסטים, שמות וענפים. השינויים נשמרים בענן ונראים לכולם.</p>
+      <input id="admPw" type="password" placeholder="סיסמה" onkeydown="if(event.key==='Enter')adminLogin()">
+      <button class="login-go" onclick="adminLogin()">כניסה</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const DATA = /*__DATA__*/null;
@@ -732,6 +770,8 @@ document.getElementById('panelBackdrop').onclick=closePanel;
 // Esc closes the share window or the detail panel
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'||e.key==='Esc'){
+    const lm=document.getElementById('loginModal');
+    if(lm && lm.classList.contains('open')){ lm.classList.remove('open'); return; }
     const sm=document.getElementById('shareModal');
     if(sm && sm.classList.contains('open')){ sm.classList.remove('open'); return; }
     if(document.body.classList.contains('panel-open')) closePanel();
@@ -841,6 +881,7 @@ function openPerson(id){
   shareBtn.innerHTML=(childMap[id]||[]).length ? '🔗 שתף את הענף של '+(p.name||'אדם זה') : '🔗 שתף אדם זה';
   shareBtn.onclick=()=>openShare([id], (childMap[id]||[]).length?('הענף של '+(p.name||'אדם זה')):(p.name||'אדם זה'));
   pBody.appendChild(shareBtn);
+  if(ADMIN){ const ed=document.createElement('div'); ed.innerHTML=adminPanelTools(id); pBody.appendChild(ed); }
   document.body.classList.add('panel-open'); panel.setAttribute('aria-hidden','false');
 }
 
@@ -1022,6 +1063,162 @@ familyJump.onchange=()=>{
   renderTree(); treeHost.scrollTop=0; treeHost.scrollLeft=0;
 };
 
+/* ================= ADMIN EDITING (cloud overrides via Cloudflare KV) ================= */
+let OVERRIDES = { v:1, edits:{}, added:{}, deleted:[] };
+let ADMIN = sessionStorage.getItem('sg_admin') || null;   // holds the password while logged in
+const ADD_PREFIX = 'e-';
+function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function val(id){ const e=document.getElementById(id); return e?e.value:''; }
+
+function setParent(id, fid){
+  const old = parentOf[id];
+  if(old && childMap[old]) childMap[old] = childMap[old].filter(c=>c!==id);
+  if(fid && persons[fid]){
+    parentOf[id]=fid; (childMap[fid]=childMap[fid]||[]).push(id);
+    persons[id]._house = persons[fid]._house; persons[id]._family = persons[fid]._family;
+  } else { delete parentOf[id]; }
+  persons[id].father_id = fid || undefined;
+}
+function applyEdit(id, patch){
+  const p = persons[id]; if(!p) return;
+  if('name' in patch) p.name = patch.name;
+  if('sex' in patch) p.sex = patch.sex;
+  if('story' in patch || 'g' in patch){
+    STORIES[id] = STORIES[id] || {t:'',g:''};
+    if('story' in patch) STORIES[id].t = patch.story;
+    if('g' in patch){ STORIES[id].g = patch.g; p.g = patch.g; }
+  }
+  if('father_id' in patch) setParent(id, patch.father_id);
+}
+function makePerson(o){
+  if(persons[o.id]) { applyEdit(o.id,o); return; }
+  persons[o.id] = { id:o.id, name:o.name||'(ללא שם)', sex:o.sex||'', g:o.g||'', _added:true };
+  childMap[o.id]=[]; idSet.add(o.id);
+  if(o.story || o.g) STORIES[o.id] = { t:o.story||'', g:o.g||'' };
+  setParent(o.id, o.father_id);
+}
+function removePerson(id){
+  (childMap[id]||[]).slice().forEach(c=> setParent(c, parentOf[id]||null) );  // children climb to grandparent
+  setParent(id, null);
+  delete persons[id]; delete childMap[id]; delete STORIES[id]; idSet.delete(id);
+}
+function applyOverrides(ov){
+  if(!ov) return;
+  OVERRIDES = { v:1, edits:ov.edits||{}, added:ov.added||{}, deleted:ov.deleted||[] };
+  Object.keys(OVERRIDES.added).forEach(id=> makePerson(Object.assign({id}, OVERRIDES.added[id])) );
+  Object.keys(OVERRIDES.edits).forEach(id=> applyEdit(id, OVERRIDES.edits[id]) );
+  OVERRIDES.deleted.forEach(id=> removePerson(id) );
+}
+async function loadOverrides(){
+  try{
+    const r = await fetch('/api/data',{cache:'no-store'});
+    if(!r.ok) return;
+    const ov = await r.json();
+    if(ov && (ov.edits||ov.added||ov.deleted)){ applyOverrides(ov); renderTree(); }
+  }catch(e){}
+}
+async function saveOverrides(){
+  if(!ADMIN){ toast('דרושה כניסת מנהל'); return false; }
+  try{
+    const r = await fetch('/api/save',{ method:'POST',
+      headers:{'content-type':'application/json','authorization':'Bearer '+ADMIN},
+      body: JSON.stringify(OVERRIDES) });
+    if(r.status===401){ toast('סיסמה שגויה — התנתקת'); adminLogout(); return false; }
+    if(!r.ok){ toast('שמירה נכשלה ('+r.status+')'); return false; }
+    toast('נשמר בענן ✓'); return true;
+  }catch(e){ toast('שגיאת רשת בשמירה'); return false; }
+}
+/* record an admin change into OVERRIDES (so it persists) AND apply it live */
+function recordEdit(id, patch){
+  if(OVERRIDES.added[id]) Object.assign(OVERRIDES.added[id], patch);
+  else OVERRIDES.edits[id] = Object.assign(OVERRIDES.edits[id]||{}, patch);
+  applyEdit(id, patch);
+}
+function recordAdd(o){
+  OVERRIDES.added[o.id] = {name:o.name,sex:o.sex,g:o.g,story:o.story,father_id:o.father_id};
+  makePerson(o);
+}
+function recordDelete(id){
+  if(OVERRIDES.added[id]) delete OVERRIDES.added[id];
+  else if(!OVERRIDES.deleted.includes(id)) OVERRIDES.deleted.push(id);
+  delete OVERRIDES.edits[id];
+  removePerson(id);
+}
+/* admin auth UI */
+function setAdminUI(){
+  document.body.classList.toggle('is-admin', !!ADMIN);
+  const b=document.getElementById('adminBtn'); if(b) b.textContent = ADMIN ? '🔓 מנהל (יציאה)' : '🔧 מנהל';
+}
+function openLogin(){
+  if(ADMIN){ adminLogout(); toast('יצאת ממצב מנהל'); return; }
+  document.getElementById('loginModal').classList.add('open');
+  setTimeout(()=>{ const e=document.getElementById('admPw'); if(e){ e.value=''; e.focus(); } },30);
+}
+async function adminLogin(){
+  const pw=val('admPw');
+  if(!pw) return;
+  try{
+    const r=await fetch('/api/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password:pw})});
+    const j=await r.json().catch(()=>({}));
+    if(j.ok){ ADMIN=pw; sessionStorage.setItem('sg_admin',pw); setAdminUI();
+      document.getElementById('loginModal').classList.remove('open'); toast('שלום מנהל ✓');
+      if(focusedPersonId) openPerson(focusedPersonId); }
+    else toast('סיסמה שגויה');
+  }catch(e){ toast('שרת-העריכה אינו זמין (יש להתקין בענן)'); }
+}
+function adminLogout(){ ADMIN=null; sessionStorage.removeItem('sg_admin'); setAdminUI(); if(focusedPersonId) openPerson(focusedPersonId); }
+
+/* the edit form shown inside the person panel when an admin is logged in */
+function adminPanelTools(id){
+  if(!ADMIN) return '';
+  const p=persons[id]; if(!p) return '';
+  const st=(STORIES[id]&&STORIES[id].t)||'';
+  const g=(STORIES[id]&&STORIES[id].g)||p.g||'';
+  const curPar = parentOf[id]&&persons[parentOf[id]] ? esc(persons[parentOf[id]].name||parentOf[id]) : 'שורש (ללא אב)';
+  return '<div class="edit-box"><div class="edit-title">✏️ עריכת מנהל</div>'+
+    '<label class="ef">שם<input id="ef-name" value="'+escAttr(p.name||'')+'"></label>'+
+    '<label class="ef">מין<select id="ef-sex">'+
+      '<option value="M"'+(p.sex==='M'?' selected':'')+'>זכר</option>'+
+      '<option value="F"'+(p.sex==='F'?' selected':'')+'>נקבה</option>'+
+      '<option value=""'+(!p.sex?' selected':'')+'>לא ידוע</option></select></label>'+
+    '<label class="ef">שנים (לועזי · למשל 1850–1910)<input id="ef-g" value="'+escAttr(g)+'"></label>'+
+    '<label class="ef">מזהה האב <span class="ef-cur">כעת: '+curPar+'</span>'+
+      '<input id="ef-fid" value="'+escAttr(p.father_id||'')+'" placeholder="הדביקו מזהה של אדם אחר"></label>'+
+    '<label class="ef">סיפור חיים<textarea id="ef-story" rows="5">'+esc(st)+'</textarea></label>'+
+    '<div class="edit-actions">'+
+      '<button class="eb eb-save" onclick="doSaveEdit(\''+escAttr(id)+'\')">💾 שמור שינויים</button>'+
+      '<button class="eb eb-add" onclick="doAddChild(\''+escAttr(id)+'\')">➕ הוסף ילד/ה</button>'+
+      '<button class="eb eb-del" onclick="doDelete(\''+escAttr(id)+'\')">🗑️ מחק</button>'+
+    '</div>'+
+    '<div class="ef-hint">מזהה אדם זה: <code>'+esc(id)+'</code> — להעתקה לשדה "אב" של אדם אחר. שינוי האב מעביר את האדם וכל צאצאיו בעץ.</div>'+
+  '</div>';
+}
+function doSaveEdit(id){
+  if(!persons[id]) return;
+  const patch={ name:val('ef-name'), sex:val('ef-sex'), g:val('ef-g').trim(), story:val('ef-story') };
+  const fid=val('ef-fid').trim();
+  if(fid!==(persons[id].father_id||'')){
+    if(fid && !persons[fid]){ toast('מזהה האב אינו קיים'); return; }
+    if(fid===id){ toast('אדם אינו יכול להיות אב של עצמו'); return; }
+    patch.father_id = fid||null;
+  }
+  recordEdit(id, patch);
+  saveOverrides().then(()=>{ renderTree(); openPerson(id); });
+}
+function doAddChild(id){
+  const name=prompt('שם הילד/ה החדש/ה:'); if(!name) return;
+  const nid=ADD_PREFIX+Date.now().toString(36);
+  recordAdd({id:nid, name:name.trim(), sex:'', g:'', story:'', father_id:id});
+  saveOverrides().then(()=>{ renderTree(); openPerson(nid); });
+}
+function doDelete(id){
+  const p=persons[id]; if(!p) return;
+  if(!confirm('למחוק את "'+(p.name||'')+'"?\nצאצאיו יחוברו אל סבו.')) return;
+  const par=parentOf[id];
+  recordDelete(id);
+  saveOverrides().then(()=>{ renderTree(); if(par&&persons[par]) openPerson(par); else closePanel(); });
+}
+
 /* ---------- init ---------- */
 document.getElementById('count').textContent=Object.keys(persons).length+' אנשים ('+(DATA.houses.reduce((a,h)=>a+h.families.reduce((b,f)=>b+f.persons.length,0),0))+' מיפקד + '+(MODERN.modern||[]).length+' צאצאים)';
 renderApex();
@@ -1045,6 +1242,9 @@ if(window.innerWidth<=760){ setOptions(false); }
 renderTree();
 // fit the whole root level (all houses) to the screen width on first load
 fitToWidth();
+// admin editing: restore admin UI if already logged in this session, then pull cloud overrides
+setAdminUI();
+loadOverrides();
 </script>
 </body>
 </html>
