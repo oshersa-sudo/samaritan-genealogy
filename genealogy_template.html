@@ -375,8 +375,9 @@
       <button onclick="document.getElementById('loginModal').classList.remove('open')" title="סגור">✕</button>
     </div>
     <div class="login-body">
-      <p>הזינו סיסמת-מנהל כדי לערוך טקסטים, שמות וענפים. השינויים נשמרים בענן ונראים לכולם.</p>
-      <input id="admPw" type="password" placeholder="סיסמה" onkeydown="if(event.key==='Enter')adminLogin()">
+      <p>הזינו שם-משתמש וסיסמת-מנהל כדי לערוך טקסטים, שמות וענפים. השינויים נשמרים בענן ונראים לכולם.</p>
+      <input id="admUser" type="text" autocomplete="username" placeholder="שם משתמש" onkeydown="if(event.key==='Enter')adminLogin()">
+      <input id="admPw" type="password" autocomplete="current-password" placeholder="סיסמה" onkeydown="if(event.key==='Enter')adminLogin()">
       <button class="login-go" onclick="adminLogin()">כניסה</button>
     </div>
   </div>
@@ -1155,10 +1156,10 @@ function openLogin(){
   setTimeout(()=>{ const e=document.getElementById('admPw'); if(e){ e.value=''; e.focus(); } },30);
 }
 async function adminLogin(){
-  const pw=val('admPw');
+  const pw=val('admPw'), user=val('admUser');
   if(!pw) return;
   try{
-    const r=await fetch('/api/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password:pw})});
+    const r=await fetch('/api/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({user:user,password:pw})});
     const j=await r.json().catch(()=>({}));
     if(j.ok){ ADMIN=pw; sessionStorage.setItem('sg_admin',pw); setAdminUI();
       document.getElementById('loginModal').classList.remove('open'); toast('שלום מנהל ✓');

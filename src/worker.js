@@ -22,7 +22,9 @@ export default {
     if (path === '/api/login' && request.method === 'POST') {
       let body = {};
       try { body = await request.json(); } catch (e) {}
-      const ok = !!env.ADMIN_PASSWORD && body.password === env.ADMIN_PASSWORD;
+      // password is the real secret; username is an extra check (only enforced if ADMIN_USER is set)
+      const userOk = !env.ADMIN_USER || body.user === env.ADMIN_USER;
+      const ok = !!env.ADMIN_PASSWORD && body.password === env.ADMIN_PASSWORD && userOk;
       return json({ ok });
     }
 
