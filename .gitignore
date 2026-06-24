@@ -17,3 +17,10 @@ hp_rot/
 hp_slice/
 hp_col/
 hp_hi/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
