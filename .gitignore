@@ -17,3 +17,6 @@ hp_rot/
 hp_slice/
 hp_col/
 hp_hi/
+
+backup_*/
+*.bak
