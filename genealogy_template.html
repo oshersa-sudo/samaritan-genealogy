@@ -102,7 +102,9 @@
     border:1.5px solid var(--line); border-radius:9px; padding:3px 6px; cursor:pointer;
     display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
     box-shadow:0 1px 3px rgba(60,45,20,.12); transition:box-shadow .12s, transform .12s; overflow:hidden}
+  .node-box{touch-action:manipulation; -webkit-tap-highlight-color:rgba(120,90,40,.12)}
   .node-box:hover{box-shadow:0 4px 12px rgba(60,45,20,.25); transform:translateY(-1px)}
+  .node-box:active{box-shadow:0 0 0 3px var(--hl-border); transform:scale(.985)}
   .node-box.male{border-color:var(--male)}
   .node-box.female{border-color:var(--female)}
   .node-box.unk{border-color:var(--muted)}
@@ -163,12 +165,15 @@
   .ef-hint{margin-top:9px; font-size:10.5px; color:var(--muted); line-height:1.5}
   .ef-hint code{background:#e7f2ee; padding:1px 5px; border-radius:4px; color:#236553; user-select:all}
   .node-toggle{
-    position:absolute; width:18px; height:18px; border-radius:50%; border:1.5px solid var(--accent);
-    background:#fff; color:var(--accent); font-size:13px; line-height:15px; text-align:center;
-    cursor:pointer; padding:0; z-index:6; font-weight:bold; box-shadow:0 1px 2px rgba(60,45,20,.2)
+    position:absolute; width:23px; height:23px; border-radius:50%; border:2px solid var(--accent);
+    background:#fff; color:var(--accent); font-size:17px; line-height:19px; text-align:center;
+    cursor:pointer; padding:0; z-index:8; font-weight:bold; box-shadow:0 1px 3px rgba(60,45,20,.35);
+    touch-action:manipulation; -webkit-tap-highlight-color:transparent; user-select:none;
   }
+  .node-toggle::before{content:''; position:absolute; inset:-7px; border-radius:50%}  /* enlarged tap target */
   .node-toggle:hover{background:var(--accent); color:#fff}
-  .node-toggle.closed{background:var(--accent); color:#fff}
+  .node-toggle.closed{background:var(--accent); color:#fff; box-shadow:0 2px 5px rgba(60,45,20,.5)}
+  .node-toggle:active{filter:brightness(.85)}
   .conn{fill:none; stroke:#cbb88f; stroke-width:1.6}
   .marriage-link{fill:none; stroke:var(--female); stroke-width:1.5; stroke-dasharray:5 4; opacity:.55}
   .marriage-link.active{stroke:#d23f7d; stroke-width:2.6; opacity:.95; stroke-dasharray:none}
@@ -258,7 +263,8 @@
     .workspace{display:block}
     #treeHost{max-height:none; height:60vh; min-height:300px}
     /* bigger touch target for expand/collapse */
-    .node-toggle{width:26px; height:26px; font-size:17px; line-height:23px}
+    .node-toggle{width:40px; height:40px; font-size:27px; line-height:36px; border-width:3px; z-index:9}
+    .node-toggle::before{inset:-11px}   /* ~62px touch target on phones */
     /* detail panel becomes a bottom sheet overlay (always visible, easy to close) */
     #panel{
       position:fixed; left:0; right:0; bottom:0; top:auto; width:auto; align-self:auto;
@@ -521,6 +527,7 @@ function spouseTargetId(sp){
 /* ---------- graphical hierarchical tree (top-down, SVG connectors) ---------- */
 const SVGNS='http://www.w3.org/2000/svg';
 const NODE_W=124, NODE_H=56, COL_W=150, ROW_H=120, PADX=26, HOUSE_H=34, FAM_H=28, FAM_GAP=70;
+const MOBILE = window.innerWidth<=760;        // bigger, lower toggle on phones (clear of the card)
 const domByPerson=new Map();      // id -> node box element
 const posByPerson=new Map();      // id -> {cx,cy} center px in canvas
 const treeHost=document.getElementById('treeHost');
@@ -529,8 +536,9 @@ function fitToWidth(){
   if(!lastCanvasW) return;
   const avail=treeHost.clientWidth-22;
   if(avail<=0) return;
-  // only shrink to fit (never enlarge past 100%); keep a readable floor
-  setZoom(Math.max(0.5, Math.min(1, avail/lastCanvasW)));
+  // only shrink to fit (never enlarge past 100%); floor kept high enough that the
+  // +/- toggles stay finger-tappable (a lower floor crammed all houses but made them tiny)
+  setZoom(Math.max(0.7, Math.min(1, avail/lastCanvasW)));
 }
 let viewMode='root', selectedFamilyIdx=null;          // 'root' = whole super-tree; 'family' = one family
 const collapsed=new Set();                            // ids whose children are hidden
@@ -695,8 +703,10 @@ function renderTree(){
       tg.className='node-toggle'+(closed?' closed':'');
       tg.textContent=closed?'+':'−';
       tg.title=closed?'הצג צאצאים':'הסתר צאצאים';
-      tg.style.left=cx+'px'; tg.style.transform='translateX(-50%)'; tg.style.top=(cy+NODE_H/2-1)+'px';
-      tg.onclick=(e)=>{ e.stopPropagation(); toggleCollapse(id); };
+      tg.style.left=cx+'px'; tg.style.transform='translateX(-50%)';
+      tg.style.top=(cy+NODE_H/2-1+(MOBILE?10:0))+'px';   // mobile: drop into the gap below the card
+      const toggle=(e)=>{ e.stopPropagation(); e.preventDefault(); toggleCollapse(id); };
+      tg.addEventListener('click', toggle);
       nodeLayer.appendChild(tg);
     }
     uChildren(id).forEach(c=>{ if(L.pos.has(c)) connectors.push([id,c]); });
