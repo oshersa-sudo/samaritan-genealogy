@@ -435,7 +435,7 @@ houseNames.forEach(hn=>{ ['דנפים','מרחיבים','צפרים','כהונה
 (MODERN.modern||[]).forEach(m=>{
   persons[m.id]={ id:m.id, name:m.name, sex:m.sex, _modern:true, g:m.g, byear:m.byear,
     bmonth:m.bmonth, bday:m.bday, dyear:m.dyear, age:m.age, family:m.family, father:m.father,
-    job:m.job, bplace:m.bplace, mother:m.mother, note:m.notes, _parentRaw:m.parent };
+    job:m.job, bplace:m.bplace, mother:m.mother, note:m.notes, _parentRaw:m.parent, spouses:m.spouses };
 });
 (MODERN.modern||[]).forEach(m=>{
   if(!childMap[m.id]) childMap[m.id]=[];
@@ -511,7 +511,7 @@ function resolveId(raw){
   if(raw==null) return null;
   raw=raw.toString().trim();
   let best=null;
-  for(let i=1;i<=raw.length;i++){ const pre=raw.slice(0,i); if(idSet.has(pre)) best=pre; }
+  for(let i=1;i<=raw.length;i++){ const pre=raw.slice(0,i); if(idSet.has(pre)||persons[pre]) best=pre; }  // persons incl. modern M-ids
   return best;
 }
 function spouseTargetId(sp){
