@@ -2852,6 +2852,26 @@
        "name": "אלינור",
        "father_id": "ev-root-mod-גבית",
        "sex": "F"
+      },
+      {
+       "id": "ev-root-hist-גבית",
+       "name": "📋 לידות היסטוריות מהמרשם (לאימות)",
+       "sex": "",
+       "note": "לידות 1888–2002 שלא אותרו בעץ — ייתכן חופפות, לאימות.",
+       "children_ids": [
+        "ev-49",
+        "ev-50"
+       ]
+      },
+      {
+       "id": "ev-49",
+       "name": "כיריה",
+       "father_id": "ev-root-hist-גבית"
+      },
+      {
+       "id": "ev-50",
+       "name": "נאילה",
+       "father_id": "ev-root-hist-גבית"
       }
      ]
     }
@@ -3551,8 +3571,6 @@
        "sex": "",
        "note": "לידות חדשות מהמרשם, מקובצות ברמת בית-האב.",
        "children_ids": [
-        "ev-49",
-        "ev-50",
         "ev-51",
         "ev-52",
         "ev-53",
@@ -3596,278 +3614,334 @@
         "ev-91",
         "ev-92",
         "ev-93",
-        "ev-94"
+        "ev-94",
+        "ev-95",
+        "ev-96"
        ]
       },
       {
-       "id": "ev-49",
+       "id": "ev-51",
        "name": "מאגד",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-50",
+       "id": "ev-52",
        "name": "אריייל",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-51",
+       "id": "ev-53",
        "name": "זינ",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-52",
+       "id": "ev-54",
        "name": "מאלכה",
        "father_id": "ev-root-mod-דבית"
       },
       {
-       "id": "ev-53",
+       "id": "ev-55",
        "name": "לילאכ",
        "father_id": "ev-root-mod-דבית"
       },
       {
-       "id": "ev-54",
+       "id": "ev-56",
        "name": "עבד אלמעינ",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-55",
+       "id": "ev-57",
        "name": "ודאד",
        "father_id": "ev-root-mod-דבית"
       },
       {
-       "id": "ev-56",
+       "id": "ev-58",
        "name": "שירא",
        "father_id": "ev-root-mod-דבית"
       },
       {
-       "id": "ev-57",
+       "id": "ev-59",
        "name": "נעמה",
        "father_id": "ev-root-mod-דבית"
       },
       {
-       "id": "ev-58",
+       "id": "ev-60",
        "name": "עבד אלמעינ",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-59",
+       "id": "ev-61",
        "name": "אסראייל",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-60",
+       "id": "ev-62",
        "name": "באטיא",
        "father_id": "ev-root-mod-דבית"
       },
       {
-       "id": "ev-61",
+       "id": "ev-63",
        "name": "דור",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-62",
+       "id": "ev-64",
        "name": "גאלי",
        "father_id": "ev-root-mod-דבית",
        "sex": "F"
       },
       {
-       "id": "ev-63",
+       "id": "ev-65",
        "name": "בסמאת",
        "father_id": "ev-root-mod-דבית",
        "sex": "F"
       },
       {
-       "id": "ev-64",
+       "id": "ev-66",
        "name": "צבחיה",
        "father_id": "ev-root-mod-דבית",
        "sex": "F"
       },
       {
-       "id": "ev-65",
+       "id": "ev-67",
        "name": "כארמנ",
        "father_id": "ev-root-mod-דבית",
        "sex": "F"
       },
       {
-       "id": "ev-66",
+       "id": "ev-68",
        "name": "בניאמימ",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-67",
+       "id": "ev-69",
        "name": "אוריא",
        "father_id": "ev-root-mod-דבית",
        "sex": "F"
       },
       {
-       "id": "ev-68",
+       "id": "ev-70",
        "name": "גבריייל",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-69",
+       "id": "ev-71",
        "name": "מעתז",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-70",
+       "id": "ev-72",
        "name": "נאתנ",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-71",
+       "id": "ev-73",
        "name": "תימ",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-72",
+       "id": "ev-74",
        "name": "לירונ",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-73",
+       "id": "ev-75",
        "name": "יאפא",
        "father_id": "ev-root-mod-דבית",
        "sex": "F"
       },
       {
-       "id": "ev-74",
+       "id": "ev-76",
        "name": "אליעאנ",
        "father_id": "ev-root-mod-דבית",
        "sex": "F"
       },
       {
-       "id": "ev-75",
+       "id": "ev-77",
        "name": "טאליא",
        "father_id": "ev-root-mod-דבית",
        "sex": "F"
       },
       {
-       "id": "ev-76",
+       "id": "ev-78",
        "name": "בארוכ",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-77",
+       "id": "ev-79",
        "name": "מניר",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-78",
+       "id": "ev-80",
        "name": "יועאב",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-79",
+       "id": "ev-81",
        "name": "גאיה",
        "father_id": "ev-root-mod-דבית",
        "sex": "F"
       },
       {
-       "id": "ev-80",
+       "id": "ev-82",
        "name": "נייור",
        "father_id": "ev-root-mod-דבית",
        "sex": "F"
       },
       {
-       "id": "ev-81",
+       "id": "ev-83",
        "name": "אלמוג",
        "father_id": "ev-root-mod-דבית",
        "sex": "F"
       },
       {
-       "id": "ev-82",
+       "id": "ev-84",
        "name": "לייו",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-83",
+       "id": "ev-85",
        "name": "בנינא",
        "father_id": "ev-root-mod-דבית",
        "sex": "F"
       },
       {
-       "id": "ev-84",
+       "id": "ev-86",
        "name": "ניבאר",
        "father_id": "ev-root-mod-דבית",
        "sex": "F"
       },
       {
-       "id": "ev-85",
+       "id": "ev-87",
        "name": "יאיר",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-86",
+       "id": "ev-88",
        "name": "אסחק",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-87",
+       "id": "ev-89",
        "name": "פארס",
        "father_id": "ev-root-mod-דבית",
        "sex": "M"
       },
       {
-       "id": "ev-88",
-       "name": "טובא",
-       "father_id": "ev-root-mod-דבית",
-       "sex": "F"
-      },
-      {
-       "id": "ev-89",
-       "name": "רוי",
-       "father_id": "ev-root-mod-דבית",
-       "sex": "M"
-      },
-      {
        "id": "ev-90",
-       "name": "זינה",
+       "name": "טובא",
        "father_id": "ev-root-mod-דבית",
        "sex": "F"
       },
       {
        "id": "ev-91",
-       "name": "אוריא",
+       "name": "רוי",
        "father_id": "ev-root-mod-דבית",
-       "sex": "F"
+       "sex": "M"
       },
       {
        "id": "ev-92",
-       "name": "טובא",
+       "name": "זינה",
        "father_id": "ev-root-mod-דבית",
        "sex": "F"
       },
       {
        "id": "ev-93",
-       "name": "סיליא",
+       "name": "אוריא",
        "father_id": "ev-root-mod-דבית",
        "sex": "F"
       },
       {
        "id": "ev-94",
+       "name": "טובא",
+       "father_id": "ev-root-mod-דבית",
+       "sex": "F"
+      },
+      {
+       "id": "ev-95",
+       "name": "סיליא",
+       "father_id": "ev-root-mod-דבית",
+       "sex": "F"
+      },
+      {
+       "id": "ev-96",
        "name": "נאיא",
        "father_id": "ev-root-mod-דבית",
        "sex": "F"
+      },
+      {
+       "id": "ev-root-hist-דבית",
+       "name": "📋 לידות היסטוריות מהמרשם (לאימות)",
+       "sex": "",
+       "note": "לידות 1888–2002 שלא אותרו בעץ — ייתכן חופפות, לאימות.",
+       "children_ids": [
+        "ev-97",
+        "ev-98",
+        "ev-99",
+        "ev-100",
+        "ev-101"
+       ]
+      },
+      {
+       "id": "ev-97",
+       "name": "גלילה",
+       "father_id": "ev-root-hist-דבית"
+      },
+      {
+       "id": "ev-98",
+       "name": "בהגה",
+       "father_id": "ev-root-hist-דבית",
+       "sex": "F"
+      },
+      {
+       "id": "ev-99",
+       "name": "עבד אלמעינ",
+       "father_id": "ev-root-hist-דבית"
+      },
+      {
+       "id": "ev-100",
+       "name": "צבחיה",
+       "father_id": "ev-root-hist-דבית",
+       "sex": "F"
+      },
+      {
+       "id": "ev-101",
+       "name": "עטא",
+       "father_id": "ev-root-hist-דבית"
+      },
+      {
+       "id": "ev-root-death-דבית",
+       "name": "📋 פטירות מהמרשם (לאימות)",
+       "sex": "",
+       "note": "פטירות מהמרשם — אנשים שלא אותרו בעץ, לאימות.",
+       "children_ids": [
+        "ev-102"
+       ]
+      },
+      {
+       "id": "ev-102",
+       "name": "נטמי",
+       "father_id": "ev-root-death-דבית"
       }
      ]
     }

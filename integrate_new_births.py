@@ -15,7 +15,7 @@ node_birth = {p['id']: p.get('birth') for h in master['houses'] for f in h['fami
 HOUSE = {'ב. בית אב הדנפים':{'fam':{'אלטיפ','אלטיף','אלטיו','סראוי','אלסראוי','דנפי','שלבי','שלפי','משלמה','מסלמה','עבדאללה'}},
          'ג. בית אב המרחיבים':{'fam':{'מרגאנ','מרחיב'}},
          'ד. בית אב הצפרים':{'fam':{'צדקה','צדקו'}}}
-HIST_HOUSES = {'ב. בית אב הדנפים'}                     # houses that also get historical + deaths
+HIST_HOUSES = {'ב. בית אב הדנפים','ג. בית אב המרחיבים','ד. בית אב הצפרים'}   # all lay houses get historical + deaths
 
 def clean_name(ar):
     ar = re.split(r'\bزوج[ةه]?\b|\bأرملة\b|[(\\/]', ar)[0]   # drop "wife/widow of …" + bracketed notes
