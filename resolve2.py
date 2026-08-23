@@ -41,6 +41,7 @@ def given_loose(s):
 
 master = json.load(io.open('master_v2.json', encoding='utf-8'))
 modern = json.load(io.open('modern_people.json', encoding='utf-8'))
+STORIES = json.load(io.open('stories.json', encoding='utf-8'))   # added nodes keep their year here
 
 def htag(h):
     for k in ('דנפים', 'מרחיבים', 'צפרים', 'כהונה'):
@@ -57,7 +58,12 @@ for h in master['houses']:
 
 def bgreg(p):
     b = p.get('birth')
-    return (b + 584) if isinstance(b, int) else None
+    if isinstance(b, int): return b + 584
+    # added nodes (מר-/הס-/כ-…) store their Gregorian year in stories.g, not master.birth —
+    # without this the age-cap was bypassed and moderns grafted onto ancient same-named nodes.
+    g = (STORIES.get(p.get('id'), {}) or {}).get('g', '')
+    mm = re.match(r'\s*(\d{3,4})', g or '')
+    return int(mm.group(1)) if mm else None
 
 def cfather(p):
     fid = p.get('father_id')
