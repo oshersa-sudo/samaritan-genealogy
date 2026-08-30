@@ -9,11 +9,16 @@ compatibility_date = "2024-09-23"
 directory = "./public"
 binding = "ASSETS"
 
-# Workers KV — stores the admin "overrides" JSON. Create it once, then paste the id:
+# Workers KV — stores the admin "overrides" JSON.
+# NOTE: this block is COMMENTED OUT on purpose. A binding with a non-existent
+# namespace id makes `wrangler deploy` fail, which froze every deploy. The worker
+# guards `env.GENEALOGY_KV &&`, so it deploys and runs fine without KV (admin just
+# can't SAVE yet). To enable saving: create the namespace, paste its real id below,
+# uncomment the three lines, and push.
 #   npx wrangler kv namespace create GENEALOGY_KV
-[[kv_namespaces]]
-binding = "GENEALOGY_KV"
-id = "PUT_YOUR_KV_NAMESPACE_ID_HERE"
+# [[kv_namespaces]]
+# binding = "GENEALOGY_KV"
+# id = "PUT_THE_REAL_NAMESPACE_ID_HERE"
 
 # ADMIN_PASSWORD is a SECRET — do NOT put it here. Set it with:
 #   npx wrangler secret put ADMIN_PASSWORD
