@@ -151,6 +151,41 @@
   .login-body p{margin:0; font-size:13px; color:var(--muted)}
   .login-body input{padding:10px; border:1px solid var(--line); border-radius:8px; font:inherit; font-size:16px}
   .login-go{padding:10px; border:none; border-radius:8px; background:var(--accent); color:#fff; font:inherit; font-weight:700; cursor:pointer}
+  /* management screen */
+  .mgmt-only{display:none}
+  body.is-admin .mgmt-only{display:inline-flex}
+  #mgmtScreen{position:fixed; inset:0; z-index:60; background:var(--bg); display:none; flex-direction:column}
+  #mgmtScreen.open{display:flex}
+  .mgmt-top{background:var(--panel); border-bottom:2px solid var(--accent2); padding:8px 12px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; box-shadow:var(--shadow)}
+  .mgmt-top h2{font-size:16px; color:var(--accent); margin:0 8px 0 0}
+  .mgmt-top .grow{flex:1}
+  .mgmt-btn{padding:7px 12px; font-size:13px; border:1px solid var(--line); background:#fff; color:var(--accent); border-radius:8px; cursor:pointer; font-weight:600; white-space:nowrap}
+  .mgmt-btn:hover{background:var(--accent); color:#fff}
+  .mgmt-btn.primary{background:#2e7d6b; color:#fff; border-color:#2e7d6b}
+  .mgmt-btn.primary:hover{background:#276456}
+  .mgmt-filters{display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:8px 12px; background:var(--panel); border-bottom:1px solid var(--line)}
+  .mgmt-filters label{font-size:12px; color:var(--muted); font-weight:bold; display:flex; gap:5px; align-items:center}
+  .mgmt-filters select,.mgmt-filters input{padding:6px 9px; font:inherit; font-size:13px; border:1px solid var(--line); border-radius:7px; background:#fff; color:var(--ink)}
+  .mgmt-count{font-size:12px; color:var(--muted)}
+  .mgmt-wrap{flex:1; overflow:auto}
+  table.mgmt{border-collapse:separate; border-spacing:0; width:100%; font-size:12.5px}
+  table.mgmt th,table.mgmt td{border-bottom:1px solid var(--line); border-inline-start:1px solid var(--line); padding:4px 7px; text-align:right; vertical-align:middle; white-space:nowrap}
+  table.mgmt th:last-child,table.mgmt td:last-child{border-inline-end:1px solid var(--line)}
+  table.mgmt thead th{position:sticky; top:0; z-index:3; background:var(--accent); color:#fff; font-size:12px; font-weight:700}
+  table.mgmt thead tr.filt th{top:26px; z-index:2; background:var(--panel); padding:2px 3px}
+  table.mgmt thead tr.filt input{width:100%; box-sizing:border-box; padding:3px 5px; font:inherit; font-size:11px; border:1px solid var(--line); border-radius:5px; color:var(--ink)}
+  table.mgmt tbody tr:nth-child(even){background:rgba(123,94,46,.04)}
+  table.mgmt tbody tr:hover{background:rgba(184,149,74,.13)}
+  table.mgmt tbody tr.editing{background:#fff8e6 !important; outline:2px solid var(--hl-border); outline-offset:-2px}
+  table.mgmt td input,table.mgmt td select{width:100%; min-width:64px; box-sizing:border-box; padding:3px 5px; font:inherit; font-size:12px; border:1px solid var(--accent2); border-radius:5px; color:var(--ink)}
+  table.mgmt td.acts{white-space:nowrap; text-align:center}
+  .rb{border:none; background:none; cursor:pointer; font-size:15px; padding:2px 4px; border-radius:6px; line-height:1}
+  .rb:hover{background:rgba(0,0,0,.09)}
+  .mgmt-photo{width:34px; height:34px; border-radius:50%; object-fit:cover; border:1px solid var(--line); background:#eee; display:inline-block; vertical-align:middle; cursor:pointer}
+  .mgmt-photo-ph{width:34px; height:34px; border-radius:50%; border:1px dashed var(--accent2); display:inline-flex; align-items:center; justify-content:center; color:var(--accent2); font-size:16px; cursor:pointer; background:#fff}
+  .mgmt-photo-ph:hover{background:var(--hl)}
+  .mgmt-hint{font-size:11px; color:var(--muted); padding:7px 12px; background:var(--panel); border-top:1px solid var(--line)}
+  @media (max-width:760px){ .mgmt-top h2{width:100%; margin:0} table.mgmt{font-size:11.5px} table.mgmt th,table.mgmt td{padding:3px 5px} }
   .edit-box{margin-top:14px; padding:12px; border:2px solid #2e7d6b; border-radius:12px; background:#f3faf7}
   .edit-title{font-weight:800; color:#236553; margin-bottom:8px}
   .edit-box .ef{display:block; font-size:11.5px; color:var(--muted); margin-bottom:9px}
@@ -290,6 +325,7 @@
   <div class="title-row">
     <h1>אילן יוחסין שומרוני</h1>
     <span class="sub">מיפקד 1909 + מרשם הקהילה (עד 2002) · <span id="count"></span></span>
+    <button id="mgmtBtn" class="admin-btn mgmt-only" type="button" onclick="openMgmt()">📋 מסך ניהול</button>
     <button id="adminBtn" class="admin-btn" type="button" onclick="openLogin()">🔧 מנהל</button>
   </div>
   <div class="controls">
@@ -387,6 +423,28 @@
       <button class="login-go" onclick="adminLogin()">כניסה</button>
     </div>
   </div>
+</div>
+
+<div id="mgmtScreen" aria-hidden="true">
+  <div class="mgmt-top">
+    <h2>📋 מסך ניהול — כל הקשרים לפי בתי אב</h2>
+    <button class="mgmt-btn" onclick="mgmtExport()">⬇️ ייצוא לאקסל</button>
+    <button class="mgmt-btn" onclick="document.getElementById('mgmtImport').click()">⬆️ טעינה מאקסל</button>
+    <button class="mgmt-btn" onclick="mgmtRefresh()">🔄 ריענון האפליקציה</button>
+    <span class="grow"></span>
+    <span class="mgmt-count" id="mgmtCount"></span>
+    <button class="mgmt-btn primary" onclick="closeMgmt()">✕ סגור</button>
+  </div>
+  <div class="mgmt-filters">
+    <label>בית אב <select id="mgmtHouse" onchange="renderMgmt()"><option value="">כל בתי-האב</option></select></label>
+    <label>משפחה <select id="mgmtFamily" onchange="renderMgmt()"><option value="">כל המשפחות</option></select></label>
+    <input id="mgmtSearch" placeholder="חיפוש חופשי בכל העמודות…" oninput="renderMgmt()" style="min-width:220px">
+    <button class="mgmt-btn" onclick="mgmtAddRoot()">➕ אדם חדש (שורש)</button>
+  </div>
+  <div class="mgmt-wrap"><table class="mgmt" id="mgmtTable"><thead></thead><tbody></tbody></table></div>
+  <div class="mgmt-hint">💡 <b>עריכה</b> משנה את הרשומה במקום · <b>הוספת צאצא</b> פותחת שורה חדשה עם אותו בית-אב ומשפחה, ושם-האב לפי השורה · <b>מחיקה</b> בלתי-הפיכה. כל שינוי נשמר בענן אוטומטית.</div>
+  <input type="file" id="mgmtImport" accept=".xlsx,.xls,.csv" style="display:none" onchange="mgmtImportFile(this)">
+  <input type="file" id="mgmtPhotoInput" accept="image/*" style="display:none">
 </div>
 
 <script>
@@ -1094,6 +1152,23 @@ function applyEdit(id, patch){
   const p = persons[id]; if(!p) return;
   if('name' in patch) p.name = patch.name;
   if('sex' in patch) p.sex = patch.sex;
+  if('house' in patch) p._house = patch.house;
+  if('family' in patch){ p._family = patch.family; p.family = patch.family; }
+  if('fatherName' in patch) p.father = patch.fatherName;
+  if('gf' in patch) p._gf = patch.gf;
+  if('mother' in patch) p.mother = patch.mother;
+  if('wife' in patch) p._wife = patch.wife;
+  if('job' in patch) p.job = patch.job;
+  if('place' in patch) p.bplace = patch.place;
+  if('en' in patch) p.en = patch.en;
+  if('photo' in patch) p.photo = patch.photo || null;
+  if('byear' in patch){ const v=(patch.byear==null?'':(''+patch.byear).trim()); p.byear = v===''? null : (/^\d{3,4}$/.test(v)? parseInt(v) : v); }
+  if('dyear' in patch){ const v=(patch.dyear==null?'':(''+patch.dyear).trim()); p.dyear = v===''? null : v; }
+  if('byear' in patch || 'dyear' in patch){                 // keep the Gregorian span (and tree label) in sync
+    const b=(p.byear!=null?p.byear:''), d=(p.dyear!=null?p.dyear:'');
+    const gg=(b!==''||d!=='')? (b+'–'+d) : '';
+    p.g=gg; STORIES[id]=STORIES[id]||{t:'',g:''}; STORIES[id].g=gg;
+  }
   if('story' in patch || 'g' in patch){
     STORIES[id] = STORIES[id] || {t:'',g:''};
     if('story' in patch) STORIES[id].t = patch.story;
@@ -1106,7 +1181,8 @@ function makePerson(o){
   persons[o.id] = { id:o.id, name:o.name||'(ללא שם)', sex:o.sex||'', g:o.g||'', _added:true };
   childMap[o.id]=[]; idSet.add(o.id);
   if(o.story || o.g) STORIES[o.id] = { t:o.story||'', g:o.g||'' };
-  setParent(o.id, o.father_id);
+  setParent(o.id, o.father_id);                              // inherits _house/_family from the father
+  applyEdit(o.id, o);                                        // then apply any explicit data fields (incl. overrides)
 }
 function removePerson(id){
   (childMap[id]||[]).slice().forEach(c=> setParent(c, parentOf[id]||null) );  // children climb to grandparent
@@ -1146,7 +1222,8 @@ function recordEdit(id, patch){
   applyEdit(id, patch);
 }
 function recordAdd(o){
-  OVERRIDES.added[o.id] = {name:o.name,sex:o.sex,g:o.g,story:o.story,father_id:o.father_id};
+  const rec = Object.assign({}, o); delete rec.id;          // store every provided data field, not just the base ones
+  OVERRIDES.added[o.id] = rec;
   makePerson(o);
 }
 function recordDelete(id){
@@ -1228,6 +1305,276 @@ function doDelete(id){
   const par=parentOf[id];
   recordDelete(id);
   saveOverrides().then(()=>{ renderTree(); if(par&&persons[par]) openPerson(par); else closePanel(); });
+}
+
+/* ================= MANAGEMENT SCREEN (admin table: view / edit / add / delete / photos / excel) ================= */
+const MGMT_FIELDS = [
+  {k:'name',   label:'שם האדם'},
+  {k:'house',  label:'בית אב'},
+  {k:'family', label:'משפחה'},
+  {k:'father', label:'שם האב'},
+  {k:'gf',     label:'שם הסב'},
+  {k:'mother', label:'שם האם'},
+  {k:'wife',   label:'שם בן/בת הזוג'},
+  {k:'birth',  label:'לידה'},
+  {k:'death',  label:'פטירה'},
+  {k:'job',    label:'מקצוע'},
+  {k:'place',  label:'מקום מגורים'},
+  {k:'en',     label:'שם באנגלית'},
+];
+let _mgRows=[], _mgColFilters={};
+function _gPart(id,which){ const g=gregOf(id)||''; const pp=g.split('–'); return which==='b'?(pp[0]||'').trim():(pp[1]||'').trim(); }
+function _grandOf(p){ const f=parentOf[p.id]; if(f&&parentOf[f]&&persons[parentOf[f]]) return persons[parentOf[f]].name||''; return p._gf||''; }
+function mgGet(p,k){
+  switch(k){
+    case 'name':   return p.name||'';
+    case 'house':  return p._house||'';
+    case 'family': return p._family||p.family||'';
+    case 'father': return fatherNameOf(p)||'';
+    case 'gf':     return _grandOf(p);
+    case 'mother': return p.mother||'';
+    case 'wife':   return (p.spouses&&p.spouses.length)? p.spouses.map(s=>s.name||'').filter(Boolean).join(', ') : (p._wife||'');
+    case 'birth':  return (p.byear!=null&&p.byear!=='')? p.byear : _gPart(p.id,'b');
+    case 'death':  return (p.dyear!=null&&p.dyear!=='')? p.dyear : _gPart(p.id,'d');
+    case 'job':    return p.job||'';
+    case 'place':  return p.bplace||'';
+    case 'en':     return p.en||'';
+  }
+  return '';
+}
+function mgPatch(k,v){
+  v=(v==null?'':v).toString();
+  switch(k){
+    case 'name':   return {name:v};
+    case 'house':  return {house:v};
+    case 'family': return {family:v};
+    case 'father': return {fatherName:v};
+    case 'gf':     return {gf:v};
+    case 'mother': return {mother:v};
+    case 'wife':   return {wife:v};
+    case 'birth':  return {byear:v};
+    case 'death':  return {dyear:v};
+    case 'job':    return {job:v};
+    case 'place':  return {place:v};
+    case 'en':     return {en:v};
+  }
+  return {};
+}
+let _rtTimer=null;
+function renderTreeSoon(){ clearTimeout(_rtTimer); _rtTimer=setTimeout(()=>{ try{renderTree();}catch(e){} }, 350); }
+
+function openMgmt(){
+  if(!ADMIN){ toast('דרושה כניסת מנהל'); openLogin(); return; }
+  const sc=document.getElementById('mgmtScreen'); sc.classList.add('open'); sc.setAttribute('aria-hidden','false');
+  populateMgmtFilters(); buildMgmtHead(); renderMgmt();
+}
+function closeMgmt(){ const sc=document.getElementById('mgmtScreen'); sc.classList.remove('open'); sc.setAttribute('aria-hidden','true'); }
+function populateMgmtFilters(){
+  const houses=new Set(), fams=new Set();
+  Object.values(persons).forEach(p=>{ if(p._house) houses.add(p._house); const f=p._family||p.family; if(f) fams.add(f); });
+  const hs=document.getElementById('mgmtHouse'), fs=document.getElementById('mgmtFamily');
+  const cur=hs.value, curf=fs.value;
+  hs.innerHTML='<option value="">כל בתי-האב</option>'+[...houses].sort((a,b)=>a.localeCompare(b,'he')).map(h=>'<option>'+esc(h)+'</option>').join('');
+  fs.innerHTML='<option value="">כל המשפחות</option>'+[...fams].sort((a,b)=>a.localeCompare(b,'he')).map(f=>'<option>'+esc(f)+'</option>').join('');
+  hs.value=cur; fs.value=curf;
+}
+function buildMgmtHead(){
+  const thead=document.querySelector('#mgmtTable thead');
+  let h='<tr><th>תמונה</th>';
+  MGMT_FIELDS.forEach(f=>h+='<th>'+esc(f.label)+'</th>');
+  h+='<th>פעולות</th></tr>';
+  h+='<tr class="filt"><th></th>';
+  MGMT_FIELDS.forEach(f=>h+='<th><input data-col="'+f.k+'" value="'+escAttr(_mgColFilters[f.k]||'')+'" oninput="mgmtColFilter(this)" placeholder="סינון"></th>');
+  h+='<th></th></tr>';
+  thead.innerHTML=h;
+}
+function mgmtColFilter(inp){ _mgColFilters[inp.getAttribute('data-col')]=inp.value.trim(); renderMgmt(); }
+function photoCell(p){
+  if(p.photo) return '<img class="mgmt-photo" src="/api/photo?id='+encodeURIComponent(p.id)+'&v='+encodeURIComponent(p.photo)+'" alt="" title="החלף/הסר תמונה" onclick="mgmtPhoto(\''+p.id+'\')">';
+  return '<span class="mgmt-photo-ph" title="העלה תמונה" onclick="mgmtPhoto(\''+p.id+'\')">＋</span>';
+}
+function mgmtRowHTML(p){
+  let h='<tr id="mg-'+escAttr(p.id)+'" data-id="'+escAttr(p.id)+'">';
+  h+='<td>'+photoCell(p)+'</td>';
+  MGMT_FIELDS.forEach(f=>{ h+='<td>'+esc(mgGet(p,f.k))+'</td>'; });
+  h+='<td class="acts">'+
+     '<button class="rb" title="עריכה" onclick="mgmtEdit(\''+p.id+'\')">✏️</button>'+
+     '<button class="rb" title="הוספת צאצא" onclick="mgmtAddChild(\''+p.id+'\')">➕</button>'+
+     '<button class="rb" title="מחיקה" onclick="mgmtDelete(\''+p.id+'\')">🗑️</button></td></tr>';
+  return h;
+}
+function renderMgmt(){
+  const houseF=document.getElementById('mgmtHouse').value;
+  const famF=document.getElementById('mgmtFamily').value;
+  const q=norm(document.getElementById('mgmtSearch').value);
+  let rows=Object.values(persons).filter(p=>{
+    if(houseF && (p._house||'')!==houseF) return false;
+    if(famF && (p._family||p.family||'')!==famF) return false;
+    for(const k in _mgColFilters){ const fv=_mgColFilters[k]; if(fv && norm(mgGet(p,k)).indexOf(norm(fv))<0) return false; }
+    if(q){ let hay=''; MGMT_FIELDS.forEach(f=>{ hay+=' '+mgGet(p,f.k); }); if(norm(hay).indexOf(q)<0) return false; }
+    return true;
+  });
+  rows.sort((a,b)=> (a._house||'').localeCompare(b._house||'','he') || (a._family||a.family||'').localeCompare(b._family||b.family||'','he') || (''+mgGet(a,'father')).localeCompare(''+mgGet(b,'father'),'he') || (a.name||'').localeCompare(b.name||'','he'));
+  _mgRows=rows;
+  const CAP=1500, shown=rows.slice(0,CAP);
+  document.getElementById('mgmtCount').textContent = rows.length+' רשומות'+(rows.length>CAP?(' (מוצגות '+CAP+' הראשונות — צמצמו בעזרת הסינון)'):'');
+  document.querySelector('#mgmtTable tbody').innerHTML = shown.map(mgmtRowHTML).join('');
+}
+/* ---- inline edit of an existing row ---- */
+function mgmtEdit(id){
+  const p=persons[id]; if(!p) return;
+  const tr=document.getElementById('mg-'+id); if(!tr) return;
+  tr.classList.add('editing');
+  const cells=tr.querySelectorAll('td');
+  MGMT_FIELDS.forEach((f,i)=>{ cells[i+1].innerHTML='<input data-col="'+f.k+'" value="'+escAttr(mgGet(p,f.k))+'">'; });
+  cells[cells.length-1].innerHTML=
+    '<button class="rb" title="שמור" onclick="mgmtSaveRow(\''+id+'\')">💾</button>'+
+    '<button class="rb" title="ביטול" onclick="renderMgmt()">✖️</button>';
+  const fn=tr.querySelector('input[data-col="name"]'); if(fn) fn.focus();
+}
+function mgmtSaveRow(id){
+  const tr=document.getElementById('mg-'+id); if(!tr) return;
+  const patch={};
+  tr.querySelectorAll('input[data-col]').forEach(inp=>{ Object.assign(patch, mgPatch(inp.getAttribute('data-col'), inp.value)); });
+  recordEdit(id, patch);
+  renderTreeSoon();
+  saveOverrides().then(()=>{ populateMgmtFilters(); renderMgmt(); });
+}
+/* ---- add a descendant (row inserted under the current one) ---- */
+function _newRowHTML(nid, preset){
+  let h='<td><span class="mgmt-photo-ph" title="ניתן להוסיף תמונה לאחר השמירה">＋</span></td>';
+  MGMT_FIELDS.forEach(f=>{ const v=(preset&&preset[f.k]!=null)?preset[f.k]:''; h+='<td><input data-col="'+f.k+'" value="'+escAttr(v)+'"></td>'; });
+  return h;
+}
+function mgmtAddChild(pid){
+  const par=persons[pid]; if(!par) return;
+  const tr=document.getElementById('mg-'+pid); if(!tr) return;
+  const nid=ADD_PREFIX+Date.now().toString(36);
+  const preset={ house:par._house||'', family:(par._family||par.family||''), father:par.name||'' };
+  const ntr=document.createElement('tr'); ntr.className='editing'; ntr.id='mgnew-'+nid;
+  ntr.innerHTML=_newRowHTML(nid,preset)+
+    '<td class="acts"><button class="rb" title="שמור" onclick="mgmtSaveNew(\''+nid+'\',\''+pid+'\')">💾</button>'+
+    '<button class="rb" title="ביטול" onclick="this.closest(\'tr\').remove()">✖️</button></td>';
+  tr.after(ntr);
+  const fn=ntr.querySelector('input[data-col="name"]'); if(fn) fn.focus();
+}
+function mgmtAddRoot(){
+  const nid=ADD_PREFIX+Date.now().toString(36);
+  const tb=document.querySelector('#mgmtTable tbody');
+  const ntr=document.createElement('tr'); ntr.className='editing'; ntr.id='mgnew-'+nid;
+  ntr.innerHTML=_newRowHTML(nid,null)+
+    '<td class="acts"><button class="rb" title="שמור" onclick="mgmtSaveNew(\''+nid+'\',\'\')">💾</button>'+
+    '<button class="rb" title="ביטול" onclick="this.closest(\'tr\').remove()">✖️</button></td>';
+  tb.prepend(ntr);
+  const fn=ntr.querySelector('input[data-col="name"]'); if(fn) fn.focus();
+}
+function mgmtSaveNew(nid,pid){
+  const ntr=document.getElementById('mgnew-'+nid); if(!ntr) return;
+  const o={ id:nid, sex:'', father_id: pid||'' };
+  ntr.querySelectorAll('input[data-col]').forEach(inp=>{ Object.assign(o, mgPatch(inp.getAttribute('data-col'), inp.value)); });
+  if(!o.name || !o.name.trim()){ toast('יש למלא שם'); return; }
+  recordAdd(o);
+  renderTreeSoon();
+  saveOverrides().then(()=>{ populateMgmtFilters(); renderMgmt(); });
+}
+/* ---- delete (irreversible, with clear warning) ---- */
+function mgmtDelete(id){
+  const p=persons[id]; if(!p) return;
+  const kids=(childMap[id]||[]).length;
+  const msg='⚠️ מחיקת הרשומה "'+(p.name||id)+'"\n\nפעולה זו בלתי-הפיכה — לא ניתן יהיה לשחזר את הרשומה.'+
+    (kids?('\n\nשימו לב: ל-'+kids+' צאצאים — הם יחוברו אל סבם.'):'')+'\n\nלמחוק?';
+  if(!confirm(msg)) return;
+  recordDelete(id);
+  renderTreeSoon();
+  saveOverrides().then(()=>{ populateMgmtFilters(); renderMgmt(); });
+}
+/* ---- photos (resized client-side, stored via /api/photo) ---- */
+function mgmtPhoto(id){
+  if(!ADMIN){ toast('דרושה כניסת מנהל'); return; }
+  const p=persons[id]; if(!p) return;
+  if(p.photo){ if(confirm('להסיר את התמונה של "'+(p.name||id)+'"?')){ savePhoto(id,''); return; } }
+  const inp=document.getElementById('mgmtPhotoInput');
+  inp.onchange=function(){ const file=inp.files&&inp.files[0]; inp.value=''; if(file) resizeAndUpload(id,file); };
+  inp.click();
+}
+function resizeAndUpload(id,file){
+  const rd=new FileReader();
+  rd.onload=()=>{ const img=new Image(); img.onload=()=>{
+    const max=512; let w=img.width, h=img.height;
+    if(w>=h){ if(w>max){ h=Math.round(h*max/w); w=max; } } else { if(h>max){ w=Math.round(w*max/h); h=max; } }
+    const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+    cv.getContext('2d').drawImage(img,0,0,w,h);
+    savePhoto(id, cv.toDataURL('image/jpeg',0.82));
+  }; img.onerror=()=>toast('קובץ התמונה אינו תקין'); img.src=rd.result; };
+  rd.readAsDataURL(file);
+}
+function savePhoto(id,dataUrl){
+  toast(dataUrl?'מעלה תמונה…':'מסיר תמונה…');
+  fetch('/api/photo?id='+encodeURIComponent(id),{ method:'POST',
+    headers:{'content-type':'text/plain','authorization':'Bearer '+ADMIN}, body:dataUrl })
+    .then(r=>{ if(r.status===401){ toast('סיסמה שגויה — התנתקת'); adminLogout(); return null; } return r.ok?r.json():null; })
+    .then(j=>{ if(!j||!j.ok){ toast('פעולת התמונה נכשלה (ודאו שצד-השרת מותקן)'); return; }
+      const ts=dataUrl? Date.now().toString(36) : null;
+      recordEdit(id,{photo:ts});
+      saveOverrides().then(()=>renderMgmt());
+      toast(dataUrl?'תמונה נשמרה ✓':'התמונה הוסרה ✓');
+    }).catch(()=>toast('שגיאת רשת בהעלאת התמונה'));
+}
+/* ---- Excel export / import (SheetJS loaded on demand) ---- */
+let _xlsxP=null;
+function loadXLSX(){
+  if(window.XLSX) return Promise.resolve(window.XLSX);
+  if(_xlsxP) return _xlsxP;
+  _xlsxP=new Promise((res,rej)=>{ const s=document.createElement('script');
+    s.src='https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+    s.onload=()=>window.XLSX?res(window.XLSX):rej(new Error('no XLSX')); s.onerror=()=>rej(new Error('load'));
+    document.head.appendChild(s); });
+  return _xlsxP;
+}
+function mgmtExport(){
+  loadXLSX().then(XLSX=>{
+    const head=['מזהה'].concat(MGMT_FIELDS.map(f=>f.label));
+    const aoa=[head];
+    _mgRows.forEach(p=>{ aoa.push([p.id].concat(MGMT_FIELDS.map(f=>mgGet(p,f.k)))); });
+    const ws=XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols']=head.map((_,i)=>({wch: i===0?10:16}));
+    const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'ניהול');
+    const d=new Date(), pad=n=>('0'+n).slice(-2);
+    XLSX.writeFile(wb,'genealogy-'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'.xlsx');
+  }).catch(()=>toast('טעינת ספריית האקסל נכשלה (נדרש חיבור לאינטרנט)'));
+}
+function mgmtImportFile(inp){
+  const file=inp.files&&inp.files[0]; inp.value=''; if(!file) return;
+  if(!ADMIN){ toast('דרושה כניסת מנהל'); return; }
+  if(!confirm('טעינה מאקסל תעדכן רשומות קיימות לפי עמודת "מזהה", ותוסיף שורות ללא מזהה. להמשיך?')) return;
+  loadXLSX().then(XLSX=>{
+    const rd=new FileReader();
+    rd.onload=()=>{ try{
+      const wb=XLSX.read(rd.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      const labelToKey={}; MGMT_FIELDS.forEach(f=>labelToKey[f.label]=f.k);
+      let upd=0, add=0, skip=0;
+      rows.forEach(r=>{
+        const id=(r['מזהה']!=null?(''+r['מזהה']):'').trim();
+        const patch={};
+        Object.keys(r).forEach(col=>{ const k=labelToKey[(''+col).trim()]; if(k) Object.assign(patch, mgPatch(k, r[col])); });
+        if(id && persons[id]){ recordEdit(id, patch); upd++; }
+        else if(!id && patch.name && patch.name.trim()){ const nid=ADD_PREFIX+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36); recordAdd(Object.assign({id:nid, sex:'', father_id:''}, patch)); add++; }
+        else skip++;
+      });
+      renderTreeSoon();
+      saveOverrides().then(()=>{ populateMgmtFilters(); renderMgmt(); });
+      toast('טעינה הושלמה: '+upd+' עודכנו'+(add?(' · '+add+' נוספו'):'')+(skip?(' · '+skip+' דולגו'):''));
+    }catch(e){ toast('קריאת הקובץ נכשלה — ודאו שהוא בפורמט של המסך'); } };
+    rd.readAsArrayBuffer(file);
+  }).catch(()=>toast('טעינת ספריית האקסל נכשלה (נדרש חיבור לאינטרנט)'));
+}
+/* ---- refresh the app trees from all corrections ---- */
+function mgmtRefresh(){
+  try{ renderTree(); }catch(e){}
+  populateMgmtFilters(); renderMgmt();
+  toast('העצים רועננו על סמך כל התיקונים ✓');
 }
 
 /* ---------- init ---------- */
