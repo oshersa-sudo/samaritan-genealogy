@@ -185,6 +185,26 @@
   .mgmt-photo-ph{width:34px; height:34px; border-radius:50%; border:1px dashed var(--accent2); display:inline-flex; align-items:center; justify-content:center; color:var(--accent2); font-size:16px; cursor:pointer; background:#fff}
   .mgmt-photo-ph:hover{background:var(--hl)}
   .mgmt-hint{font-size:11px; color:var(--muted); padding:7px 12px; background:var(--panel); border-top:1px solid var(--line)}
+  /* person picker (father link, delete-reconnect target) */
+  .ppick{position:relative}
+  .ppick-in{width:100%; box-sizing:border-box; padding:3px 5px; font:inherit; font-size:12px; border:1px solid var(--accent2); border-radius:5px; color:var(--ink)}
+  .ppick-list{display:none; position:fixed; z-index:200; min-width:230px; max-width:360px; max-height:250px; overflow:auto; background:var(--panel); border:1px solid var(--accent2); border-radius:7px; box-shadow:var(--shadow)}
+  .ppick-list.open{display:block}
+  .ppick-opt{padding:5px 9px; font-size:12.5px; cursor:pointer; border-bottom:1px solid var(--line); white-space:nowrap}
+  .ppick-opt:hover,.ppick-opt.on{background:var(--hl)}
+  .ppick-empty{padding:6px 9px; color:var(--muted); font-size:12px}
+  td.ro-father{color:var(--muted); font-style:italic}
+  /* delete dialog */
+  .del-modal{position:fixed; inset:0; z-index:80; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; padding:16px}
+  .del-card{background:var(--panel); border-radius:12px; width:min(470px,100%); box-shadow:var(--shadow); overflow:hidden; max-height:90vh; display:flex; flex-direction:column}
+  .del-head{background:#b5474a; color:#fff; padding:12px 16px; font-weight:bold; font-size:16px}
+  .del-body{padding:14px 16px; font-size:14px; color:var(--ink); overflow:auto}
+  .del-body p{margin:0 0 10px}
+  .del-warn{background:#fdecec; color:#a3313a; border:1px solid #e6b8bb; border-radius:8px; padding:8px 10px}
+  .del-opt{display:flex; gap:7px; align-items:flex-start; margin:10px 0 4px; cursor:pointer; font-weight:600}
+  .del-opt input{margin-top:3px}
+  .del-picker{margin:0 24px 6px}
+  .del-actions{display:flex; gap:10px; justify-content:flex-end; padding:12px 16px; border-top:1px solid var(--line)}
   @media (max-width:760px){ .mgmt-top h2{width:100%; margin:0} table.mgmt{font-size:11.5px} table.mgmt th,table.mgmt td{padding:3px 5px} }
   .edit-box{margin-top:14px; padding:12px; border:2px solid #2e7d6b; border-radius:12px; background:#f3faf7}
   .edit-title{font-weight:800; color:#236553; margin-bottom:8px}
@@ -24579,7 +24599,7 @@ function showResults(list){
     const fa=fatherNameOf(p);
     d.innerHTML='<div class="r-name">'+esc(p.name||'(ללא שם)')+' <span class="years">'+displayYears(p.id,p)+'</span></div>'+
       '<div class="r-meta">'+esc(p._family)+(fa?' · אב: '+esc(fa):'')+'</div>';
-    d.onclick=()=>{ results.classList.remove('open'); search.value=p.name||''; openPerson(p.id); };
+    d.onclick=()=>{ results.classList.remove('open'); search.value=p.name||''; focusNode(p.id); };  // take the user to the node in the tree (don't open details)
     results.appendChild(d);
   });
   results.classList.add('open');
@@ -24759,7 +24779,9 @@ function makePerson(o){
   applyEdit(o.id, o);                                        // then apply any explicit data fields (incl. overrides)
 }
 function removePerson(id){
-  (childMap[id]||[]).slice().forEach(c=> setParent(c, parentOf[id]||null) );  // children climb to grandparent
+  // detach children (they become roots); what happens to them is decided explicitly at delete time
+  // (reconnect to a chosen person, or cascade-delete) — never a silent climb to the grandparent.
+  (childMap[id]||[]).slice().forEach(c=> setParent(c, null) );
   setParent(id, null);
   delete persons[id]; delete childMap[id]; delete STORIES[id]; idSet.delete(id);
 }
@@ -24778,7 +24800,7 @@ async function loadOverrides(){
     if(ov && (ov.edits||ov.added||ov.deleted)){ applyOverrides(ov); renderTree(); }
   }catch(e){}
 }
-async function saveOverrides(){
+async function saveOverrides(quiet){
   if(!ADMIN){ toast('דרושה כניסת מנהל'); return false; }
   try{
     const r = await fetch('/api/save',{ method:'POST',
@@ -24786,7 +24808,7 @@ async function saveOverrides(){
       body: JSON.stringify(OVERRIDES) });
     if(r.status===401){ toast('סיסמה שגויה — התנתקת'); adminLogout(); return false; }
     if(!r.ok){ toast('שמירה נכשלה ('+r.status+')'); return false; }
-    toast('נשמר בענן ✓'); return true;
+    if(!quiet) toast('נשמר בענן ✓'); return true;
   }catch(e){ toast('שגיאת רשת בשמירה'); return false; }
 }
 /* record an admin change into OVERRIDES (so it persists) AND apply it live */
@@ -24874,11 +24896,8 @@ function doAddChild(id){
   saveOverrides().then(()=>{ renderTree(); openPerson(nid); });
 }
 function doDelete(id){
-  const p=persons[id]; if(!p) return;
-  if(!confirm('למחוק את "'+(p.name||'')+'"?\nצאצאיו יחוברו אל סבו.')) return;
   const par=parentOf[id];
-  recordDelete(id);
-  saveOverrides().then(()=>{ renderTree(); if(par&&persons[par]) openPerson(par); else closePanel(); });
+  promptDelete(id, ()=>{ if(par&&persons[par]) openPerson(par); else closePanel(); });
 }
 
 /* ================= MANAGEMENT SCREEN (admin table: view / edit / add / delete / photos / excel) ================= */
@@ -24940,7 +24959,7 @@ function renderTreeSoon(){ clearTimeout(_rtTimer); _rtTimer=setTimeout(()=>{ try
 function openMgmt(){
   if(!ADMIN){ toast('דרושה כניסת מנהל'); openLogin(); return; }
   const sc=document.getElementById('mgmtScreen'); sc.classList.add('open'); sc.setAttribute('aria-hidden','false');
-  populateMgmtFilters(); buildMgmtHead(); renderMgmt();
+  populateMgmtFilters(); buildFamDatalist(); buildMgmtHead(); renderMgmt();
 }
 function closeMgmt(){ const sc=document.getElementById('mgmtScreen'); sc.classList.remove('open'); sc.setAttribute('aria-hidden','true'); }
 function populateMgmtFilters(){
@@ -24994,30 +25013,154 @@ function renderMgmt(){
   document.getElementById('mgmtCount').textContent = rows.length+' רשומות'+(rows.length>CAP?(' (מוצגות '+CAP+' הראשונות — צמצמו בעזרת הסינון)'):'');
   document.querySelector('#mgmtTable tbody').innerHTML = shown.map(mgmtRowHTML).join('');
 }
-/* ---- inline edit of an existing row ---- */
+/* ---- reusable person picker (father link, delete-reconnect target) ---- */
+function ppickLabel(p){                                   // "name (בן father) · birthYear"
+  if(!p) return '';
+  const fa=fatherNameOf(p)||'—';
+  const by=(p.byear!=null&&p.byear!=='')?p.byear:_gPart(p.id,'b');
+  return (p.name||'(ללא שם)')+' (בן '+fa+')'+(by?(' · '+by):'');
+}
+function descendantSet(id){                               // id + all descendants (to forbid cycles)
+  const s=new Set([id]), st=[id];
+  while(st.length){ const x=st.pop(); (childMap[x]||[]).forEach(c=>{ if(!s.has(c)){ s.add(c); st.push(c); } }); }
+  return s;
+}
+function ppickSearch(inp){
+  const wrap=inp.closest('.ppick'), list=wrap.querySelector('.ppick-list');
+  const exclude=wrap.getAttribute('data-exclude');
+  const q=norm(inp.value);
+  if(q.length<1){ list.classList.remove('open'); list.innerHTML=''; return; }
+  const banned = exclude? descendantSet(exclude) : null;
+  const res=[];
+  for(const p of Object.values(persons)){
+    if(banned && banned.has(p.id)) continue;
+    if(norm(p.name).indexOf(q)>=0) res.push(p);
+    if(res.length>400) break;
+  }
+  const by=p=>{ const v=(p.byear!=null&&p.byear!=='')?p.byear:parseInt(_gPart(p.id,'b')); return v||9999; };
+  res.sort((a,b)=> (norm(a.name).indexOf(q)-norm(b.name).indexOf(q)) || by(a)-by(b));
+  list.innerHTML = res.length
+    ? res.slice(0,30).map(p=>'<div class="ppick-opt" data-id="'+escAttr(p.id)+'" onmousedown="event.preventDefault();ppickPick(this)">'+esc(ppickLabel(p))+'</div>').join('')
+    : '<div class="ppick-empty">אין תוצאות</div>';
+  const r=inp.getBoundingClientRect();
+  list.style.top=(r.bottom+2)+'px'; list.style.left=r.left+'px'; list.style.minWidth=r.width+'px';
+  list.classList.add('open');
+}
+function ppickPick(opt){
+  const wrap=opt.closest('.ppick'), id=opt.getAttribute('data-id');
+  wrap.setAttribute('data-pid', id);
+  const inp=wrap.querySelector('.ppick-in'); inp.value=ppickLabel(persons[id]);
+  wrap.querySelector('.ppick-list').classList.remove('open');
+  inp.focus();
+}
+document.addEventListener('mousedown',e=>{ if(!e.target.closest('.ppick')) document.querySelectorAll('.ppick-list.open').forEach(l=>l.classList.remove('open')); });
+function fatherPickerHTML(id){
+  const p=persons[id], curFid=parentOf[id]||'';
+  const curLabel = (curFid&&persons[curFid]) ? ppickLabel(persons[curFid]) : (p.father? (p.father+' (לא מקושר — בחרו אב לקישור)') : '');
+  return '<div class="ppick" data-col="father" data-pid="'+escAttr(curFid)+'" data-exclude="'+escAttr(id)+'">'+
+    '<input class="ppick-in" placeholder="חפש אב לקישור…" value="'+escAttr(curLabel)+'" autocomplete="off" oninput="ppickSearch(this)" onfocus="ppickSearch(this)">'+
+    '<div class="ppick-list"></div></div>';
+}
+function buildFamDatalist(){
+  let dl=document.getElementById('mgFamList');
+  if(!dl){ dl=document.createElement('datalist'); dl.id='mgFamList'; document.body.appendChild(dl); }
+  const fams=new Set(); Object.values(persons).forEach(p=>{ const f=p._family||p.family; if(f) fams.add(f); });
+  dl.innerHTML=[...fams].sort((a,b)=>a.localeCompare(b,'he')).map(f=>'<option value="'+escAttr(f)+'"></option>').join('');
+}
+
+/* ---- inline edit of an existing row (auto-saves; refreshes the trees in the background on exit) ---- */
+let _autoSaveT=null;
+function scheduleAutoSave(id){ clearTimeout(_autoSaveT); _autoSaveT=setTimeout(()=>applyRowPatch(id,false), 700); }
+function applyRowPatch(id, finalize){
+  const tr=document.getElementById('mg-'+id); if(!tr) return;
+  const patch={};
+  tr.querySelectorAll('[data-col]').forEach(el=>{
+    const k=el.getAttribute('data-col');
+    if(k==='father') return;                              // father is set by the picker only (below) — never free-typed
+    if(el.tagName==='INPUT'||el.tagName==='SELECT') Object.assign(patch, mgPatch(k, el.value));
+  });
+  const fp=tr.querySelector('.ppick[data-col="father"]');
+  if(fp){ const nf=fp.getAttribute('data-pid')||'', cf=parentOf[id]||'';
+    if(nf && nf!==cf && nf!==id) patch.father_id=nf; }     // re-link to the chosen father (structural)
+  recordEdit(id, patch);
+  saveOverrides(!finalize);                               // quiet while typing; toast on finalize
+  renderTreeSoon();                                       // background tree refresh
+  if(finalize && document.getElementById('mg-'+id)) tr.outerHTML = mgmtRowHTML(persons[id]);
+}
 function mgmtEdit(id){
   const p=persons[id]; if(!p) return;
   const tr=document.getElementById('mg-'+id); if(!tr) return;
   tr.classList.add('editing');
   const cells=tr.querySelectorAll('td');
-  MGMT_FIELDS.forEach((f,i)=>{ cells[i+1].innerHTML='<input data-col="'+f.k+'" value="'+escAttr(mgGet(p,f.k))+'">'; });
+  MGMT_FIELDS.forEach((f,i)=>{
+    const td=cells[i+1];
+    if(f.k==='father'){ td.innerHTML=fatherPickerHTML(id); }
+    else if(f.k==='family'){ td.innerHTML='<input data-col="family" list="mgFamList" value="'+escAttr(mgGet(p,'family'))+'" autocomplete="off">'; }
+    else td.innerHTML='<input data-col="'+f.k+'" value="'+escAttr(mgGet(p,f.k))+'">';
+  });
   cells[cells.length-1].innerHTML=
-    '<button class="rb" title="שמור" onclick="mgmtSaveRow(\''+id+'\')">💾</button>'+
-    '<button class="rb" title="ביטול" onclick="renderMgmt()">✖️</button>';
-  const fn=tr.querySelector('input[data-col="name"]'); if(fn) fn.focus();
+    '<button class="rb" title="סיום (נשמר אוטומטית)" onclick="applyRowPatch(\''+id+'\',true)">✓</button>'+
+    '<button class="rb" title="סגור עריכה" onclick="renderMgmt()">✖️</button>';
+  tr.addEventListener('input', ()=>scheduleAutoSave(id));
+  tr.addEventListener('change', ()=>scheduleAutoSave(id));
+  tr.addEventListener('focusout', ()=>{ setTimeout(()=>{ if(tr.classList.contains('editing') && !tr.contains(document.activeElement)) applyRowPatch(id,true); }, 170); });
+  const fn=tr.querySelector('input[data-col="name"]'); if(fn){ fn.focus(); if(fn.select) fn.select(); }
 }
-function mgmtSaveRow(id){
-  const tr=document.getElementById('mg-'+id); if(!tr) return;
-  const patch={};
-  tr.querySelectorAll('input[data-col]').forEach(inp=>{ Object.assign(patch, mgPatch(inp.getAttribute('data-col'), inp.value)); });
-  recordEdit(id, patch);
-  renderTreeSoon();
-  saveOverrides().then(()=>{ populateMgmtFilters(); renderMgmt(); });
+function mgmtSaveRow(id){ applyRowPatch(id, true); }
+
+/* ---- delete: choose to reconnect children, or cascade-delete the branch (never a silent grandparent climb) ---- */
+function promptDelete(id, afterFn){
+  if(!ADMIN){ toast('דרושה כניסת מנהל'); return; }
+  const p=persons[id]; if(!p) return;
+  const kids=(childMap[id]||[]).slice();
+  const branch=descendantSet(id).size-1;
+  const back=document.createElement('div'); back.className='del-modal open';
+  let inner='<div class="del-card"><div class="del-head">🗑️ מחיקת «'+esc(p.name||id)+'»</div><div class="del-body">'+
+    '<p class="del-warn">⚠️ פעולה בלתי-הפיכה — לא ניתן יהיה לשחזר את הרשומה.</p>';
+  if(kids.length){
+    const names=kids.slice(0,6).map(c=>esc(persons[c]?persons[c].name:'')).filter(Boolean).join(', ')+(kids.length>6?(' ועוד '+(kids.length-6)):'');
+    inner+='<p>ל«'+esc(p.name||'')+'» '+kids.length+' צאצאים ('+names+'). מה לעשות בהם?</p>'+
+      '<label class="del-opt"><input type="radio" name="delmode" value="reconnect" checked> חבר את הצאצאים אל אדם אחר:</label>'+
+      '<div class="del-picker"><div class="ppick" data-pid="" data-exclude="'+escAttr(id)+'">'+
+        '<input class="ppick-in" placeholder="חפש אדם לחיבור הצאצאים…" autocomplete="off" oninput="ppickSearch(this)" onfocus="ppickSearch(this)">'+
+        '<div class="ppick-list"></div></div></div>'+
+      '<label class="del-opt"><input type="radio" name="delmode" value="cascade"> מחק את הצאצאים יחד עם הרשומה (כל הענף — '+branch+' רשומות נוספות)</label>';
+  }
+  inner+='</div><div class="del-actions">'+
+    '<button class="mgmt-btn" onclick="this.closest(\'.del-modal\').remove()">ביטול</button>'+
+    '<button class="mgmt-btn primary del-go">מחק</button></div></div>';
+  back.innerHTML=inner;
+  document.body.appendChild(back);
+  back.addEventListener('mousedown',e=>{ if(e.target===back) back.remove(); });
+  back.querySelector('.del-go').onclick=()=>{
+    const modeEl=back.querySelector('input[name="delmode"]:checked');
+    const mode = modeEl? modeEl.value : 'single';
+    if(kids.length && mode==='reconnect'){
+      const target=(back.querySelector('.ppick').getAttribute('data-pid')||'');
+      if(!target || !persons[target]){ toast('בחרו אדם לחיבור הצאצאים'); return; }
+      if(descendantSet(id).has(target)){ toast('אי אפשר לחבר אל האדם הנמחק או צאצאיו'); return; }
+      kids.forEach(c=> recordEdit(c, {father_id: target}) );
+      recordDelete(id);
+    } else if(kids.length && mode==='cascade'){
+      [...descendantSet(id)].forEach(x=> recordDelete(x));
+    } else {
+      recordDelete(id);
+    }
+    back.remove();
+    renderTreeSoon();
+    saveOverrides();
+    if(afterFn) afterFn();
+  };
 }
 /* ---- add a descendant (row inserted under the current one) ---- */
 function _newRowHTML(nid, preset){
   let h='<td><span class="mgmt-photo-ph" title="ניתן להוסיף תמונה לאחר השמירה">＋</span></td>';
-  MGMT_FIELDS.forEach(f=>{ const v=(preset&&preset[f.k]!=null)?preset[f.k]:''; h+='<td><input data-col="'+f.k+'" value="'+escAttr(v)+'"></td>'; });
+  MGMT_FIELDS.forEach(f=>{
+    const v=(preset&&preset[f.k]!=null)?preset[f.k]:'';
+    if(f.k==='father'){ h+='<td class="ro-father" title="שם-האב נקבע לפי השורה שממנה נלחץ ➕">'+(v?esc(v):'—')+'</td>'; }   // fixed, not free-typed
+    else if(f.k==='family'){ h+='<td><input data-col="family" list="mgFamList" value="'+escAttr(v)+'" autocomplete="off"></td>'; }
+    else h+='<td><input data-col="'+f.k+'" value="'+escAttr(v)+'"></td>';
+  });
   return h;
 }
 function mgmtAddChild(pid){
@@ -25052,16 +25195,7 @@ function mgmtSaveNew(nid,pid){
   saveOverrides().then(()=>{ populateMgmtFilters(); renderMgmt(); });
 }
 /* ---- delete (irreversible, with clear warning) ---- */
-function mgmtDelete(id){
-  const p=persons[id]; if(!p) return;
-  const kids=(childMap[id]||[]).length;
-  const msg='⚠️ מחיקת הרשומה "'+(p.name||id)+'"\n\nפעולה זו בלתי-הפיכה — לא ניתן יהיה לשחזר את הרשומה.'+
-    (kids?('\n\nשימו לב: ל-'+kids+' צאצאים — הם יחוברו אל סבם.'):'')+'\n\nלמחוק?';
-  if(!confirm(msg)) return;
-  recordDelete(id);
-  renderTreeSoon();
-  saveOverrides().then(()=>{ populateMgmtFilters(); renderMgmt(); });
-}
+function mgmtDelete(id){ promptDelete(id, ()=>{ populateMgmtFilters(); renderMgmt(); }); }
 /* ---- photos (resized client-side, stored via /api/photo) ---- */
 function mgmtPhoto(id){
   if(!ADMIN){ toast('דרושה כניסת מנהל'); return; }
