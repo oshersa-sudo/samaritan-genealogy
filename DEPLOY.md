@@ -102,3 +102,21 @@ git push -u origin main
 >
 > **שחזור:** התיקונים נפרדים מהנתונים המקוריים. למחיקת כל התיקונים — לרוקן את מפתח
 > `overrides` ב-KV (דשבורד → KV → הערך → מחיקה).
+
+---
+
+# מצב ההתקנה (הותקן ואומת · 2026-08-31)
+
+הכל פעיל בפרודקשן. הלקחים שנפתרו בדרך — חשוב לדעת לתחזוקה עתידית:
+
+1. **הפרויקט הוא *Worker* (לא Pages).** הפריסה: `npx wrangler deploy` (Build command ריק).
+   ה-API מגיע מ-`main = src/worker.js`; הקבצים הסטטיים מ-`[assets] directory = "./public"`.
+2. **אסור** שיהיה `public/_worker.js` — `wrangler` מסרב להעלות `_worker.js` כ-asset
+   וכל הבנייה נכשלת ("Uploading a Pages _worker.js file as an asset"). זה הקפיא פרסומים.
+3. **מזהה ה-KV חייב להיות אמיתי ב-`wrangler.toml`** (לא placeholder), אחרת `wrangler deploy` נכשל.
+   מחובר: `GENEALOGY_KV` → `dfe338e3c8214dbcae5bb6b1849d3e30`.
+4. **סודות (`ADMIN_PASSWORD`, `ADMIN_USER`) — בדשבורד בלבד** (Settings → Variables and secrets,
+   סוג Secret). הם נשמרים בין פריסות (`wrangler deploy` לא מוחק אותם). **`ADMIN_USER` = המייל של
+   הבעלים.** אזהרה: הוספת סוד בדשבורד יוצרת *גרסה* חדשה שאינה נפרסת אוטומטית — צריך דחיפת-git
+   (או קידום הגרסה ל-100%) כדי שהסוד ייכנס לפריסה הפעילה.
+5. **כניסה:** בחלון "🔧 מנהל" — שם משתמש = המייל של הבעלים, והסיסמה. שמירות/תמונות → KV, נראות לכולם.
