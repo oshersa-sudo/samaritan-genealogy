@@ -17,9 +17,9 @@ if ($out.Contains('/*__DATA__*/null') -or $out.Contains('/*__STORIES__*/{}') -or
 [System.IO.File]::WriteAllText("$dir\index.html", $out, $enc)
 New-Item -ItemType Directory -Force -Path "$dir\public" | Out-Null
 [System.IO.File]::WriteAllText("$dir\public\index.html", $out, $enc)
-# Cloudflare Pages "advanced mode": a _worker.js in the output dir handles /api/* (login,
-# save, data, photos) and falls back to static assets. Keep it in sync with src/worker.js.
-$worker = [System.IO.File]::ReadAllText("$dir\src\worker.js", [System.Text.Encoding]::UTF8)
-[System.IO.File]::WriteAllText("$dir\public\_worker.js", $worker, $enc)
+# NOTE: this is a Worker deploy (`npx wrangler deploy`), NOT Cloudflare Pages. The API
+# comes from `main = src/worker.js` in wrangler.toml; static files are the `[assets]`
+# dir `./public`. Do NOT put a `_worker.js` in ./public — wrangler rejects uploading a
+# `_worker.js` as an asset and the whole deploy fails.
 $len = $out.Length
-Write-Host "Built index.html + public/index.html + public/_worker.js ($len bytes)"
+Write-Host "Built index.html + public/index.html ($len bytes)"
