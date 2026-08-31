@@ -272,6 +272,11 @@
     color:var(--accent); border-radius:8px; padding:9px; font:inherit; font-size:13px; font-weight:bold; cursor:pointer}
   @media (max-width:760px){
     header{padding:8px 10px}
+    /* keep the admin / management buttons out of the top-INLINE-END (left in RTL) corner,
+       where a mobile webview / launcher "close ✕" overlaps them. Move them to the
+       inline-START corner (top-right in RTL), beside the title, and clear of that ✕. */
+    .title-row{align-items:center}
+    .title-row .admin-btn{order:-1; margin-inline-start:0; margin-inline-end:8px}
     h1{font-size:17px}
     .opt-toggle{display:block}
     .controls.collapsed .ctl:not(.search-wrap){display:none}
