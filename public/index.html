@@ -108,6 +108,9 @@
   .node-box.male{border-color:var(--male)}
   .node-box.female{border-color:var(--female)}
   .node-box.unk{border-color:var(--muted)}
+  .nb-sex{position:absolute; left:3px; top:2px; font-size:9.5px; font-weight:bold; line-height:1.3;
+    color:#fff; background:rgba(60,45,20,.45); border-radius:4px; padding:0 3px; pointer-events:none}
+  .node-box.male .nb-sex{background:var(--male)} .node-box.female .nb-sex{background:var(--female)}
   .node-box.modern{background:#f3f8fc}
   .node-box.modern::after{content:'·דור חדש'; position:absolute; bottom:1px; inset-inline-start:4px; font-size:7.5px; color:#7a93ad}
   .node-box .nb-gen{font-size:9px; color:#fff; background:var(--accent2); border-radius:8px; padding:0 6px;
@@ -188,7 +191,7 @@
   /* person picker (father link, delete-reconnect target) */
   .ppick{position:relative}
   .ppick-in{width:100%; box-sizing:border-box; padding:3px 5px; font:inherit; font-size:12px; border:1px solid var(--accent2); border-radius:5px; color:var(--ink)}
-  .ppick-list{display:none; position:fixed; z-index:200; min-width:230px; max-width:360px; max-height:250px; overflow:auto; background:var(--panel); border:1px solid var(--accent2); border-radius:7px; box-shadow:var(--shadow)}
+  .ppick-list{display:none; position:fixed; z-index:200; box-sizing:border-box; max-height:250px; overflow:auto; background:var(--panel); border:1px solid var(--accent2); border-radius:7px; box-shadow:var(--shadow)}
   .ppick-list.open{display:block}
   .ppick-opt{padding:5px 9px; font-size:12.5px; cursor:pointer; border-bottom:1px solid var(--line); white-space:nowrap}
   .ppick-opt:hover,.ppick-opt.on{background:var(--hl)}
@@ -205,6 +208,18 @@
   .del-opt input{margin-top:3px}
   .del-picker{margin:0 24px 6px}
   .del-actions{display:flex; gap:10px; justify-content:flex-end; padding:12px 16px; border-top:1px solid var(--line)}
+  .ef-kids{display:flex; flex-direction:column; gap:4px}
+  .ef-kids>span{font-size:12px; color:var(--muted); font-weight:bold}
+  .ef-kid{padding:5px 7px; border:1px solid var(--line); border-radius:6px; font:inherit; font-size:13px; color:var(--ink)}
+  .pdf-btn{padding:6px 10px; font-size:12px; border:1px solid var(--accent2); background:#fff; color:var(--accent); border-radius:7px; cursor:pointer; font-weight:600; margin-top:4px}
+  .pdf-btn:hover{background:var(--accent); color:#fff}
+  @media print{
+    header,.legend,.house-legend,#apexHost,#panel,#panelBackdrop,.opt-toggle,#toast,#mgmtScreen,.del-modal,.pdf-btn{display:none !important}
+    main,.workspace{position:static !important; display:block !important}
+    #treeHost{position:static !important; height:auto !important; max-height:none !important; min-height:0 !important; overflow:visible !important}
+    .tree-canvas{transform:none !important}
+    body{background:#fff !important}
+  }
   @media (max-width:760px){ .mgmt-top h2{width:100%; margin:0} table.mgmt{font-size:11.5px} table.mgmt th,table.mgmt td{padding:3px 5px} }
   .edit-box{margin-top:14px; padding:12px; border:2px solid #2e7d6b; border-radius:12px; background:#f3faf7}
   .edit-title{font-weight:800; color:#236553; margin-bottom:8px}
@@ -378,13 +393,14 @@
       <label>קווי נישואין (<span id="marriageCount">0</span> בסך הכל)</label>
       <div class="btns" id="marriageMode" title="בחרו מתי להציג את קווי הנישואין/הקישור בין המשפחות">
         <button class="act mode-btn" data-mode="all">הכל</button>
-        <button class="act mode-btn on" data-mode="selected">רק לאדם הנבחר</button>
-        <button class="act mode-btn" data-mode="off">כבוי</button>
+        <button class="act mode-btn" data-mode="selected">רק לאדם הנבחר</button>
+        <button class="act mode-btn on" data-mode="off">כבוי</button>
       </div>
     </div>
     <div class="ctl">
       <label>הצג משפחה בלבד</label>
       <select id="familyJump"><option value="">🌳 כל אילן השורש</option></select>
+      <button id="pdfBtn" class="pdf-btn" type="button" onclick="exportBranchPDF()">🖨️ ייצוא ל-PDF</button>
     </div>
   </div>
 </header>
@@ -24158,6 +24174,28 @@ function motherNamesOf(p){
   if(parentOf[p.id] && persons[parentOf[p.id]]) return (persons[parentOf[p.id]].spouses||[]).map(s=>s.name||'');
   return [];
 }
+/* every person is shown as  «name (בן/בת <father>)»  — derived from the ACTUAL linked father */
+function relOf(p){ return (p&&p.sex==='F') ? 'בת' : 'בן'; }
+function fatherGivenOf(p){
+  let fn='';
+  if(p&&parentOf[p.id] && persons[parentOf[p.id]]) fn=persons[parentOf[p.id]].name||'';
+  else if(p) fn=p.father||'';
+  fn=(fn||'').replace(/\s*[\(（].*$/,'').trim();          // strip any qualifier on the father's own name
+  return (fn.split(/\s+/)[0]||'');
+}
+function displayName(p){
+  const base=(p&&p.name)||'(ללא שם)';
+  if(/[\(（]/.test(base)) return base;                    // already qualified (nickname / manual «בן X») — leave as typed
+  if(!p || (p.sex!=='M' && p.sex!=='F')) return base;     // unknown sex → don't guess בן/בת
+  const fg=fatherGivenOf(p);
+  return fg ? base+' ('+relOf(p)+' '+fg+')' : base;
+}
+function deriveYear(s){                                    // "1964" | "1964-03-02" | "2.3.1964" | "03/1964" → 1964
+  if(s==null) return null;
+  s=(''+s).trim(); if(!s) return null;
+  const m=s.match(/(\d{4})/);
+  return m ? parseInt(m[1]) : null;
+}
 // longest valid id prefix
 function resolveId(raw){
   if(raw==null) return null;
@@ -24183,7 +24221,7 @@ const MOBILE = window.innerWidth<=760;        // bigger, lower toggle on phones 
 const domByPerson=new Map();      // id -> node box element
 const posByPerson=new Map();      // id -> {cx,cy} center px in canvas
 const treeHost=document.getElementById('treeHost');
-let zoom=1, marriageMode='selected', focusedBox=null, focusedPersonId=null, lastCanvasW=0;
+let zoom=1, marriageMode='off', focusedBox=null, focusedPersonId=null, lastCanvasW=0;   // marriage lines OFF by default
 function fitToWidth(){
   if(!lastCanvasW) return;
   const avail=treeHost.clientWidth-22;
@@ -24298,8 +24336,10 @@ function makeNodeBox(id){
   const gen=genOf(id);
   const story=(STORIES[id]&&STORIES[id].t)?' <span class="nb-story" title="יש סיפור חיים">📖</span>':'';
   const ys=displayYears(id,p);
-  d.innerHTML='<div class="nb-gen">דור '+gen+'</div>'+
-    '<div class="nb-name">'+esc(p.name||'(ללא שם)')+story+'</div>'+
+  const sexMark=p.sex==='M'?'ז׳':p.sex==='F'?'נ׳':'';
+  d.innerHTML=(sexMark?'<div class="nb-sex" title="'+(p.sex==='M'?'זכר':'נקבה')+'">'+sexMark+'</div>':'')+
+    '<div class="nb-gen">דור '+gen+'</div>'+
+    '<div class="nb-name">'+esc(displayName(p))+story+'</div>'+
     (ys?'<div class="nb-years">'+ys+'</div>':'');
   d.onclick=()=>openPerson(id);
   return d;
@@ -24443,13 +24483,13 @@ document.addEventListener('keydown',e=>{
 });
 
 function field(k,vHtml){ return '<div class="field"><div class="k">'+k+'</div><div class="v">'+vHtml+'</div></div>'; }
-function plink(id,label){ return '<button class="link" data-go="'+esc(id)+'">'+esc(label||persons[id].name||id)+'</button>'; }
+function plink(id,label){ return '<button class="link" data-go="'+esc(id)+'">'+esc(label||displayName(persons[id])||id)+'</button>'; }
 
 function openPerson(id){
   const p=persons[id]; if(!p) return;
   focusNode(id);
   focusedPersonId=id; applyMarriageMode();
-  pTitle.textContent=p.name||'(ללא שם)';
+  pTitle.textContent=displayName(p);
   pSub.textContent=p._house.replace(/^[א-ת]\.\s*/,'')+' · '+p._family;
   panel.className=houseClass(p._house);            // house-colour accent on the panel head
   let html='';
@@ -24572,6 +24612,17 @@ function focusNode(id){
   box.scrollIntoView({behavior:'smooth', block:'center', inline:'center'});
 }
 
+/* ---------- export the shown branch to PDF (via the browser's Save-as-PDF) ---------- */
+function exportBranchPDF(){
+  const fam=(viewMode==='family' && selectedFamilyIdx!=null && familyList[selectedFamilyIdx]) ? familyList[selectedFamilyIdx] : null;
+  const label=fam?(fam.name||'ענף'):'כל אילן השורש';
+  toast('נפתח חלון הדפסה — בחרו "יעד: שמירה כ-PDF"');
+  const old=document.title; document.title='אילן יוחסין שומרוני — '+label;
+  const restore=()=>{ document.title=old; window.removeEventListener('afterprint',restore); };
+  window.addEventListener('afterprint',restore);
+  setTimeout(()=>{ try{ window.print(); }catch(e){ toast('הדפסה אינה נתמכת בדפדפן זה'); restore(); } }, 200);
+}
+
 /* ---------- search ---------- */
 const search=document.getElementById('search'), results=document.getElementById('results');
 function searchPersons(q){
@@ -24597,7 +24648,7 @@ function showResults(list){
   list.forEach(({p})=>{
     const d=document.createElement('div'); d.className='res';
     const fa=fatherNameOf(p);
-    d.innerHTML='<div class="r-name">'+esc(p.name||'(ללא שם)')+' <span class="years">'+displayYears(p.id,p)+'</span></div>'+
+    d.innerHTML='<div class="r-name">'+esc(displayName(p))+' <span class="years">'+displayYears(p.id,p)+'</span></div>'+
       '<div class="r-meta">'+esc(p._family)+(fa?' · אב: '+esc(fa):'')+'</div>';
     d.onclick=()=>{ results.classList.remove('open'); search.value=p.name||''; focusNode(p.id); };  // take the user to the node in the tree (don't open details)
     results.appendChild(d);
@@ -24751,11 +24802,14 @@ function applyEdit(id, patch){
   if('fatherName' in patch) p.father = patch.fatherName;
   if('gf' in patch) p._gf = patch.gf;
   if('mother' in patch) p.mother = patch.mother;
+  if('note' in patch) p.note = patch.note;
   if('wife' in patch) p._wife = patch.wife;
   if('job' in patch) p.job = patch.job;
   if('place' in patch) p.bplace = patch.place;
   if('en' in patch) p.en = patch.en;
   if('photo' in patch) p.photo = patch.photo || null;
+  if('bdate' in patch) p.bdate = patch.bdate || '';
+  if('ddate' in patch) p.ddate = patch.ddate || '';
   if('byear' in patch){ const v=(patch.byear==null?'':(''+patch.byear).trim()); p.byear = v===''? null : (/^\d{3,4}$/.test(v)? parseInt(v) : v); }
   if('dyear' in patch){ const v=(patch.dyear==null?'':(''+patch.dyear).trim()); p.dyear = v===''? null : v; }
   if('byear' in patch || 'dyear' in patch){                 // keep the Gregorian span (and tree label) in sync
@@ -24857,18 +24911,26 @@ function adminPanelTools(id){
   if(!ADMIN) return '';
   const p=persons[id]; if(!p) return '';
   const st=(STORIES[id]&&STORIES[id].t)||'';
-  const g=(STORIES[id]&&STORIES[id].g)||p.g||'';
+  const bd=mgGet(p,'birth'), dd=mgGet(p,'death'), wf=mgGet(p,'wife');
   const curPar = parentOf[id]&&persons[parentOf[id]] ? esc(persons[parentOf[id]].name||parentOf[id]) : 'שורש (ללא אב)';
+  const kids=childMap[id]||[];
+  const kidsHtml = kids.length
+    ? '<div class="ef ef-kids"><span>שמות הצאצאים</span>'+kids.map(cid=>'<input class="ef-kid" data-cid="'+escAttr(cid)+'" value="'+escAttr(persons[cid].name||'')+'">').join('')+'</div>'
+    : '';
   return '<div class="edit-box"><div class="edit-title">✏️ עריכת מנהל</div>'+
     '<label class="ef">שם<input id="ef-name" value="'+escAttr(p.name||'')+'"></label>'+
-    '<label class="ef">מין<select id="ef-sex">'+
-      '<option value="M"'+(p.sex==='M'?' selected':'')+'>זכר</option>'+
-      '<option value="F"'+(p.sex==='F'?' selected':'')+'>נקבה</option>'+
-      '<option value=""'+(!p.sex?' selected':'')+'>לא ידוע</option></select></label>'+
-    '<label class="ef">שנים (לועזי · למשל 1850–1910)<input id="ef-g" value="'+escAttr(g)+'"></label>'+
+    '<label class="ef">מין (חובה)<select id="ef-sex">'+
+      '<option value=""'+(!p.sex?' selected':'')+'>— בחר —</option>'+
+      '<option value="M"'+(p.sex==='M'?' selected':'')+'>ז׳ (זכר)</option>'+
+      '<option value="F"'+(p.sex==='F'?' selected':'')+'>נ׳ (נקבה)</option></select></label>'+
+    '<label class="ef">תאריך לידה <span class="ef-cur">שנת-הלידה נגזרת מכאן</span><input id="ef-bdate" value="'+escAttr(bd)+'" placeholder="למשל 1950 או 2.3.1950"></label>'+
+    '<label class="ef">תאריך פטירה<input id="ef-ddate" value="'+escAttr(dd)+'" placeholder="שנה או תאריך מלא"></label>'+
+    '<label class="ef">שם בן/בת הזוג<input id="ef-wife" value="'+escAttr(wf)+'"></label>'+
     '<label class="ef">מזהה האב <span class="ef-cur">כעת: '+curPar+'</span>'+
       '<input id="ef-fid" value="'+escAttr(p.father_id||'')+'" placeholder="הדביקו מזהה של אדם אחר"></label>'+
-    '<label class="ef">סיפור חיים<textarea id="ef-story" rows="5">'+esc(st)+'</textarea></label>'+
+    '<label class="ef">סיפור חיים<textarea id="ef-story" rows="4">'+esc(st)+'</textarea></label>'+
+    '<label class="ef">הערה<textarea id="ef-note" rows="2">'+esc(p.note||'')+'</textarea></label>'+
+    kidsHtml+
     '<div class="edit-actions">'+
       '<button class="eb eb-save" onclick="doSaveEdit(\''+escAttr(id)+'\')">💾 שמור שינויים</button>'+
       '<button class="eb eb-add" onclick="doAddChild(\''+escAttr(id)+'\')">➕ הוסף ילד/ה</button>'+
@@ -24879,7 +24941,11 @@ function adminPanelTools(id){
 }
 function doSaveEdit(id){
   if(!persons[id]) return;
-  const patch={ name:val('ef-name'), sex:val('ef-sex'), g:val('ef-g').trim(), story:val('ef-story') };
+  const sex=val('ef-sex');
+  if(sex!=='M' && sex!=='F'){ toast('יש לבחור מין (ז׳/נ׳)'); return; }
+  const bd=val('ef-bdate').trim(), dd=val('ef-ddate').trim();
+  const patch={ name:val('ef-name'), sex:sex, story:val('ef-story'), note:val('ef-note'), wife:val('ef-wife'),
+    bdate:bd, byear:(deriveYear(bd)!=null?deriveYear(bd):''), ddate:dd, dyear:(deriveYear(dd)!=null?deriveYear(dd):'') };
   const fid=val('ef-fid').trim();
   if(fid!==(persons[id].father_id||'')){
     if(fid && !persons[fid]){ toast('מזהה האב אינו קיים'); return; }
@@ -24887,12 +24953,19 @@ function doSaveEdit(id){
     patch.father_id = fid||null;
   }
   recordEdit(id, patch);
+  document.querySelectorAll('#pBody .ef-kid').forEach(inp=>{        // edit children's names inline
+    const cid=inp.getAttribute('data-cid'), nn=inp.value.trim();
+    if(cid && persons[cid] && nn && nn!==persons[cid].name) recordEdit(cid, {name:nn});
+  });
+  warnParenMismatch(id);
   saveOverrides().then(()=>{ renderTree(); openPerson(id); });
 }
 function doAddChild(id){
-  const name=prompt('שם הילד/ה החדש/ה:'); if(!name) return;
+  const name=prompt('שם הילד/ה החדש/ה:'); if(!name||!name.trim()) return;
+  const sx=sexNorm(prompt('מין — הקלד ז או נ:'));
+  if(sx!=='M' && sx!=='F'){ toast('חובה לציין מין (ז/נ) — הילד/ה לא נוסף/ה'); return; }
   const nid=ADD_PREFIX+Date.now().toString(36);
-  recordAdd({id:nid, name:name.trim(), sex:'', g:'', story:'', father_id:id});
+  recordAdd({id:nid, name:name.trim(), sex:sx, father_id:id});
   saveOverrides().then(()=>{ renderTree(); openPerson(nid); });
 }
 function doDelete(id){
@@ -24903,32 +24976,36 @@ function doDelete(id){
 /* ================= MANAGEMENT SCREEN (admin table: view / edit / add / delete / photos / excel) ================= */
 const MGMT_FIELDS = [
   {k:'name',   label:'שם האדם'},
+  {k:'sex',    label:'מין'},
   {k:'house',  label:'בית אב'},
   {k:'family', label:'משפחה'},
   {k:'father', label:'שם האב'},
   {k:'gf',     label:'שם הסב'},
   {k:'mother', label:'שם האם'},
   {k:'wife',   label:'שם בן/בת הזוג'},
-  {k:'birth',  label:'לידה'},
-  {k:'death',  label:'פטירה'},
+  {k:'birth',  label:'תאריך לידה'},
+  {k:'death',  label:'תאריך פטירה'},
   {k:'job',    label:'מקצוע'},
   {k:'place',  label:'מקום מגורים'},
   {k:'en',     label:'שם באנגלית'},
 ];
+function sexHe(s){ return s==='M'?'ז':s==='F'?'נ':''; }
+function sexNorm(v){ v=(''+v).trim(); return (v==='M'||v==='ז'||v==='זכר')?'M':(v==='F'||v==='נ'||v==='נקבה')?'F':''; }
 let _mgRows=[], _mgColFilters={};
 function _gPart(id,which){ const g=gregOf(id)||''; const pp=g.split('–'); return which==='b'?(pp[0]||'').trim():(pp[1]||'').trim(); }
 function _grandOf(p){ const f=parentOf[p.id]; if(f&&parentOf[f]&&persons[parentOf[f]]) return persons[parentOf[f]].name||''; return p._gf||''; }
 function mgGet(p,k){
   switch(k){
     case 'name':   return p.name||'';
+    case 'sex':    return sexHe(p.sex);
     case 'house':  return p._house||'';
     case 'family': return p._family||p.family||'';
     case 'father': return fatherNameOf(p)||'';
     case 'gf':     return _grandOf(p);
     case 'mother': return p.mother||'';
     case 'wife':   return (p.spouses&&p.spouses.length)? p.spouses.map(s=>s.name||'').filter(Boolean).join(', ') : (p._wife||'');
-    case 'birth':  return (p.byear!=null&&p.byear!=='')? p.byear : _gPart(p.id,'b');
-    case 'death':  return (p.dyear!=null&&p.dyear!=='')? p.dyear : _gPart(p.id,'d');
+    case 'birth':  return p.bdate || ((p.byear!=null&&p.byear!=='')? p.byear : _gPart(p.id,'b'));
+    case 'death':  return p.ddate || ((p.dyear!=null&&p.dyear!=='')? p.dyear : _gPart(p.id,'d'));
     case 'job':    return p.job||'';
     case 'place':  return p.bplace||'';
     case 'en':     return p.en||'';
@@ -24939,14 +25016,15 @@ function mgPatch(k,v){
   v=(v==null?'':v).toString();
   switch(k){
     case 'name':   return {name:v};
+    case 'sex':    return {sex:sexNorm(v)};
     case 'house':  return {house:v};
     case 'family': return {family:v};
     case 'father': return {fatherName:v};
     case 'gf':     return {gf:v};
     case 'mother': return {mother:v};
     case 'wife':   return {wife:v};
-    case 'birth':  return {byear:v};
-    case 'death':  return {dyear:v};
+    case 'birth':  return {bdate:v, byear:(deriveYear(v)!=null?deriveYear(v):'')};   // derive birth YEAR from the date
+    case 'death':  return {ddate:v, dyear:(deriveYear(v)!=null?deriveYear(v):'')};   // derive death YEAR from the date
     case 'job':    return {job:v};
     case 'place':  return {place:v};
     case 'en':     return {en:v};
@@ -25014,11 +25092,11 @@ function renderMgmt(){
   document.querySelector('#mgmtTable tbody').innerHTML = shown.map(mgmtRowHTML).join('');
 }
 /* ---- reusable person picker (father link, delete-reconnect target) ---- */
-function ppickLabel(p){                                   // "name (בן father) · birthYear"
+function ppickLabel(p){                                   // "name (בן/בת father) · birthYear"
   if(!p) return '';
   const fa=fatherNameOf(p)||'—';
   const by=(p.byear!=null&&p.byear!=='')?p.byear:_gPart(p.id,'b');
-  return (p.name||'(ללא שם)')+' (בן '+fa+')'+(by?(' · '+by):'');
+  return (p.name||'(ללא שם)')+' ('+relOf(p)+' '+fa+')'+(by?(' · '+by):'');
 }
 function descendantSet(id){                               // id + all descendants (to forbid cycles)
   const s=new Set([id]), st=[id];
@@ -25042,13 +25120,20 @@ function ppickSearch(inp){
   list.innerHTML = res.length
     ? res.slice(0,30).map(p=>'<div class="ppick-opt" data-id="'+escAttr(p.id)+'" onmousedown="event.preventDefault();ppickPick(this)">'+esc(ppickLabel(p))+'</div>').join('')
     : '<div class="ppick-empty">אין תוצאות</div>';
-  const r=inp.getBoundingClientRect();
-  list.style.top=(r.bottom+2)+'px'; list.style.left=r.left+'px'; list.style.minWidth=r.width+'px';
+  const r=inp.getBoundingClientRect(), vw=window.innerWidth||document.documentElement.clientWidth;
+  // fixed width, aligned to the input's right edge (RTL) and then clamped fully into the viewport
+  const width=Math.min(320, Math.max(220, r.width));
+  let left=Math.max(6, Math.min(r.right-width, vw-width-6));
+  list.style.top=(r.bottom+2)+'px';
+  list.style.right='auto';
+  list.style.left=left+'px';
+  list.style.width=width+'px'; list.style.minWidth=width+'px'; list.style.maxWidth=width+'px';
   list.classList.add('open');
 }
 function ppickPick(opt){
   const wrap=opt.closest('.ppick'), id=opt.getAttribute('data-id');
   wrap.setAttribute('data-pid', id);
+  wrap.setAttribute('data-pname', (persons[id]&&persons[id].name)||'');   // for name-mode fields (grandfather / wife)
   const inp=wrap.querySelector('.ppick-in'); inp.value=ppickLabel(persons[id]);
   wrap.querySelector('.ppick-list').classList.remove('open');
   inp.focus();
@@ -25057,9 +25142,19 @@ document.addEventListener('mousedown',e=>{ if(!e.target.closest('.ppick')) docum
 function fatherPickerHTML(id){
   const p=persons[id], curFid=parentOf[id]||'';
   const curLabel = (curFid&&persons[curFid]) ? ppickLabel(persons[curFid]) : (p.father? (p.father+' (לא מקושר — בחרו אב לקישור)') : '');
-  return '<div class="ppick" data-col="father" data-pid="'+escAttr(curFid)+'" data-exclude="'+escAttr(id)+'">'+
+  return '<div class="ppick" data-col="father" data-mode="link" data-pid="'+escAttr(curFid)+'" data-exclude="'+escAttr(id)+'">'+
     '<input class="ppick-in" placeholder="חפש אב לקישור…" value="'+escAttr(curLabel)+'" autocomplete="off" oninput="ppickSearch(this)" onfocus="ppickSearch(this)">'+
     '<div class="ppick-list"></div></div>';
+}
+function namePickerHTML(col, id, curVal, ph){          // grandfather / wife: choose a person, store their NAME
+  return '<div class="ppick" data-col="'+col+'" data-mode="name" data-pname="" data-exclude="'+escAttr(id)+'">'+
+    '<input class="ppick-in" placeholder="'+escAttr(ph||'חפש אדם…')+'" value="'+escAttr(curVal||'')+'" autocomplete="off" oninput="ppickSearch(this)" onfocus="ppickSearch(this)">'+
+    '<div class="ppick-list"></div></div>';
+}
+function sexSelectHTML(cur){
+  return '<select data-col="sex"><option value=""'+(!cur?' selected':'')+'>— בחר —</option>'+
+    '<option value="ז"'+(cur==='M'?' selected':'')+'>ז׳ (זכר)</option>'+
+    '<option value="נ"'+(cur==='F'?' selected':'')+'>נ׳ (נקבה)</option></select>';
 }
 function buildFamDatalist(){
   let dl=document.getElementById('mgFamList');
@@ -25071,18 +25166,28 @@ function buildFamDatalist(){
 /* ---- inline edit of an existing row (auto-saves; refreshes the trees in the background on exit) ---- */
 let _autoSaveT=null;
 function scheduleAutoSave(id){ clearTimeout(_autoSaveT); _autoSaveT=setTimeout(()=>applyRowPatch(id,false), 700); }
+function warnParenMismatch(id){                            // «(בן/בת X)» in the name must match the linked father
+  const nm=persons[id].name||'';
+  const m=nm.match(/\(\s*ב[נת]\s+([^)）]+?)\s*\)/);
+  if(!m) return;
+  const typed=norm(m[1].split(/\s+/)[0]), fg=norm(fatherGivenOf(persons[id]));
+  if(fg && typed && typed!==fg) toast('שים לב: בשם כתוב «'+m[1].trim()+'» אך האב המשויך הוא «'+(fatherNameOf(persons[id])||'—')+'»');
+}
 function applyRowPatch(id, finalize){
   const tr=document.getElementById('mg-'+id); if(!tr) return;
   const patch={};
-  tr.querySelectorAll('[data-col]').forEach(el=>{
-    const k=el.getAttribute('data-col');
-    if(k==='father') return;                              // father is set by the picker only (below) — never free-typed
-    if(el.tagName==='INPUT'||el.tagName==='SELECT') Object.assign(patch, mgPatch(k, el.value));
+  tr.querySelectorAll('input[data-col],select[data-col]').forEach(el=>{ Object.assign(patch, mgPatch(el.getAttribute('data-col'), el.value)); });
+  tr.querySelectorAll('.ppick[data-col]').forEach(fp=>{
+    const col=fp.getAttribute('data-col');
+    if(col==='father'){ const nf=fp.getAttribute('data-pid')||'', cf=parentOf[id]||''; if(nf && nf!==cf && nf!==id) patch.father_id=nf; }  // structural re-link
+    else { const nm=fp.getAttribute('data-pname')||''; if(nm) Object.assign(patch, mgPatch(col, nm)); }                                   // gf / wife → picked person's name
   });
-  const fp=tr.querySelector('.ppick[data-col="father"]');
-  if(fp){ const nf=fp.getAttribute('data-pid')||'', cf=parentOf[id]||'';
-    if(nf && nf!==cf && nf!==id) patch.father_id=nf; }     // re-link to the chosen father (structural)
+  if(finalize){
+    const sexNow = ('sex' in patch)? patch.sex : persons[id].sex;
+    if(sexNow!=='M' && sexNow!=='F'){ toast('יש לבחור מין (ז׳/נ׳) לפני סיום'); const s=tr.querySelector('select[data-col="sex"]'); if(s) s.focus(); return; }
+  }
   recordEdit(id, patch);
+  if(finalize) warnParenMismatch(id);
   saveOverrides(!finalize);                               // quiet while typing; toast on finalize
   renderTreeSoon();                                       // background tree refresh
   if(finalize && document.getElementById('mg-'+id)) tr.outerHTML = mgmtRowHTML(persons[id]);
@@ -25095,6 +25200,9 @@ function mgmtEdit(id){
   MGMT_FIELDS.forEach((f,i)=>{
     const td=cells[i+1];
     if(f.k==='father'){ td.innerHTML=fatherPickerHTML(id); }
+    else if(f.k==='gf'){ td.innerHTML=namePickerHTML('gf', id, mgGet(p,'gf'), 'חפש סב…'); }
+    else if(f.k==='wife'){ td.innerHTML=namePickerHTML('wife', id, mgGet(p,'wife'), 'חפש בן/בת זוג…'); }
+    else if(f.k==='sex'){ td.innerHTML=sexSelectHTML(p.sex); }
     else if(f.k==='family'){ td.innerHTML='<input data-col="family" list="mgFamList" value="'+escAttr(mgGet(p,'family'))+'" autocomplete="off">'; }
     else td.innerHTML='<input data-col="'+f.k+'" value="'+escAttr(mgGet(p,f.k))+'">';
   });
@@ -25158,6 +25266,9 @@ function _newRowHTML(nid, preset){
   MGMT_FIELDS.forEach(f=>{
     const v=(preset&&preset[f.k]!=null)?preset[f.k]:'';
     if(f.k==='father'){ h+='<td class="ro-father" title="שם-האב נקבע לפי השורה שממנה נלחץ ➕">'+(v?esc(v):'—')+'</td>'; }   // fixed, not free-typed
+    else if(f.k==='sex'){ h+='<td>'+sexSelectHTML('')+'</td>'; }
+    else if(f.k==='gf'){ h+='<td>'+namePickerHTML('gf', nid, v, 'חפש סב…')+'</td>'; }
+    else if(f.k==='wife'){ h+='<td>'+namePickerHTML('wife', nid, v, 'חפש בן/בת זוג…')+'</td>'; }
     else if(f.k==='family'){ h+='<td><input data-col="family" list="mgFamList" value="'+escAttr(v)+'" autocomplete="off"></td>'; }
     else h+='<td><input data-col="'+f.k+'" value="'+escAttr(v)+'"></td>';
   });
@@ -25187,12 +25298,15 @@ function mgmtAddRoot(){
 }
 function mgmtSaveNew(nid,pid){
   const ntr=document.getElementById('mgnew-'+nid); if(!ntr) return;
-  const o={ id:nid, sex:'', father_id: pid||'' };
-  ntr.querySelectorAll('input[data-col]').forEach(inp=>{ Object.assign(o, mgPatch(inp.getAttribute('data-col'), inp.value)); });
+  const o={ id:nid, father_id: pid||'' };
+  ntr.querySelectorAll('input[data-col],select[data-col]').forEach(el=>{ Object.assign(o, mgPatch(el.getAttribute('data-col'), el.value)); });
+  ntr.querySelectorAll('.ppick[data-col]').forEach(fp=>{ const col=fp.getAttribute('data-col'), nm=fp.getAttribute('data-pname')||''; if(col!=='father' && nm) Object.assign(o, mgPatch(col, nm)); });
   if(!o.name || !o.name.trim()){ toast('יש למלא שם'); return; }
+  if(o.sex!=='M' && o.sex!=='F'){ toast('יש לבחור מין (ז׳/נ׳)'); return; }
   recordAdd(o);
+  warnParenMismatch(nid);
   renderTreeSoon();
-  saveOverrides().then(()=>{ populateMgmtFilters(); renderMgmt(); });
+  saveOverrides().then(()=>{ populateMgmtFilters(); buildFamDatalist(); renderMgmt(); });
 }
 /* ---- delete (irreversible, with clear warning) ---- */
 function mgmtDelete(id){ promptDelete(id, ()=>{ populateMgmtFilters(); renderMgmt(); }); }
