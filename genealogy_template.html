@@ -1342,7 +1342,7 @@ function adminPanelTools(id){
   if(!ADMIN) return '';
   const p=persons[id]; if(!p) return '';
   const st=(STORIES[id]&&STORIES[id].t)||'';
-  const bd=mgGet(p,'birth'), dd=mgGet(p,'death'), wf=mgGet(p,'wife');
+  const bd=mgGet(p,'birth'), dd=mgGet(p,'death'), wf=mgGet(p,'wife'), jb=p.job||'';
   const curPar = parentOf[id]&&persons[parentOf[id]] ? esc(persons[parentOf[id]].name||parentOf[id]) : 'שורש (ללא אב)';
   const kids=childMap[id]||[];
   const kidsHtml = kids.length
@@ -1357,6 +1357,7 @@ function adminPanelTools(id){
     '<label class="ef">תאריך לידה <span class="ef-cur">שנת-הלידה נגזרת מכאן</span><input id="ef-bdate" value="'+escAttr(bd)+'" placeholder="למשל 1950 או 2.3.1950"></label>'+
     '<label class="ef">תאריך פטירה<input id="ef-ddate" value="'+escAttr(dd)+'" placeholder="שנה או תאריך מלא"></label>'+
     '<label class="ef">שם בן/בת הזוג<input id="ef-wife" value="'+escAttr(wf)+'"></label>'+
+    '<label class="ef">מקצוע<input id="ef-job" value="'+escAttr(jb)+'"></label>'+
     '<label class="ef">מזהה האב <span class="ef-cur">כעת: '+curPar+'</span>'+
       '<input id="ef-fid" value="'+escAttr(p.father_id||'')+'" placeholder="הדביקו מזהה של אדם אחר"></label>'+
     '<label class="ef">סיפור חיים<textarea id="ef-story" rows="4">'+esc(st)+'</textarea></label>'+
@@ -1375,7 +1376,7 @@ function doSaveEdit(id){
   const sex=val('ef-sex');
   if(sex!=='M' && sex!=='F'){ toast('יש לבחור מין (ז׳/נ׳)'); return; }
   const bd=val('ef-bdate').trim(), dd=val('ef-ddate').trim();
-  const patch={ name:val('ef-name'), sex:sex, story:val('ef-story'), note:val('ef-note'), wife:val('ef-wife'),
+  const patch={ name:val('ef-name'), sex:sex, story:val('ef-story'), note:val('ef-note'), wife:val('ef-wife'), job:val('ef-job'),
     bdate:bd, byear:(deriveYear(bd)!=null?deriveYear(bd):''), ddate:dd, dyear:(deriveYear(dd)!=null?deriveYear(dd):'') };
   const fid=val('ef-fid').trim();
   if(fid!==(persons[id].father_id||'')){
