@@ -177,6 +177,7 @@
   table.mgmt thead th{position:sticky; top:0; z-index:3; background:var(--accent); color:#fff; font-size:12px; font-weight:700}
   table.mgmt thead tr.filt th{top:26px; z-index:2; background:var(--panel); padding:2px 3px}
   table.mgmt thead tr.filt input{width:100%; box-sizing:border-box; padding:3px 5px; font:inherit; font-size:11px; border:1px solid var(--line); border-radius:5px; color:var(--ink)}
+  table.mgmt td.mg-id{font-family:Consolas,monospace;font-size:11px;white-space:nowrap;direction:ltr;text-align:left;cursor:copy;color:#7b5e2e}
   table.mgmt tbody tr:nth-child(even){background:rgba(123,94,46,.04)}
   table.mgmt tbody tr:hover{background:rgba(184,149,74,.13)}
   table.mgmt tbody tr.editing{background:#fff8e6 !important; outline:2px solid var(--hl-border); outline-offset:-2px}
@@ -1057,8 +1058,11 @@ function exportBranchPDF(){
 /* ---------- search ---------- */
 const search=document.getElementById('search'), results=document.getElementById('results');
 function searchPersons(q){
+  const qid=(q||'').trim();
+  let idHit=null;
+  if(qid){ if(persons[qid]) idHit=persons[qid]; else { const lo=qid.toLowerCase(); const k=Object.keys(persons).find(x=>x.toLowerCase()===lo); if(k) idHit=persons[k]; } }
   const toks=norm(q).split(' ').filter(Boolean);
-  if(!toks.length) return [];
+  if(!toks.length) return idHit?[{p:idHit,ownHits:99}]:[];
   const out=[];
   Object.values(persons).forEach(p=>{
     const own=norm(p.name); if(!own) return;
@@ -1071,7 +1075,9 @@ function searchPersons(q){
     out.push({p,ownHits});
   });
   out.sort((a,b)=> b.ownHits-a.ownHits || (numYear(a.p.birth)||9999)-(numYear(b.p.birth)||9999));
-  return out.slice(0,40);
+  const res=out.filter(o=>!idHit||o.p.id!==idHit.id).slice(0,40);
+  if(idHit) res.unshift({p:idHit,ownHits:99});            // exact ID match always first
+  return res;
 }
 function showResults(list){
   if(!list.length){ results.innerHTML='<div class="r-empty">לא נמצאו תוצאות</div>'; results.classList.add('open'); return; }
@@ -1080,7 +1086,7 @@ function showResults(list){
     const d=document.createElement('div'); d.className='res';
     const fa=fatherNameOf(p);
     d.innerHTML='<div class="r-name">'+esc(displayName(p))+' <span class="years">'+displayYears(p.id,p)+'</span></div>'+
-      '<div class="r-meta">'+esc(p._family)+(fa?' · אב: '+esc(fa):'')+'</div>';
+      '<div class="r-meta">'+esc(p._family)+(fa?' · אב: '+esc(fa):'')+(ADMIN?' · ID: '+esc(p.id):'')+'</div>';
     d.onclick=()=>{ results.classList.remove('open'); search.value=p.name||''; focusNode(p.id); };  // take the user to the node in the tree (don't open details)
     results.appendChild(d);
   });
@@ -1421,6 +1427,7 @@ const MGMT_FIELDS = [
   {k:'place',  label:'מקום מגורים'},
   {k:'en',     label:'שם באנגלית'},
 ];
+function copyPersonId(t){ t=(t||'').trim(); try{ navigator.clipboard.writeText(t); toast('ה-ID הועתק: '+t); }catch(e){ toast('ID: '+t); } }
 function sexHe(s){ return s==='M'?'ז':s==='F'?'נ':''; }
 function sexNorm(v){ v=(''+v).trim(); return (v==='M'||v==='ז'||v==='זכר')?'M':(v==='F'||v==='נ'||v==='נקבה')?'F':''; }
 let _mgRows=[], _mgColFilters={};
@@ -1428,6 +1435,7 @@ function _gPart(id,which){ const g=gregOf(id)||''; const pp=g.split('–'); retu
 function _grandOf(p){ const f=parentOf[p.id]; if(f&&parentOf[f]&&persons[parentOf[f]]) return persons[parentOf[f]].name||''; return p._gf||''; }
 function mgGet(p,k){
   switch(k){
+    case 'id':     return p.id||'';
     case 'name':   return p.name||'';
     case 'sex':    return sexHe(p.sex);
     case 'house':  return p._house||'';
@@ -1483,10 +1491,10 @@ function populateMgmtFilters(){
 }
 function buildMgmtHead(){
   const thead=document.querySelector('#mgmtTable thead');
-  let h='<tr><th>תמונה</th>';
+  let h='<tr><th>ID</th><th>תמונה</th>';
   MGMT_FIELDS.forEach(f=>h+='<th>'+esc(f.label)+'</th>');
   h+='<th>פעולות</th></tr>';
-  h+='<tr class="filt"><th></th>';
+  h+='<tr class="filt"><th><input data-col="id" value="'+escAttr(_mgColFilters.id||'')+'" oninput="mgmtColFilter(this)" placeholder="ID" style="min-width:70px"></th><th></th>';
   MGMT_FIELDS.forEach(f=>h+='<th><input data-col="'+f.k+'" value="'+escAttr(_mgColFilters[f.k]||'')+'" oninput="mgmtColFilter(this)" placeholder="סינון"></th>');
   h+='<th></th></tr>';
   thead.innerHTML=h;
@@ -1498,6 +1506,7 @@ function photoCell(p){
 }
 function mgmtRowHTML(p){
   let h='<tr id="mg-'+escAttr(p.id)+'" data-id="'+escAttr(p.id)+'">';
+  h+='<td class="mg-id" title="לחיצה — העתקת ה-ID" onclick="copyPersonId(this.textContent)">'+esc(p.id)+'</td>';
   h+='<td>'+photoCell(p)+'</td>';
   MGMT_FIELDS.forEach(f=>{ h+='<td>'+esc(mgGet(p,f.k))+'</td>'; });
   h+='<td class="acts">'+
@@ -1514,7 +1523,7 @@ function renderMgmt(){
     if(houseF && (p._house||'')!==houseF) return false;
     if(famF && (p._family||p.family||'')!==famF) return false;
     for(const k in _mgColFilters){ const fv=_mgColFilters[k]; if(fv && norm(mgGet(p,k)).indexOf(norm(fv))<0) return false; }
-    if(q){ let hay=''; MGMT_FIELDS.forEach(f=>{ hay+=' '+mgGet(p,f.k); }); if(norm(hay).indexOf(q)<0) return false; }
+    if(q){ let hay=' '+p.id; MGMT_FIELDS.forEach(f=>{ hay+=' '+mgGet(p,f.k); }); if(norm(hay).indexOf(q)<0) return false; }
     return true;
   });
   rows.sort((a,b)=> (a._house||'').localeCompare(b._house||'','he') || (a._family||a.family||'').localeCompare(b._family||b.family||'','he') || (''+mgGet(a,'father')).localeCompare(''+mgGet(b,'father'),'he') || (a.name||'').localeCompare(b.name||'','he'));
@@ -1630,7 +1639,7 @@ function mgmtEdit(id){
   tr.classList.add('editing');
   const cells=tr.querySelectorAll('td');
   MGMT_FIELDS.forEach((f,i)=>{
-    const td=cells[i+1];
+    const td=cells[i+2];                     // cells[0]=ID, cells[1]=photo
     if(f.k==='father'){ td.innerHTML=fatherPickerHTML(id); }
     else if(f.k==='gf'){ td.innerHTML=namePickerHTML('gf', id, mgGet(p,'gf'), 'חפש סב…'); }
     else if(f.k==='wife'){ td.innerHTML=namePickerHTML('wife', id, mgGet(p,'wife'), 'חפש בן/בת זוג…'); }
@@ -1694,7 +1703,7 @@ function promptDelete(id, afterFn){
 }
 /* ---- add a descendant (row inserted under the current one) ---- */
 function _newRowHTML(nid, preset){
-  let h='<td><span class="mgmt-photo-ph" title="ניתן להוסיף תמונה לאחר השמירה">＋</span></td>';
+  let h='<td class="mg-id">'+esc(nid)+'</td><td><span class="mgmt-photo-ph" title="ניתן להוסיף תמונה לאחר השמירה">＋</span></td>';
   MGMT_FIELDS.forEach(f=>{
     const v=(preset&&preset[f.k]!=null)?preset[f.k]:'';
     if(f.k==='father'){ h+='<td class="ro-father" title="שם-האב נקבע לפי השורה שממנה נלחץ ➕">'+(v?esc(v):'—')+'</td>'; }   // fixed, not free-typed
