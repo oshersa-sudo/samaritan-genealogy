@@ -123,3 +123,11 @@
 
 הכול נשמר ב-`events_removed_archive.json` (להחזרה). הסקריפט: `remove_arabic_events_data.py` (אידמפוטנטי).
 **אין להריץ שוב** את `integrate_events_v2.py` / `integrate_daughters.py` / `integrate_marriages.py` — הם יחזירו את הנתונים.
+
+---
+
+## 2026-11-05 — שכבת האקסל (מיפקד.xlsx) הורדה; נשארה שכבת הדפים הסרוקים
+בגיבוי מלא קודם (`../backup_layers_20261105.zip` + תג git `pre-layer-rework-20261105`).
+הוסרו: כל אישי ה"מודרני" (M…, אבות משוחזרים F…, mx-…) ועדכוני ה-overlap — הכול בארכיון `excel_layer_archive.json`.
+נשארו: שכבת הדפים הסרוקים (master_v2.json + stories.json) וכן הרשומות שהבעלים עדכן ישירות באתר: ev-12 (יוגב), e-mw2nfaa4 (יפת, הוזן ע"י מנהל) ושני הוריו בשרשרת — M426 (גולן) ו-M210 (יפת).
+החלטות מיזוג של הבעלים לשלב ההחזרה: `merge_decisions.json`. הסקריפט: `remove_excel_layer.py`.
