@@ -535,7 +535,7 @@ houseNames.forEach(hn=>{ ['דנפים','מרחיבים','צפרים','כהונה
 (MODERN.modern||[]).forEach(m=>{
   persons[m.id]={ id:m.id, name:m.name, sex:m.sex, _modern:true, g:m.g, byear:m.byear,
     bmonth:m.bmonth, bday:m.bday, dyear:m.dyear, age:m.age, family:m.family, father:m.father,
-    job:m.job, bplace:m.bplace, mother:m.mother, note:m.notes, _parentRaw:m.parent, spouses:m.spouses };
+    job:m.job, bplace:m.bplace, mother:m.mother, note:m.notes, _parentRaw:m.parent, spouses:m.spouses, src:m.src, bamb:m.bamb };
 });
 (MODERN.modern||[]).forEach(m=>{
   if(!childMap[m.id]) childMap[m.id]=[];
@@ -858,7 +858,7 @@ function renderTree(){
   let rootIds, topY=14, famForHeader=null;
   if(viewMode==='family' && selectedFamilyIdx!=null && familyList[selectedFamilyIdx]){
     famForHeader=familyList[selectedFamilyIdx];
-    rootIds=famForHeader.rootIds.slice();
+    rootIds=famForHeader.rootIds.length? famForHeader.rootIds.slice() : famForHeader.allIds.filter(id=>!famForHeader.allIds.includes(parentOf[id]));
   } else { rootIds=[VROOT]; }
 
   const L=layoutForest(rootIds);
@@ -1001,6 +1001,7 @@ function openPerson(id){
   meta.push('מין: '+(p.sex==='M'?'זכר':p.sex==='F'?'נקבה':'לא ידוע'));
   if(p._modern && p.family) meta.push('משפחה: '+esc(p.family));
   html+=field('פרטים', meta.join(' · '));
+  { const st=p.src||(p._added?'הוזן ע״י מנהל באתר':''); if(st) html+=field('מקור המידע', esc(st)); }
 
   // life-years (Gregorian) — shown prominently
   const g=gregOf(id);
@@ -1273,7 +1274,7 @@ familyList.forEach((fam,i)=>{
 familyJump.onchange=()=>{
   const v=familyJump.value;
   if(v===''){ viewMode='root'; selectedFamilyIdx=null; renderTree(); treeHost.scrollTop=0; treeHost.scrollLeft=0; return; }
-  const i=+v, fam=familyList[i]; if(!fam||!fam.rootIds.length) return;
+  const i=+v, fam=familyList[i]; if(!fam||!(fam.rootIds.length||fam.allIds.length)) return;
   viewMode='family'; selectedFamilyIdx=i;
   fam.allIds.forEach(id=>collapsed.delete(id));   // show the whole family expanded
   renderTree(); treeHost.scrollTop=0; treeHost.scrollLeft=0;
