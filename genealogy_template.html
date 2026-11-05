@@ -700,7 +700,7 @@ function resolveId(raw){
 function spouseTargetId(sp){
   const fields=[sp.note,sp.birth,sp.death].filter(x=>typeof x==='string');
   for(const f of fields){
-    const m=f.match(/#\s*([0-9][0-9א-ת׳'']*)/);
+    const m=f.match(/#\s*([0-9][0-9א-ת׳'']*)/) || f.match(/#\s*([א-ת][א-ת0-9\-]*)/);   // census number, or a Hebrew-led id such as הס-חבובה
     if(m){ const id=resolveId(m[1]); if(id) return id; }
   }
   if(typeof sp.ref==='string'){ const id=resolveId(sp.ref); if(id) return id; }
