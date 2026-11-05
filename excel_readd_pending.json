@@ -1,0 +1,1255 @@
+[
+ {
+  "id": "M158",
+  "name": "רמזיה",
+  "father_needed": "M9",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M222",
+  "name": "אברהם",
+  "father_needed": "M40",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M239",
+  "name": "סמיר",
+  "father_needed": "M40",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M385",
+  "name": "ורדה",
+  "father_needed": "M102",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M403",
+  "name": "לוטפי",
+  "father_needed": "M102",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M416",
+  "name": "אורלי",
+  "father_needed": "M149",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M435",
+  "name": "רנה",
+  "father_needed": "M102",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M439",
+  "name": "אמני",
+  "father_needed": "M149",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M476",
+  "name": "נג'לא",
+  "father_needed": "M233",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M492",
+  "name": "ברק",
+  "father_needed": "M102",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M498",
+  "name": "עזיזה",
+  "father_needed": "M233",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M503",
+  "name": "רג'אי",
+  "father_needed": "M219",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M504",
+  "name": "רנאד",
+  "father_needed": "M219",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M521",
+  "name": "עטיאט",
+  "father_needed": "M233",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M535",
+  "name": "עובדיה",
+  "father_needed": "M216",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M537",
+  "name": "ריאד",
+  "father_needed": "M233",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M541",
+  "name": "ראפת",
+  "father_needed": "M219",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M545",
+  "name": "יסמין",
+  "father_needed": "M188",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M546",
+  "name": "אברהם",
+  "father_needed": "M220",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M547",
+  "name": "חליל",
+  "father_needed": "M220",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M563",
+  "name": "ניסרין",
+  "father_needed": "M188",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M564",
+  "name": "ישמעאל",
+  "father_needed": "M259",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M565",
+  "name": "פדי",
+  "father_needed": "M220",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M577",
+  "name": "נורה",
+  "father_needed": "M262",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M585",
+  "name": "פרדס",
+  "father_needed": "M259",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M600",
+  "name": "תאמר",
+  "father_needed": "M216",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M606",
+  "name": "בנדר",
+  "father_needed": "M220",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M610",
+  "name": "רובה",
+  "father_needed": "M262",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M624",
+  "name": "רצון",
+  "father_needed": "M216",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M648",
+  "name": "בדור",
+  "father_needed": "M262",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M651",
+  "name": "אברהם",
+  "father_needed": "M302",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M668",
+  "name": "עבדללא",
+  "father_needed": "M262",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M689",
+  "name": "רצון",
+  "father_needed": "M253",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M706",
+  "name": "ירח",
+  "father_needed": "M389",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M707",
+  "name": "רזן",
+  "father_needed": "M325",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M712",
+  "name": "זבולון",
+  "father_needed": "M403",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M718",
+  "name": "ישמעאל",
+  "father_needed": "M389",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M143",
+  "name": "עוני",
+  "father_needed": "M54",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M172",
+  "name": "עובדיה",
+  "father_needed": "M54",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M207",
+  "name": "אסף   (עאקף)",
+  "father_needed": "M54",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M238",
+  "name": "עמרם",
+  "father_needed": "M60",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M242",
+  "name": "איתיקאר",
+  "father_needed": "M61",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M256",
+  "name": "זיין  (יפה)",
+  "father_needed": "M60",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M260",
+  "name": "כמאל  (תמים)",
+  "father_needed": "M61",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M261",
+  "name": "חנן",
+  "father_needed": "M61",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M280",
+  "name": "אהרן  (הרון)",
+  "father_needed": "M60",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M287",
+  "name": "נאג'ח   (מצליח",
+  "father_needed": "M61",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M295",
+  "name": "פינחס",
+  "father_needed": "M47",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M297",
+  "name": "מרים",
+  "father_needed": "M54",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M313",
+  "name": "סנאית",
+  "father_needed": "M47",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M328",
+  "name": "הייה",
+  "father_needed": "M60",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M334",
+  "name": "ופא",
+  "father_needed": "M47",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M336",
+  "name": "מגדה",
+  "father_needed": "M54",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M351",
+  "name": "אילן",
+  "father_needed": "M143",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M359",
+  "name": "תקי",
+  "father_needed": "M152",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M365",
+  "name": "נאג'י",
+  "father_needed": "M47",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M368",
+  "name": "סוהייל",
+  "father_needed": "M146",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M394",
+  "name": "כוכבה",
+  "father_needed": "M143",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M398",
+  "name": "הדיה",
+  "father_needed": "M138",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M405",
+  "name": "סוסן",
+  "father_needed": "M146",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M409",
+  "name": "רבקה",
+  "father_needed": "M136",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M415",
+  "name": "אברהם",
+  "father_needed": "M107",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M421",
+  "name": "נג'לה",
+  "father_needed": "M152",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M425",
+  "name": "עופאה",
+  "father_needed": "M143",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M429",
+  "name": "רנדה",
+  "father_needed": "M146",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M432",
+  "name": "נעמת",
+  "father_needed": "M138",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M437",
+  "name": "יעקב",
+  "father_needed": "M209",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M445",
+  "name": "אייל",
+  "father_needed": "M143",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M456",
+  "name": "שלמה",
+  "father_needed": "M138",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M473",
+  "name": "שיפה",
+  "father_needed": "M238",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M477",
+  "name": "אהרן",
+  "father_needed": "M209",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M479",
+  "name": "ג'מיל",
+  "father_needed": "M107",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M480",
+  "name": "סמיר",
+  "father_needed": "M146",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M483",
+  "name": "אברהם",
+  "father_needed": "M138",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M526",
+  "name": "סאמח",
+  "father_needed": "M138",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M527",
+  "name": "יצחק",
+  "father_needed": "M152",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M550",
+  "name": "אשר  (ואסף)",
+  "father_needed": "M138",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M551",
+  "name": "לובנה",
+  "father_needed": "M138",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M566",
+  "name": "עפרה  (עפאף)",
+  "father_needed": "M252",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M578",
+  "name": "ע'אליה",
+  "father_needed": "M152",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M594",
+  "name": "שלמה",
+  "father_needed": "M92",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M598",
+  "name": "סלמה  (שלומית)",
+  "father_needed": "M252",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M601",
+  "name": "אימאן",
+  "father_needed": "M152",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M611",
+  "name": "ברית",
+  "father_needed": "M152",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M661",
+  "name": "כינרת",
+  "father_needed": "M309",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M674",
+  "name": "יפת  (חסן)",
+  "father_needed": "M368",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M683",
+  "name": "כלנית",
+  "father_needed": "M309",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M686",
+  "name": "לוי",
+  "father_needed": "M374",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M687",
+  "name": "רבקה",
+  "father_needed": "M374",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M688",
+  "name": "פרח",
+  "father_needed": "M252",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M705",
+  "name": "רנין",
+  "father_needed": "M368",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M722",
+  "name": "סלווה",
+  "father_needed": "M365",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M52",
+  "name": "אליס",
+  "father_needed": "M1",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M163",
+  "name": "מנשה",
+  "father_needed": "M33",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M199",
+  "name": "יצחק     (ריבחי)",
+  "father_needed": "M33",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M213",
+  "name": "ניסים",
+  "father_needed": "M33",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M217",
+  "name": "מלכה",
+  "father_needed": "M43",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M237",
+  "name": "ברוך",
+  "father_needed": "M33",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M248",
+  "name": "לבנה",
+  "father_needed": "M43",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M263",
+  "name": "סעדיה",
+  "father_needed": "M43",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M273",
+  "name": "רצון",
+  "father_needed": "M33",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M320",
+  "name": "לאה",
+  "father_needed": "M49",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M333",
+  "name": "שושנה",
+  "father_needed": "M163",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M346",
+  "name": "איתן",
+  "father_needed": "M141",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M355",
+  "name": "כוכבה",
+  "father_needed": "M141",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M371",
+  "name": "אברהם",
+  "father_needed": "M163",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M372",
+  "name": "פרג'",
+  "father_needed": "M181",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M373",
+  "name": "אירס",
+  "father_needed": "M141",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M386",
+  "name": "יצחק",
+  "father_needed": "M163",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M387",
+  "name": "יובל",
+  "father_needed": "M191",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M395",
+  "name": "נוגה",
+  "father_needed": "M191",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M404",
+  "name": "סוהא",
+  "father_needed": "M181",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M412",
+  "name": "רחל",
+  "father_needed": "M191",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M413",
+  "name": "אברהם",
+  "father_needed": "M181",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M436",
+  "name": "לימור",
+  "father_needed": "M191",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M462",
+  "name": "יעקב",
+  "father_needed": "M163",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M463",
+  "name": "הינד",
+  "father_needed": "M181",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M491",
+  "name": "אורלי",
+  "father_needed": "M191",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M499",
+  "name": "לואי",
+  "father_needed": "M181",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M500",
+  "name": "ארז",
+  "father_needed": "M141",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M508",
+  "name": "גאי",
+  "father_needed": "M241",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M514",
+  "name": "מיכל",
+  "father_needed": "M213",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M519",
+  "name": "גלית",
+  "father_needed": "M215",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M532",
+  "name": "לירן",
+  "father_needed": "M241",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M548",
+  "name": "ליאור",
+  "father_needed": "M213",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M556",
+  "name": "שירלי",
+  "father_needed": "M215",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M559",
+  "name": "גד",
+  "father_needed": "M237",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M574",
+  "name": "אברהם",
+  "father_needed": "M237",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M587",
+  "name": "אברהם",
+  "father_needed": "M308",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M620",
+  "name": "הדר",
+  "father_needed": "M308",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M621",
+  "name": "אייה",
+  "father_needed": "M257",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M623",
+  "name": "ספיר",
+  "father_needed": "M241",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M631",
+  "name": "שני",
+  "father_needed": "M308",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M634",
+  "name": "יוסף",
+  "father_needed": "M387",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M643",
+  "name": "לינוי",
+  "father_needed": "M215",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M644",
+  "name": "אמירה",
+  "father_needed": "M257",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M650",
+  "name": "אמיר",
+  "father_needed": "M257",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M666",
+  "name": "יוסי",
+  "father_needed": "M387",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M675",
+  "name": "דור",
+  "father_needed": "M215",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M727",
+  "name": "טל",
+  "father_needed": "M387",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M690",
+  "name": "ירין",
+  "father_needed": "M420",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M694",
+  "name": "עדן",
+  "father_needed": "M342",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M700",
+  "name": "יעל",
+  "father_needed": "M346",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M702",
+  "name": "יצחק",
+  "father_needed": "M430",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M714",
+  "name": "מנשה",
+  "father_needed": "M257",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M715",
+  "name": "כפיר",
+  "father_needed": "M420",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M720",
+  "name": "נטלי",
+  "father_needed": "M430",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M283",
+  "name": "מרים",
+  "father_needed": "M86",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M292",
+  "name": "מלכה",
+  "father_needed": "M86",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M293",
+  "name": "גבריאל",
+  "father_needed": "M116",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M298",
+  "name": "נפתלי",
+  "father_needed": "M86",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M299",
+  "name": "נור",
+  "father_needed": "M116",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M331",
+  "name": "ציפורה",
+  "father_needed": "M86",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M345",
+  "name": "יגאל",
+  "father_needed": "M116",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M361",
+  "name": "דורון",
+  "father_needed": "M86",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M367",
+  "name": "גדי",
+  "father_needed": "M167",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M384",
+  "name": "ירון",
+  "father_needed": "M116",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M397",
+  "name": "עופר",
+  "father_needed": "M167",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M407",
+  "name": "יפאור",
+  "father_needed": "M189",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M446",
+  "name": "סופי",
+  "father_needed": "M145",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M450",
+  "name": "טל",
+  "father_needed": "M167",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M475",
+  "name": "נור",
+  "father_needed": "M145",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M487",
+  "name": "אופירה",
+  "father_needed": "M250",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M533",
+  "name": "יצחק",
+  "father_needed": "M255",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M534",
+  "name": "אלי  (אליס)",
+  "father_needed": "M250",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M553",
+  "name": "עיד",
+  "father_needed": "M255",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M554",
+  "name": "תומר",
+  "father_needed": "M255",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M555",
+  "name": "יעקב",
+  "father_needed": "M250",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M589",
+  "name": "אברהם",
+  "father_needed": "M343",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M607",
+  "name": "יפית",
+  "father_needed": "M298",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M609",
+  "name": "יקירה",
+  "father_needed": "M343",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M625",
+  "name": "תמי",
+  "father_needed": "M285",
+  "tier": "גבוהה",
+  "father_tier": "בינונית"
+ },
+ {
+  "id": "M632",
+  "name": "תום",
+  "father_needed": "M298",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M638",
+  "name": "יקירה",
+  "father_needed": "M343",
+  "tier": "גבוהה",
+  "father_tier": "ללא אב ודאי"
+ },
+ {
+  "id": "M662",
+  "name": "רחל",
+  "father_needed": "M367",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M663",
+  "name": "רותם",
+  "father_needed": "M298",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M673",
+  "name": "יפתח",
+  "father_needed": "M367",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M692",
+  "name": "עדן",
+  "father_needed": "M384",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ },
+ {
+  "id": "M711",
+  "name": "בת אל",
+  "father_needed": "M361",
+  "tier": "גבוהה",
+  "father_tier": "גבוהה"
+ }
+]
