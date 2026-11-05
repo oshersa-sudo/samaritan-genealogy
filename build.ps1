@@ -3,6 +3,10 @@
 # Usage:  powershell -ExecutionPolicy Bypass -File build.ps1
 $dir = $PSScriptRoot
 $enc = New-Object System.Text.UTF8Encoding($false)   # UTF-8, no BOM
+# every person must have a unique numeric ID (uid): assigns running numbers to anyone new, never changes an existing one
+Push-Location $dir
+if (Get-Command py -ErrorAction SilentlyContinue) { py -3 -X utf8 assign_uids.py } elseif (Get-Command python -ErrorAction SilentlyContinue) { python assign_uids.py } else { Write-Warning "python not found - assign_uids.py not run" }
+Pop-Location
 $json    = [System.IO.File]::ReadAllText("$dir\master_v2.json", [System.Text.Encoding]::UTF8)
 $stories = [System.IO.File]::ReadAllText("$dir\stories.json",  [System.Text.Encoding]::UTF8)
 $modern  = [System.IO.File]::ReadAllText("$dir\integrate.json", [System.Text.Encoding]::UTF8)

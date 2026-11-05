@@ -493,6 +493,7 @@
 const DATA = /*__DATA__*/null;
 const STORIES = /*__STORIES__*/{};
 const MODERN = /*__MODERN__*/{"modern":[],"overlap":[]};
+const AUIDS = (MODERN && MODERN.admin_uids) || {};    // numeric IDs of the records the owner added on the live site
 
 /* ---------- index building ---------- */
 const persons = {};
@@ -535,7 +536,7 @@ houseNames.forEach(hn=>{ ['דנפים','מרחיבים','צפרים','כהונה
 (MODERN.modern||[]).forEach(m=>{
   persons[m.id]={ id:m.id, name:m.name, sex:m.sex, _modern:true, g:m.g, byear:m.byear,
     bmonth:m.bmonth, bday:m.bday, dyear:m.dyear, age:m.age, family:m.family, father:m.father,
-    job:m.job, bplace:m.bplace, mother:m.mother, note:m.notes, _parentRaw:m.parent, spouses:m.spouses, src:m.src, bamb:m.bamb };
+    job:m.job, bplace:m.bplace, mother:m.mother, note:m.notes, _parentRaw:m.parent, spouses:m.spouses, src:m.src, bamb:m.bamb, uid:m.uid };
 });
 (MODERN.modern||[]).forEach(m=>{
   if(!childMap[m.id]) childMap[m.id]=[];
@@ -995,7 +996,7 @@ function openPerson(id){
   }
 
   const meta=[];
-  meta.push('ID: <b class="pid" dir="ltr" title="לחיצה — העתקת ה-ID" data-pid="'+escAttr(p.id)+'" onclick="copyPersonId(this.dataset.pid)" style="cursor:copy">'+esc(p.id)+'</b>');
+  meta.push('ID: <b class="pid" dir="ltr" title="לחיצה — העתקת ה-ID" data-pid="'+escAttr(p.uid||p.id)+'" onclick="copyPersonId(this.dataset.pid)" style="cursor:copy">'+esc(p.uid||p.id)+'</b>');
   if(p._modern) meta.push('מקור: מרשם הקהילה');
   else { if(p.code) meta.push('קוד עץ: '+esc(p.code)); }
   meta.push('מין: '+(p.sex==='M'?'זכר':p.sex==='F'?'נקבה':'לא ידוע'));
@@ -1083,6 +1084,7 @@ function openPerson(id){
   shareBtn.onclick=()=>openShare([id], (childMap[id]||[]).length?('הענף של '+(p.name||'אדם זה')):(p.name||'אדם זה'));
   pBody.appendChild(shareBtn);
   if(ADMIN){ const ed=document.createElement('div'); ed.innerHTML=adminPanelTools(id); pBody.appendChild(ed); }
+  { const old=document.createElement('div'); old.innerHTML=field('ID קודם','<span dir="ltr">'+esc(p.id)+'</span>'); pBody.appendChild(old.firstElementChild); }   // the previous identifier, kept at the bottom of the card
   document.body.classList.add('panel-open'); panel.setAttribute('aria-hidden','false');
 }
 
@@ -1126,7 +1128,7 @@ const search=document.getElementById('search'), results=document.getElementById(
 function searchPersons(q){
   const qid=(q||'').trim();
   let idHit=null;
-  if(qid){ if(persons[qid]) idHit=persons[qid]; else { const lo=qid.toLowerCase(); const k=Object.keys(persons).find(x=>x.toLowerCase()===lo); if(k) idHit=persons[k]; } }
+  if(qid){ const byUid=Object.values(persons).find(p=>(''+p.uid)===qid); if(byUid) idHit=byUid; else if(persons[qid]) idHit=persons[qid]; else { const lo=qid.toLowerCase(); const k=Object.keys(persons).find(x=>x.toLowerCase()===lo); if(k) idHit=persons[k]; } }
   const toks=norm(q).split(' ').filter(Boolean);
   if(!toks.length) return idHit?[{p:idHit,ownHits:99}]:[];
   const out=[];
@@ -1152,7 +1154,7 @@ function showResults(list){
     const d=document.createElement('div'); d.className='res';
     const fa=fatherNameOf(p);
     d.innerHTML='<div class="r-name">'+esc(displayName(p))+' <span class="years">'+displayYears(p.id,p)+'</span></div>'+
-      '<div class="r-meta">'+esc(p._family)+(fa?' · אב: '+esc(fa):'')+(ADMIN?' · ID: '+esc(p.id):'')+'</div>';
+      '<div class="r-meta">'+esc(p._family)+(fa?' · אב: '+esc(fa):'')+(ADMIN?' · ID: '+esc(p.uid||p.id)+(String(p.uid)!==p.id?' (קודם: '+esc(p.id)+')':''):'')+'</div>';
     d.onclick=()=>{ results.classList.remove('open'); search.value=p.name||''; focusNode(p.id); };  // take the user to the node in the tree (don't open details)
     results.appendChild(d);
   });
@@ -1327,9 +1329,21 @@ function applyEdit(id, patch){
   }
   if('father_id' in patch) setParent(id, patch.father_id);
 }
+function nextUid(){
+  let mx=1000;
+  Object.values(persons).forEach(p=>{ const n=+p.uid; if(n>mx) mx=n; });
+  Object.keys(AUIDS).forEach(k=>{ const n=+AUIDS[k]; if(n>mx) mx=n; });
+  return mx+1;
+}
+function idByAny(x){                                       // a number typed by the owner (new ID) or an old id -> internal id
+  x=(x==null?'':(''+x)).trim(); if(!x) return '';
+  if(persons[x]) return x;
+  const hit=Object.values(persons).find(p=>(''+p.uid)===x);
+  return hit?hit.id:x;
+}
 function makePerson(o){
   if(persons[o.id]) { applyEdit(o.id,o); return; }
-  persons[o.id] = { id:o.id, name:o.name||'(ללא שם)', sex:o.sex||'', g:o.g||'', _added:true };
+  persons[o.id] = { id:o.id, name:o.name||'(ללא שם)', sex:o.sex||'', g:o.g||'', _added:true, uid:(o.uid||AUIDS[o.id]||nextUid()) };
   childMap[o.id]=[]; idSet.add(o.id);
   if(o.story || o.g) STORIES[o.id] = { t:o.story||'', g:o.g||'' };
   setParent(o.id, o.father_id);                              // inherits _house/_family from the father
@@ -1375,6 +1389,7 @@ function recordEdit(id, patch){
   applyEdit(id, patch);
 }
 function recordAdd(o){
+  if(!o.uid) o.uid = AUIDS[o.id] || nextUid();                // running numeric ID, stored with the record
   const rec = Object.assign({}, o); delete rec.id;          // store every provided data field, not just the base ones
   OVERRIDES.added[o.id] = rec;
   makePerson(o);
@@ -1440,7 +1455,7 @@ function adminPanelTools(id){
       '<button class="eb eb-add" onclick="doAddChild(\''+escAttr(id)+'\')">➕ הוסף ילד/ה</button>'+
       '<button class="eb eb-del" onclick="doDelete(\''+escAttr(id)+'\')">🗑️ מחק</button>'+
     '</div>'+
-    '<div class="ef-hint">מזהה אדם זה: <code>'+esc(id)+'</code> — להעתקה לשדה "אב" של אדם אחר. שינוי האב מעביר את האדם וכל צאצאיו בעץ.</div>'+
+    '<div class="ef-hint">ID של אדם זה: <code>'+esc(p.uid||id)+'</code> (ID קודם: <code>'+esc(id)+'</code>) — להעתקה לשדה "אב" של אדם אחר. שינוי האב מעביר את האדם וכל צאצאיו בעץ.</div>'+
   '</div>';
 }
 function doSaveEdit(id){
@@ -1450,7 +1465,7 @@ function doSaveEdit(id){
   const bd=val('ef-bdate').trim(), dd=val('ef-ddate').trim();
   const patch={ name:val('ef-name'), sex:sex, story:val('ef-story'), note:val('ef-note'), wife:val('ef-wife'), job:val('ef-job'),
     bdate:bd, byear:(deriveYear(bd)!=null?deriveYear(bd):''), ddate:dd, dyear:(deriveYear(dd)!=null?deriveYear(dd):'') };
-  const fid=val('ef-fid').trim();
+  const fid=idByAny(val('ef-fid'));
   if(fid!==(persons[id].father_id||'')){
     if(fid && !persons[fid]){ toast('מזהה האב אינו קיים'); return; }
     if(fid===id){ toast('אדם אינו יכול להיות אב של עצמו'); return; }
@@ -1501,7 +1516,7 @@ function _gPart(id,which){ const g=gregOf(id)||''; const pp=g.split('–'); retu
 function _grandOf(p){ const f=parentOf[p.id]; if(f&&parentOf[f]&&persons[parentOf[f]]) return persons[parentOf[f]].name||''; return p._gf||''; }
 function mgGet(p,k){
   switch(k){
-    case 'id':     return p.id||'';
+    case 'id':     return (p.uid?p.uid+' ':'')+(p.id||'');
     case 'name':   return p.name||'';
     case 'sex':    return sexHe(p.sex);
     case 'house':  return p._house||'';
@@ -1573,7 +1588,7 @@ function photoCell(p){
 function mgShow(p,k){ let v=mgGet(p,k); if((v===''||v==null) && (k==='birth'||k==='death')){ const h=(k==='birth')?p.birth:p.death; const g=hij2greg(h); if(g) v='≈'+g; } return v; }
 function mgmtRowHTML(p){
   let h='<tr id="mg-'+escAttr(p.id)+'" data-id="'+escAttr(p.id)+'">';
-  h+='<td class="mg-id" title="לחיצה — העתקת ה-ID" onclick="copyPersonId(this.textContent)">'+esc(p.id)+'</td>';
+  h+='<td class="mg-id" title="לחיצה — העתקת ה-ID" data-uid="'+escAttr(p.uid||p.id)+'" onclick="copyPersonId(this.dataset.uid)">'+esc(p.uid||p.id)+(String(p.uid)!==p.id?'<br><small style="color:#999">'+esc(p.id)+'</small>':'')+'</td>';
   h+='<td>'+photoCell(p)+'</td>';
   MGMT_FIELDS.forEach(f=>{ h+='<td>'+esc(mgShow(p,f.k))+'</td>'; });
   h+='<td class="acts">'+
@@ -1590,7 +1605,7 @@ function renderMgmt(){
     if(houseF && (p._house||'')!==houseF) return false;
     if(famF && (p._family||p.family||'')!==famF) return false;
     for(const k in _mgColFilters){ const fv=_mgColFilters[k]; if(fv && norm(mgGet(p,k)).indexOf(norm(fv))<0) return false; }
-    if(q){ let hay=' '+p.id; MGMT_FIELDS.forEach(f=>{ hay+=' '+mgGet(p,f.k); }); if(norm(hay).indexOf(q)<0) return false; }
+    if(q){ let hay=' '+p.id+' '+(p.uid||''); MGMT_FIELDS.forEach(f=>{ hay+=' '+mgGet(p,f.k); }); if(norm(hay).indexOf(q)<0) return false; }
     return true;
   });
   rows.sort((a,b)=> (a._house||'').localeCompare(b._house||'','he') || (a._family||a.family||'').localeCompare(b._family||b.family||'','he') || (''+mgGet(a,'father')).localeCompare(''+mgGet(b,'father'),'he') || (a.name||'').localeCompare(b.name||'','he'));
@@ -1770,7 +1785,7 @@ function promptDelete(id, afterFn){
 }
 /* ---- add a descendant (row inserted under the current one) ---- */
 function _newRowHTML(nid, preset){
-  let h='<td class="mg-id">'+esc(nid)+'</td><td><span class="mgmt-photo-ph" title="ניתן להוסיף תמונה לאחר השמירה">＋</span></td>';
+  let h='<td class="mg-id">חדש</td><td><span class="mgmt-photo-ph" title="ניתן להוסיף תמונה לאחר השמירה">＋</span></td>';
   MGMT_FIELDS.forEach(f=>{
     const v=(preset&&preset[f.k]!=null)?preset[f.k]:'';
     if(f.k==='father'){ h+='<td class="ro-father" title="שם-האב נקבע לפי השורה שממנה נלחץ ➕">'+(v?esc(v):'—')+'</td>'; }   // fixed, not free-typed
@@ -1863,9 +1878,9 @@ function loadXLSX(){
 }
 function mgmtExport(){
   loadXLSX().then(XLSX=>{
-    const head=['מזהה'].concat(MGMT_FIELDS.map(f=>f.label));
+    const head=['ID','מזהה'].concat(MGMT_FIELDS.map(f=>f.label));
     const aoa=[head];
-    _mgRows.forEach(p=>{ aoa.push([p.id].concat(MGMT_FIELDS.map(f=>mgGet(p,f.k)))); });
+    _mgRows.forEach(p=>{ aoa.push([p.uid||'',p.id].concat(MGMT_FIELDS.map(f=>mgGet(p,f.k)))); });
     const ws=XLSX.utils.aoa_to_sheet(aoa);
     ws['!cols']=head.map((_,i)=>({wch: i===0?10:16}));
     const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'ניהול');
