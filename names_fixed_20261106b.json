@@ -1,0 +1,42 @@
+[
+ {
+  "file": "master_v2.json",
+  "changes": 2
+ },
+ {
+  "file": "stories.json",
+  "changes": 2
+ },
+ {
+  "file": "page_81_mishlama_prose.txt",
+  "changes": 2
+ },
+ {
+  "file": "page_88_hasatri_prose.txt",
+  "changes": 1
+ },
+ {
+  "file": "page_98_tsfari_prose.txt",
+  "changes": 1
+ },
+ {
+  "file": "diagrams_summary.md",
+  "changes": 1
+ },
+ {
+  "file": "events_crosscheck.csv",
+  "changes": 1
+ },
+ {
+  "file": "fix_tsfari.py",
+  "changes": 1
+ },
+ {
+  "file": "master_v2.json",
+  "changes": 1
+ },
+ {
+  "file": "add_hesatri.py",
+  "changes": 1
+ }
+]
