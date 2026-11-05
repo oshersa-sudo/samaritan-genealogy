@@ -77,7 +77,7 @@ def art(pdf_pages):
 
 
 MANUAL_PAGES = {'182': [18], '242': [28], '251': [29], '252': [29], '253': [29], '254': [29], '255': [29], '256': [29],
-                'ר-סלגח49': [2], 'ר-שלביה': [8], 'ר-אינמר': [13], 'הס-נבון': [17], 'הס-וגיה': [17], 'הס-צער': [17], 'דנ-עפיף43': [5],
+                'ר-סלגח49': [2], 'ר-שלביה': [8], 'ר-אינמר': [13], 'הס-נבון': [17], 'הס-וגיה': [17], 'הס-צער': [17], 'דנ-עפיף43': [5], 'דנ-צדקה-ב': [7], '78-son': [7], 'דנ-שלביה72': [7], 'דנ-מראד79': [7],
                 'מר-יעקב202': [23], 'מר-ברור202': [23], 'מר-אברהם184': [22, 23], 'הס-עבדאלה140': [16], 'הס-סלים140': [16]}
 BOOK = 'ספר «תולדות בני ישראל השומרונים»'
 
@@ -100,6 +100,7 @@ def book_src(pid, name):
     return None
 
 
+EXTRA_PAGES = {i: [7] for i in ('71','72','73','74','75','75א','76','77','78','78-son','79','80','81','82','83','ר-שלביה')}   # also drawn in the printed tree of page 79
 APEX_NOTE = f'{ART} — עמוד 75 (עמוד 3 בקובץ הסרוק): עצי החיים — צמרות המשפחות'
 UNKNOWN = f'{ART} — העמוד המדויק לא אותר'
 n_by = {'excel': 0, 'art': 0, 'book': 0, 'apex': 0, 'unknown': 0, 'admin': 0}
@@ -115,9 +116,10 @@ for pid, p in P.items():
     elif pid in APEX_ANCHORS:
         src = APEX_NOTE + '; ופירוט בפרוזה של המאמר'; n_by['apex'] += 1
     elif pid in MANUAL_PAGES:
-        src = art(MANUAL_PAGES[pid]); n_by['art'] += 1
+        src = art(MANUAL_PAGES[pid] + EXTRA_PAGES.get(pid, [])); n_by['art'] += 1
     elif pid in SF and SF[pid]['src']:
         pages = [int(re.sub(r'\D', '', s)) for s in SF[pid]['src']]
+        pages = pages + EXTRA_PAGES.get(pid, [])
         src = art(pages); n_by['art'] += 1
     else:
         src = UNKNOWN; n_by['unknown'] += 1
