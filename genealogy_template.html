@@ -625,7 +625,7 @@ function ageInfo(id){
   const now=new Date(); let a=now.getFullYear()-L.by;       // recomputed every time the app is opened / re-rendered
   const exact=!!(L.bm&&L.bd&&!L.bA);
   if(exact && ((now.getMonth()+1)<L.bm || ((now.getMonth()+1)===L.bm && now.getDate()<L.bd))) a--;
-  if(a<0||a>110) return null;                                // no death date but implausibly old: presumably deceased
+  if(a<0||a>93) return null;                                // no death date and older than 93: presumably deceased — do not show an age
   return {n:a,kind:'now',approx:!exact};
 }
 const ZOD_START=[[1,20,'דלי','♒'],[2,19,'דגים','♓'],[3,21,'טלה','♈'],[4,20,'שור','♉'],[5,21,'תאומים','♊'],[6,21,'סרטן','♋'],
