@@ -121,6 +121,8 @@ for pid, p in P.items():
         src = art(pages); n_by['art'] += 1
     else:
         src = UNKNOWN; n_by['unknown'] += 1
+    if pid == 'דנ-אברהם-ב':
+        src = src + '; ופרטים נוספים: ויקיפדיה, הערך «אברהם בן יעקב הדנפי»'
     p['src'] = src
 
 # ------------------------------------------------------------------ modern (Excel) + events + admin-restored

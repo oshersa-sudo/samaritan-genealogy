@@ -1003,6 +1003,7 @@ function openPerson(id){
   if(p._modern && p.family) meta.push('משפחה: '+esc(p.family));
   html+=field('פרטים', meta.join(' · '));
   { const st=p.src||(p._added?'הוזן ע״י מנהל באתר':''); if(st) html+=field('מקור המידע', esc(st)); }
+  if(p.links&&p.links.length) html+=field('קישורים', p.links.filter(l=>/^https:\/\//.test(l.url||'')).map(l=>'<a href="'+escAttr(l.url)+'" target="_blank" rel="noopener">'+esc(l.label||l.url)+'</a>').join('<br>'));
 
   // life-years (Gregorian) — shown prominently
   const g=gregOf(id);
