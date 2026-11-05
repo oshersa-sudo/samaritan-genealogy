@@ -995,8 +995,9 @@ function openPerson(id){
   }
 
   const meta=[];
+  meta.push('ID: <b class="pid" dir="ltr" title="לחיצה — העתקת ה-ID" data-pid="'+escAttr(p.id)+'" onclick="copyPersonId(this.dataset.pid)" style="cursor:copy">'+esc(p.id)+'</b>');
   if(p._modern) meta.push('מקור: מרשם הקהילה');
-  else { meta.push('מזהה מיפקד: '+esc(p.id)); if(p.code) meta.push('קוד עץ: '+esc(p.code)); }
+  else { if(p.code) meta.push('קוד עץ: '+esc(p.code)); }
   meta.push('מין: '+(p.sex==='M'?'זכר':p.sex==='F'?'נקבה':'לא ידוע'));
   if(p._modern && p.family) meta.push('משפחה: '+esc(p.family));
   html+=field('פרטים', meta.join(' · '));
