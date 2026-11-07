@@ -102,6 +102,7 @@
     border:1.5px solid var(--line); border-radius:9px; padding:15px 6px 3px; cursor:pointer;
     display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
     box-shadow:0 1px 3px rgba(60,45,20,.12); transition:box-shadow .12s, transform .12s; overflow:hidden}
+  .nb-mom{position:absolute; height:12px; line-height:12px; font-size:9.5px; color:#7b5e2e; text-align:right; direction:rtl; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:default}
   .node-box{touch-action:manipulation; -webkit-tap-highlight-color:rgba(120,90,40,.12)}
   .node-box:hover{box-shadow:0 4px 12px rgba(60,45,20,.25); transform:translateY(-1px)}
   .node-box:active{box-shadow:0 0 0 3px var(--hl-border); transform:scale(.985)}
@@ -957,6 +958,9 @@ function renderTree(){
     const box=makeNodeBox(id);
     box.style.left=(cx-NODE_W/2)+'px'; box.style.top=(cy-NODE_H/2)+'px';
     nodeLayer.appendChild(box); domByPerson.set(id,box);
+    { const hm=halfMomInfo(id);                      // half-siblings: the mother's name, small, above the card
+      if(hm){ const lb=document.createElement('div'); lb.className='nb-mom'; lb.textContent=hm.text; lb.title=hm.full;
+        lb.style.left=(cx+NODE_W/2-64)+'px'; lb.style.top=(cy-NODE_H/2-13)+'px'; lb.style.width='60px'; nodeLayer.appendChild(lb); } }
     // expand/collapse button under any node that has children
     if(uHasChildren(id)){
       const closed=collapsed.has(id);
@@ -1191,6 +1195,27 @@ function motherHtml(p){
   const t=motherText(p);
   if(t){ const hs=houseShort(p.mother_house); return esc(t)+(hs?' <span class="years">· מבית אב: '+esc(hs)+'</span>':''); }
   return '<span class="years">לא ידוע במקורות</span>';
+}
+function momKey2(p){                                       // same as motherKey, but two different unnamed wives of one man stay different
+  const m=motherPerson(p); if(m) return 'id:'+m.id;
+  const t=motherText(p); if(!t) return null;
+  return (/^אשה/.test(t) && /נודע/.test(t)) ? 'u:'+t : 't:'+norm(givenOnly(t));
+}
+function momLabelText(p){
+  const m=motherPerson(p); if(m) return 'אם: '+givenOnly(m.name);
+  const t=motherText(p); if(!t) return '';
+  if(/^אשה/.test(t) && /נודע/.test(t)) return 'אם: '+(/שניי/.test(t)?'אשה שנייה':/ראשונ/.test(t)?'אשה ראשונה':'אשה ללא שם');
+  return 'אם: '+givenOnly(t);
+}
+// half-siblings: the father has children by more than one mother -> the card carries its mother's name
+function halfMomInfo(id){
+  const f=parentOf[id]; if(!f || !persons[f]) return null;
+  const p=persons[id]; if(!momKey2(p)) return null;
+  const sibs=(childMap[f]||[]).filter(c=>persons[c]); if(sibs.length<2) return null;
+  const keys=new Set(); sibs.forEach(c=>{ const k=momKey2(persons[c]); if(k) keys.add(k); });
+  if(keys.size<2) return null;
+  const m=motherPerson(p);
+  return {text:momLabelText(p), full:'אמו: '+(m?lineageName(m.id):(motherText(p)||''))};
 }
 function motherShort(p){ const m=motherPerson(p); if(m) return givenOnly(m.name); const t=motherText(p); return t?givenOnly(t):''; }
 
@@ -1519,6 +1544,7 @@ function drawTreeImage(rootIds, title, maxGen, withSpouses){
     const p=persons[id], x=X(v.x)-NW/2, y=Y(v.y), col=houseColorOf(p._house), isRoot=rootIds.includes(id);
     c.fillStyle=isRoot?'#fff3c4':(p.sex==='F'?'#f8eaf1':p.sex==='M'?'#e7f0f6':'#f3f0ea'); c.strokeStyle=col; c.lineWidth=isRoot?3.5:2;
     c.beginPath(); if(c.roundRect) c.roundRect(x,y,NW,NH,9); else c.rect(x,y,NW,NH); c.fill(); c.stroke();
+    { const hm=halfMomInfo(id); if(hm){ c.save(); c.font='9px "Segoe UI","Arial Hebrew",Arial,sans-serif'; c.fillStyle='#7b5e2e'; c.textAlign='right'; c.fillText(wrapLines(c,hm.text,60,1)[0],x+NW-3,y-4); c.restore(); } }
     c.fillStyle='#2c2620'; c.font='bold 13px "Segoe UI","Arial Hebrew",Arial,sans-serif';
     const nl=wrapLines(c,displayName(p),NW-12,2); let ty=y+17; nl.forEach(t=>{ c.fillText(t,x+NW/2,ty); ty+=15; });
     const yr=(displayYears(id,p)||'').replace(/^\(|\)$/g,'');
