@@ -22,7 +22,11 @@ present = {m['id'] for m in integ['modern']}
 # ------------------------------------------------------------------ selection (owner's rule)
 ws = openpyxl.load_workbook(PLAN)['תוספת מוצעת']
 rows = {r[0]: r for r in ws.iter_rows(min_row=2, values_only=True)}
-sel = {i: r for i, r in rows.items() if r[11] == 'גבוהה' and not (r[14] and 'חשד' in r[14])}
+try:
+    MERGED = json.load(io.open('registry_merged_20261109.json', encoding='utf-8'))      # registry ids already merged into a census person
+except Exception:
+    MERGED = {}
+sel = {i: r for i, r in rows.items() if r[11] == 'גבוהה' and not (r[14] and 'חשד' in r[14]) and i not in MERGED}
 
 
 def father_of(r):
@@ -39,7 +43,7 @@ while changed:                                         # a person needs its fath
         if not ok:
             del sel[i]; changed = True
 pending = [dict(id=i, name=r[1], father_needed=father_of(r), tier=r[11], father_tier=(rows.get(father_of(r)) or [None] * 12)[11])
-           for i, r in rows.items() if r[11] == 'גבוהה' and not (r[14] and 'חשד' in r[14]) and i not in sel and i not in present]
+           for i, r in rows.items() if r[11] == 'גבוהה' and not (r[14] and 'חשד' in r[14]) and i not in sel and i not in present and i not in MERGED]
 
 # ------------------------------------------------------------------ Hebrew spelling
 NIQ = re.compile('[\u0591-\u05c7]')
