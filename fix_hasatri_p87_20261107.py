@@ -6,7 +6,7 @@
 #   2. עבד-חנונה (#135): the eight census persons 141–148 that were never on the site —
 #      141 עבד-חנונה, 142 קמר (children of אברהם #140), 143 שמעון (+סלוח #233) with 144 יעקב, 145 זינאב=פועה (+#230), 146 כוכב and (not numbered,
 #      died 1897) עזיזה, and the sisters 147 נעימה (+#89) and 148 בהייה (+#211); the two infants «יוסף ?» under #137 and #138.
-#   3. סעד (#150 «הס-סעד»): already complete — only the wife/husband links are made (the wives' records point at the census numbers 150-160).
+#   3. סעד (#150 «150»): already complete — only the wife/husband links are made (the wives' records point at the census numbers 150-160).
 # Idempotent; log in hasatri_p87_fixed_20261107.json
 import json, io, sys
 sys.stdout.reconfigure(encoding='utf-8')
@@ -110,22 +110,22 @@ kids('135', ['136', '140', '143', '147', '148'])
 add('הס-יוסף137', 'יוסף ?', 'M', '137', note=T87 + ' השם בתרשים עם סימן שאלה. מת בן 7 ימים ונקבר בחצר הבית (עמ׳ 88).')
 add('הס-יוסף138', 'יוסף ?', 'M', '138', note=T87 + ' השם בתרשים עם סימן שאלה. מת בן 10 ימים (עמ׳ 88).')
 kids('137', ['הס-יוסף137']); kids('138', ['הס-יוסף138'])
-# 137's wife pointed at #115 by the number inside «115ד'» — she is רסמיה #153 (= «הס-רסמיה»)
-spnote('137', 'רסמיה', '= אדם #הס-רסמיה; בן אחד מת בגיל 7 ימים')
+# 137's wife pointed at #115 by the number inside «115ד'» — she is רסמיה #153 (= «153»)
+spnote('137', 'רסמיה', '= אדם #153; בן אחד מת בגיל 7 ימים')
 
-# =============================================================== 3. סעד בן ישמעאל (#150 = «הס-סעד»): links only
-spnote('הס-סעד', "238 צי'", '= אדם #238; בתרשים עמ׳ 87 מודפס «זוהרה בן יעקב הצפרי» (בן/בת — טעות דפוס); ברשומת המפקד: בת יעקב בן ישמעאל הצפרי')
-spnote('238', 'סעד', '= אדם #הס-סעד')
-spnote('111', 'אב-ספוה', '= אדם #הס-אבספוה')
-spnote('234', 'עבד-הרחום', '= אדם #הס-עבדהרחום')
-spnote('215', 'סעדיה', '= אדם #הס-סעדיה')
+# =============================================================== 3. סעד בן ישמעאל (#150 = «150»): links only
+spnote('150', "238 צי'", '= אדם #238; בתרשים עמ׳ 87 מודפס «זוהרה בן יעקב הצפרי» (בן/בת — טעות דפוס); ברשומת המפקד: בת יעקב בן ישמעאל הצפרי')
+spnote('238', 'סעד', '= אדם #150')
+spnote('111', 'אב-ספוה', '= אדם #151')
+spnote('234', 'עבד-הרחום', '= אדם #155')
+spnote('215', 'סעדיה', '= אדם #152')
 # קמרה (#160) — married אברהם בן מרחיב הצפרי (#214; the census prints him a second time as #254 «ככל הנראה זהה»)
-if not P['הס-קמרה'].get('spouses'):
-    P['הס-קמרה']['spouses'] = [{'name': 'אברהם בן מרחיב הצפרי', 'ref': '214', 'note': '= אדם #214; ברשומת המפקד הוא מופיע גם כ-#254'}]
-    LOG.append({'id': 'הס-קמרה', 'spouse_added': 'אברהם בן מרחיב הצפרי #214'})
-spnote('214', 'קמרה', '= אדם #הס-קמרה')
-P['הס-קמרה']['note'] = (P['הס-קמרה'].get('note', '') + ' ' + T87).strip() if T87 not in P['הס-קמרה'].get('note', '') else P['הס-קמרה']['note']
-print('הס-סעד children:', P['הס-סעד'].get('children_ids'))
+if not P['160'].get('spouses'):
+    P['160']['spouses'] = [{'name': 'אברהם בן מרחיב הצפרי', 'ref': '214', 'note': '= אדם #214; ברשומת המפקד הוא מופיע גם כ-#254'}]
+    LOG.append({'id': '160', 'spouse_added': 'אברהם בן מרחיב הצפרי #214'})
+spnote('214', 'קמרה', '= אדם #160')
+P['160']['note'] = (P['160'].get('note', '') + ' ' + T87).strip() if T87 not in P['160'].get('note', '') else P['160']['note']
+print('150 children:', P['150'].get('children_ids'))
 
 
 # =============================================================== 4. names as printed on page 87 (cosmetic, same persons)
@@ -138,8 +138,8 @@ def rename_sp(pid, frag, new):
     raise SystemExit('spouse not found %s %s' % (pid, frag))
 
 
-if P['הס-סעד']['name'] != 'סעד':          # «סעד בן ישמעאל» printed in full → the card adds «(בן ישמעאל)» itself
-    LOG.append({'renamed': 'הס-סעד', 'from': P['הס-סעד']['name'], 'to': 'סעד'}); P['הס-סעד']['name'] = 'סעד'
+if P['150']['name'] != 'סעד':          # «סעד בן ישמעאל» printed in full → the card adds «(בן ישמעאל)» itself
+    LOG.append({'renamed': '150', 'from': P['150']['name'], 'to': 'סעד'}); P['150']['name'] = 'סעד'
 rename_sp('122', 'מסעודה', 'מסעודה בת שלמה הכה״ג')
 rename_sp('123', 'בדיעה', 'בדיעה בת יעקב הכה״ג')
 rename_sp('124', 'שלבי', 'שלבי בן יעקב השלבי')

@@ -1168,6 +1168,7 @@ function openPerson(id){
   pBody.appendChild(shareBtn);
   if(ADMIN){ const ed=document.createElement('div'); ed.innerHTML=adminPanelTools(id); pBody.appendChild(ed); }
   { const old=document.createElement('div'); old.innerHTML=field('ID קודם','<span dir="ltr">'+esc(p.id)+'</span>'); pBody.appendChild(old.firstElementChild); }   // the previous identifier, kept at the bottom of the card
+  if((p.alt_ids||[]).length){ const al=document.createElement('div'); al.innerHTML=field('מזהה שאוחד לכאן','<span dir="ltr">'+p.alt_ids.map(esc).join(', ')+'</span> — אותו אדם נספר פעמיים במפקד'); pBody.appendChild(al.firstElementChild); }
   document.body.classList.add('panel-open'); panel.setAttribute('aria-hidden','false');
 }
 
@@ -1360,7 +1361,7 @@ const search=document.getElementById('search'), results=document.getElementById(
 function searchPersons(q){
   const qid=(q||'').trim();
   let idHit=null;
-  if(qid){ const byUid=Object.values(persons).find(p=>(''+p.uid)===qid); if(byUid) idHit=byUid; else if(persons[qid]) idHit=persons[qid]; else { const lo=qid.toLowerCase(); const k=Object.keys(persons).find(x=>x.toLowerCase()===lo); if(k) idHit=persons[k]; } }
+  if(qid){ const byUid=Object.values(persons).find(p=>(''+p.uid)===qid || (p.alt_ids||[]).indexOf(qid)>=0); if(byUid) idHit=byUid; else if(persons[qid]) idHit=persons[qid]; else { const lo=qid.toLowerCase(); const k=Object.keys(persons).find(x=>x.toLowerCase()===lo); if(k) idHit=persons[k]; } }
   const toks=norm(q).split(' ').filter(Boolean);
   if(!toks.length) return idHit?[{p:idHit,ownHits:99}]:[];
   const out=[];
@@ -1682,7 +1683,7 @@ function nextUid(){
 function idByAny(x){                                       // a number typed by the owner (new ID) or an old id -> internal id
   x=(x==null?'':(''+x)).trim(); if(!x) return '';
   if(persons[x]) return x;
-  const hit=Object.values(persons).find(p=>(''+p.uid)===x);
+  const hit=Object.values(persons).find(p=>(''+p.uid)===x || (p.alt_ids||[]).indexOf(x)>=0);   // alt_ids: a census number of a record that was merged into this person
   return hit?hit.id:x;
 }
 function makePerson(o){
