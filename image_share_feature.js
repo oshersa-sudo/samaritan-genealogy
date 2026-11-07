@@ -6,7 +6,7 @@ function treeImgLayout(rootIds, maxGen){
   const pos=new Map(), seen=new Set(); let nx=0, maxD=0, leaves=0;
   function asg(id,d){
     seen.add(id); if(d>maxD) maxD=d;
-    const ks=(d+1<maxGen)?(childMap[id]||[]).slice().sort(byBirthIds).filter(c=>!seen.has(c)&&persons[c]):[];
+    const ks=(d+1<maxGen)?orderKids(id, childMap[id]||[]).filter(c=>!seen.has(c)&&persons[c]):[];
     if(!ks.length){ pos.set(id,{x:nx++,y:d,kids:[]}); leaves++; return; }
     ks.forEach(c=>asg(c,d+1));
     const xs=ks.map(c=>pos.get(c).x); pos.set(id,{x:(Math.min(...xs)+Math.max(...xs))/2,y:d,kids:ks});

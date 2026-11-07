@@ -153,6 +153,10 @@ for pid, p in P.items():
     if not fid or fid not in P: cov['no father on site'] += 1; continue
     F = P[fid]; sps = F.get('spouses') or []
     res = None
+    if F.get('sex') == 'F':                                  # the registered parent is a woman: she IS the mother (the father is not on the site)
+        res = {'mother_id': fid, 'mother_src': 'האם היא ההורה הרשום (האב אינו באתר)'}
+        p.update(res); cov['mother set'] += 1; cov['by woman parent'] += 1
+        LOG.append({'id': pid, 'name': p['name'], **res}); continue
     # 1. article reading
     if pid in ART:
         mt, page = ART[pid]

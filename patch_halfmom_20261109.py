@@ -27,7 +27,7 @@ function momLabelText(p){
 }
 // half-siblings: the father has children by more than one mother -> the card carries its mother's name
 function halfMomInfo(id){
-  const f=parentOf[id]; if(!f || !persons[f]) return null;
+  const f=parentOf[id]; if(!f || !persons[f] || persons[f].sex==='F') return null;      // a woman registered as the parent is the mother herself
   const p=persons[id]; if(!momKey2(p)) return null;
   const sibs=(childMap[f]||[]).filter(c=>persons[c]); if(sibs.length<2) return null;
   const keys=new Set(); sibs.forEach(c=>{ const k=momKey2(persons[c]); if(k) keys.add(k); });

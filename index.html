@@ -1536,8 +1536,8 @@ const DATA = {
        "father_id": "49",
        "src": "מאמר «מיפקד השומרונים בשנת 1909» — עמוד 74 (עמוד 2 בקובץ הסרוק)",
        "uid": 1028,
-       "mother": "שלח בן אברהם הדנפי",
-       "mother_src": "האשה היחידה של האב שלא סומנה כחסרת ילדים"
+       "mother_id": "49",
+       "mother_src": "האם היא ההורה הרשום (האב אינו באתר)"
       },
       {
        "id": "דנ-עפיף43",
@@ -2464,8 +2464,8 @@ const DATA = {
        ],
        "src": "מאמר «מיפקד השומרונים בשנת 1909» — עמודים 84, 85 (עמודים 12, 13 בקובץ הסרוק)",
        "uid": 116,
-       "mother": "סעדה",
-       "mother_src": "המאמר, עמ׳ 84"
+       "mother_id": "115",
+       "mother_src": "האם היא ההורה הרשום (האב אינו באתר)"
       },
       {
        "id": "117",
@@ -2488,8 +2488,8 @@ const DATA = {
        "note": "מוזכרת כ'ופלקה בת כנימים המטרי עזתי'; נשואה גם לאברהם #203 (הדדי)",
        "src": "מאמר «מיפקד השומרונים בשנת 1909» — עמוד 84 (עמוד 12 בקובץ הסרוק)",
        "uid": 117,
-       "mother": "סעדה",
-       "mother_src": "המאמר, עמ׳ 84"
+       "mother_id": "115",
+       "mother_src": "האם היא ההורה הרשום (האב אינו באתר)"
       },
       {
        "id": "118",
@@ -2519,8 +2519,8 @@ const DATA = {
        "father_id": "115",
        "src": "מאמר «מיפקד השומרונים בשנת 1909» — עמוד 85 (עמוד 13 בקובץ הסרוק)",
        "uid": 1032,
-       "mother": "בנימים בן שלמה המטרי העזתי",
-       "mother_src": "האשה היחידה של האב שלא סומנה כחסרת ילדים"
+       "mother_id": "115",
+       "mother_src": "האם היא ההורה הרשום (האב אינו באתר)"
       }
      ]
     },
@@ -11565,7 +11565,7 @@ function rawChildren(id){
     if((modernHouseRoots[hn]||[]).length) kids.push(extrasNodeId(hn));   // grouped extras node, last
     return kids;
   }
-  return (childMap[id]||[]).slice().sort(byBirthIds);
+  return orderKids(id, childMap[id]||[]);
 }
 function uChildren(id){ return collapsed.has(id) ? [] : rawChildren(id); }
 function uHasChildren(id){ return rawChildren(id).length>0; }
@@ -11638,12 +11638,12 @@ function makeNodeBox(id){
   }
   const p=persons[id];
   d.className='node-box '+(p.sex==='M'?'male':p.sex==='F'?'female':'unk')+(p._modern?' modern':'')+' '+houseClass(p._house);
-  const gen=genOf(id);
+  const gen=genOf(id), ko=kidOrdinal(id);
   const story=(STORIES[id]&&STORIES[id].t)?' <span class="nb-story" title="יש סיפור חיים">📖</span>':'';
   const ys0=displayYears(id,p), ai0=ageInfo(id), ys=ys0+(ai0? (ys0?' · ':'')+(ai0.kind==='now'?'גיל '+(ai0.approx?'≈':'')+ai0.n+' כיום':'גיל '+(ai0.approx?'≈':'')+ai0.n):'');
   const sexMark=p.sex==='M'?'ז׳':p.sex==='F'?'נ׳':'';
   d.innerHTML=(sexMark?'<div class="nb-sex" title="'+(p.sex==='M'?'זכר':'נקבה')+'">'+sexMark+'</div>':'')+
-    '<div class="nb-gen">דור '+gen+'</div>'+
+    '<div class="nb-gen"'+(ko?' title="'+esc(ko.full)+'"':'')+'>דור '+gen+(ko?' · '+ko.text:'')+'</div>'+
     '<div class="nb-name">'+esc(displayName(p))+story+'</div>'+
     (ys?'<div class="nb-years">'+ys+'</div>':'');
   d.onclick=()=>openPerson(id);
@@ -11944,13 +11944,51 @@ function momLabelText(p){
 }
 // half-siblings: the father has children by more than one mother -> the card carries its mother's name
 function halfMomInfo(id){
-  const f=parentOf[id]; if(!f || !persons[f]) return null;
+  const f=parentOf[id]; if(!f || !persons[f] || persons[f].sex==='F') return null;      // a woman registered as the parent is the mother herself
   const p=persons[id]; if(!momKey2(p)) return null;
   const sibs=(childMap[f]||[]).filter(c=>persons[c]); if(sibs.length<2) return null;
   const keys=new Set(); sibs.forEach(c=>{ const k=momKey2(persons[c]); if(k) keys.add(k); });
   if(keys.size<2) return null;
   const m=motherPerson(p);
   return {text:momLabelText(p), full:'אמו: '+(m?lineageName(m.id):(motherText(p)||''))};
+}
+// children of one father, in tree order: by age; when the mothers differ — grouped by mother (the order of the father's wives, else by the eldest child of each)
+function orderKids(fid, ids){
+  const kids=ids.slice().sort(byBirthIds);
+  if(!fid || !persons[fid] || persons[fid].sex==='F' || kids.length<2) return kids;     // (a woman registered as the parent IS the mother)
+  const key={}; kids.forEach(c=>{ key[c]=momKey2(persons[c]); });
+  if(new Set(kids.map(c=>key[c]).filter(Boolean)).size<2) return kids;
+  const sps=persons[fid].spouses||[];
+  function wifeIndex(c){
+    const p=persons[c], mid=p.mother_id;
+    for(let i=0;i<sps.length;i++){
+      if(mid && spouseTargetId(sps[i])===mid) return i;
+      const t=motherText(p);
+      if(!mid && t){
+        const sn=norm(givenOnly(sps[i].name||'')), tn=norm(givenOnly(t));
+        if(sn && sn===tn) return i;
+        if(/^אשה/.test(t) && /ראשונ/.test(t) && /^אשה/.test(sps[i].name||'') && /ראשונ/.test(sps[i].name||'')) return i;
+        if(/^אשה/.test(t) && /שניי/.test(t) && /שניי/.test(sps[i].name||'')) return i;
+      }
+    }
+    return -1;
+  }
+  const groups=[], idx=new Map();
+  kids.forEach(c=>{ const k=key[c]||'?'; if(!idx.has(k)){ idx.set(k,groups.length); groups.push({k,ids:[],w:wifeIndex(c)}); } groups[idx.get(k)].ids.push(c); });
+  const useWives=groups.every(g=>g.k==='?'||g.w>=0);
+  groups.forEach(g=>{ g.b=Math.min(...g.ids.map(birthSortKey)); });
+  groups.sort((a,b)=>{ if(a.k==='?') return 1; if(b.k==='?') return -1;          // the mother of the eldest child first; equal/unknown ages -> the order of the wives
+    const unk=a.b>=99999 || b.b>=99999;                                            // an unknown age cannot order two mothers — the wives' order does
+    return (unk && useWives) ? (a.w-b.w) : ((a.b-b.b) || (useWives ? (a.w-b.w) : 0)); });
+  return [].concat(...groups.map(g=>g.ids));
+}
+// the child's number among the father's children, by age (not shown where the children are split by mother — the mother's name is shown instead)
+function kidOrdinal(id){
+  const f=parentOf[id]; if(!f || !persons[f] || halfMomInfo(id)) return null;
+  const sibs=(childMap[f]||[]).filter(c=>persons[c]); if(sibs.length<2) return null;
+  const ord=sibs.slice().sort(byBirthIds), n=ord.indexOf(id)+1; if(!n) return null;
+  const exact=sibs.every(c=>birthSortKey(c)<99999);
+  return {n, exact, text:'ילד '+(exact?'':'≈')+n, full:'הילד ה-'+n+' מתוך '+sibs.length+' ילדי האב, לפי הגילאים'+(exact?'':' (לחלק מהאחים אין שנת לידה — הסדר משוער)')};
 }
 function motherShort(p){ const m=motherPerson(p); if(m) return givenOnly(m.name); const t=motherText(p); return t?givenOnly(t):''; }
 
@@ -12215,7 +12253,7 @@ function buildTreeText(rootIds, title){
     const indent=depth>0 ? '   '.repeat(depth)+'└ ' : '';
     const g=gregOf(id); const yr=g?(' ('+fmtGreg(g)+')'):(yearStr(p)?(' '+yearStr(p)):'');
     lines.push(indent+'דור '+(depth+1)+': '+(p.name||'(ללא שם)')+yr);
-    (childMap[id]||[]).slice().sort(byBirthIds).forEach(c=>rec(c,depth+1));
+    orderKids(id, childMap[id]||[]).forEach(c=>rec(c,depth+1));
   }
   rootIds.forEach(r=>rec(r,0));
   lines.push('');
@@ -12232,7 +12270,7 @@ function treeImgLayout(rootIds, maxGen){
   const pos=new Map(), seen=new Set(); let nx=0, maxD=0, leaves=0;
   function asg(id,d){
     seen.add(id); if(d>maxD) maxD=d;
-    const ks=(d+1<maxGen)?(childMap[id]||[]).slice().sort(byBirthIds).filter(c=>!seen.has(c)&&persons[c]):[];
+    const ks=(d+1<maxGen)?orderKids(id, childMap[id]||[]).filter(c=>!seen.has(c)&&persons[c]):[];
     if(!ks.length){ pos.set(id,{x:nx++,y:d,kids:[]}); leaves++; return; }
     ks.forEach(c=>asg(c,d+1));
     const xs=ks.map(c=>pos.get(c).x); pos.set(id,{x:(Math.min(...xs)+Math.max(...xs))/2,y:d,kids:ks});
@@ -12279,6 +12317,7 @@ function drawTreeImage(rootIds, title, maxGen, withSpouses){
     const p=persons[id], x=X(v.x)-NW/2, y=Y(v.y), col=houseColorOf(p._house), isRoot=rootIds.includes(id);
     c.fillStyle=isRoot?'#fff3c4':(p.sex==='F'?'#f8eaf1':p.sex==='M'?'#e7f0f6':'#f3f0ea'); c.strokeStyle=col; c.lineWidth=isRoot?3.5:2;
     c.beginPath(); if(c.roundRect) c.roundRect(x,y,NW,NH,9); else c.rect(x,y,NW,NH); c.fill(); c.stroke();
+    { const ko=kidOrdinal(id); if(ko){ c.save(); c.font='9px "Segoe UI","Arial Hebrew",Arial,sans-serif'; c.fillStyle='#8a8478'; c.textAlign='left'; c.fillText(ko.text,x+4,y+11); c.restore(); } }
     { const hm=halfMomInfo(id); if(hm){ c.save(); c.font='9px "Segoe UI","Arial Hebrew",Arial,sans-serif'; c.fillStyle='#7b5e2e'; c.textAlign='right'; c.fillText(wrapLines(c,hm.text,60,1)[0],x+NW-3,y-4); c.restore(); } }
     c.fillStyle='#2c2620'; c.font='bold 13px "Segoe UI","Arial Hebrew",Arial,sans-serif';
     const nl=wrapLines(c,displayName(p),NW-12,2); let ty=y+17; nl.forEach(t=>{ c.fillText(t,x+NW/2,ty); ty+=15; });
