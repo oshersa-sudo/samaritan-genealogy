@@ -745,7 +745,8 @@ function motherNamesOf(p){
   return [];
 }
 /* every person is shown as  «name (בן/בת <father>)»  — derived from the ACTUAL linked father */
-function relOf(p){ return (p&&p.sex==='F') ? 'בת' : 'בן'; }
+function sexOf(p){ const x=p&&p.sex; return x==='ז'?'M':x==='נ'?'F':x; }   // the admin form can store the Hebrew letters ז / נ
+function relOf(p){ return (sexOf(p)==='F') ? 'בת' : 'בן'; }
 function fatherGivenOf(p){
   let fn='';
   if(p&&parentOf[p.id] && persons[parentOf[p.id]]) fn=persons[parentOf[p.id]].name||'';
@@ -755,8 +756,12 @@ function fatherGivenOf(p){
 }
 function displayName(p){
   const base=(p&&p.name)||'(ללא שם)';
-  if(/[\(（]/.test(base)) return base;                    // already qualified (nickname / manual «בן X») — leave as typed
-  if(!p || (p.sex!=='M' && p.sex!=='F')) return base;     // unknown sex → don't guess בן/בת
+  if(/[\(（]/.test(base) && /ב[ןת](\s|\)|,|$)/.test(base)) return base;   // already says בן/בת — leave as typed
+  if(!p || (sexOf(p)!=='M' && sexOf(p)!=='F')) return base;     // unknown sex → don't guess בן/בת
+  if(/[\(（]/.test(base)){                                 // a bracket (nickname / note) but no father → the father goes first inside it
+    const fb=fatherGivenOf(p); if(!fb) return base;
+    return base.replace(/[\(（]\s*=?\s*/,'('+relOf(p)+' '+fb+', ').replace(/, ?\)/,')');
+  }
   const fg=fatherGivenOf(p);
   return fg ? base+' ('+relOf(p)+' '+fg+')' : base;
 }
