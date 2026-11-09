@@ -1,0 +1,217 @@
+[
+ {
+  "merged": "M36",
+  "into": "דנ-ורדה-גמליאל"
+ },
+ {
+  "merged": "M37",
+  "into": "דנ-נדיה-זבולן"
+ },
+ {
+  "merged": "M63",
+  "into": "דנ-אבסכוה-גמליאל"
+ },
+ {
+  "merged": "M28",
+  "into": "54"
+ },
+ {
+  "merged": "M9",
+  "into": "128"
+ },
+ {
+  "merged": "M26",
+  "into": "62"
+ },
+ {
+  "added": "M65",
+  "name": "אורי (נורי)",
+  "parent": "#133"
+ },
+ {
+  "added": "M179",
+  "name": "יוסף",
+  "parent": "M35"
+ },
+ {
+  "added": "M216",
+  "name": "ישראל (מרואן)",
+  "parent": "M35"
+ },
+ {
+  "added": "M233",
+  "name": "פתחי",
+  "parent": "M35"
+ },
+ {
+  "added": "M247",
+  "name": "טלאל",
+  "parent": "M35"
+ },
+ {
+  "added": "M259",
+  "name": "נאייף",
+  "parent": "M35"
+ },
+ {
+  "added": "M296",
+  "name": "מורד",
+  "parent": "M35"
+ },
+ {
+  "added": "M302",
+  "name": "גמליאל",
+  "parent": "#דנ-אבסכוה-גמליאל"
+ },
+ {
+  "added": "M318",
+  "name": "תמים",
+  "parent": "M65"
+ },
+ {
+  "added": "M376",
+  "name": "נדיה",
+  "parent": "M154"
+ },
+ {
+  "added": "M389",
+  "name": "עזאת",
+  "parent": "M154"
+ },
+ {
+  "added": "M391",
+  "name": "יצחק",
+  "parent": "M142"
+ },
+ {
+  "added": "M408",
+  "name": "נזמיה",
+  "parent": "M142"
+ },
+ {
+  "added": "M410",
+  "name": "אברהם",
+  "parent": "M179"
+ },
+ {
+  "added": "M418",
+  "name": "מלי",
+  "parent": "M154"
+ },
+ {
+  "added": "M422",
+  "name": "עפיף",
+  "parent": "M171"
+ },
+ {
+  "added": "M433",
+  "name": "ראניה",
+  "parent": "M171"
+ },
+ {
+  "added": "M434",
+  "name": "סאמר",
+  "parent": "M179"
+ },
+ {
+  "added": "M442",
+  "name": "סמי",
+  "parent": "M142"
+ },
+ {
+  "added": "M453",
+  "name": "פריאל",
+  "parent": "M154"
+ },
+ {
+  "added": "M458",
+  "name": "ענן",
+  "parent": "M179"
+ },
+ {
+  "added": "M469",
+  "name": "עובדיה",
+  "parent": "M171"
+ },
+ {
+  "added": "M482",
+  "name": "נאהד",
+  "parent": "M154"
+ },
+ {
+  "added": "M485",
+  "name": "סאמח",
+  "parent": "M142"
+ },
+ {
+  "added": "M496",
+  "name": "ישמעאל",
+  "parent": "M179"
+ },
+ {
+  "added": "M507",
+  "name": "איהאב",
+  "parent": "M171"
+ },
+ {
+  "added": "M513",
+  "name": "היבה",
+  "parent": "M154"
+ },
+ {
+  "added": "M545",
+  "name": "יסמין",
+  "parent": "M188"
+ },
+ {
+  "added": "M563",
+  "name": "ניסרין",
+  "parent": "M188"
+ },
+ {
+  "added": "M564",
+  "name": "ישמעאל",
+  "parent": "M259"
+ },
+ {
+  "added": "M582",
+  "name": "אלעד",
+  "parent": "M301"
+ },
+ {
+  "added": "M585",
+  "name": "פרדס",
+  "parent": "M259"
+ },
+ {
+  "added": "M615",
+  "name": "אורי",
+  "parent": "M318"
+ },
+ {
+  "added": "M619",
+  "name": "לוטפיה",
+  "parent": "M259"
+ },
+ {
+  "added": "M651",
+  "name": "אברהם",
+  "parent": "M302"
+ },
+ {
+  "added": "M681",
+  "name": "מאור",
+  "parent": "M318"
+ },
+ {
+  "added": "M706",
+  "name": "ירח",
+  "parent": "M389"
+ },
+ {
+  "added": "M718",
+  "name": "ישמעאל",
+  "parent": "M389"
+ },
+ "M579 died 2012"
+]
