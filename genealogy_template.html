@@ -1084,11 +1084,11 @@ function openPerson(id){
 
   const meta=[];
   meta.push('ID: <b class="pid" dir="ltr" title="לחיצה — העתקת ה-ID" data-pid="'+escAttr(p.uid||p.id)+'" onclick="copyPersonId(this.dataset.pid)" style="cursor:copy">'+esc(p.uid||p.id)+'</b>');
-  if(p._modern) meta.push('מקור: מרשם הקהילה');
+  if(p._modern && String(p.id).indexOf('ow-')!==0) meta.push('מקור: מרשם הקהילה');
   else { if(p.code) meta.push('קוד עץ: '+esc(p.code)); }
   meta.push('מין: '+(p.sex==='M'?'זכר':p.sex==='F'?'נקבה':'לא ידוע'));
   if(p._modern && p.family) meta.push('משפחה: '+esc(p.family));
-  if(p.me) html+=field('★ אנוכי','<div class="me-box">זה אני — בעל האתר, בנם של שוהם ובדיעה. כאן אני עומד בעץ המשפחה.</div>');
+  if(p.me) html+=field('★ אנוכי','<div class="me-box">זה אני — בעל האתר, בנם של שוהם ויפה (בדיעה). כאן אני עומד בעץ המשפחה.</div>');
   html+=field('פרטים', meta.join(' · '));
   { const st=p.src||(p._added?'הוזן ע״י מנהל באתר':''); if(st) html+=field('מקור המידע', esc(st)); }
   if(p.links&&p.links.length) html+=field('קישורים', p.links.filter(l=>/^https:\/\//.test(l.url||'')).map(l=>'<a href="'+escAttr(l.url)+'" target="_blank" rel="noopener">'+esc(l.label||l.url)+'</a>').join('<br>'));
@@ -2115,7 +2115,7 @@ function warnParenMismatch(id){                            // «(בן/בת X)» 
   const nm=persons[id].name||'';
   const m=nm.match(/\(\s*ב[נת]\s+([^)）]+?)\s*\)/);
   if(!m) return;
-  const typed=norm(m[1].split(/\s+/)[0]), fg=norm(fatherGivenOf(persons[id]));
+  const typed=norm(m[1].split(/[\s,]+/)[0]), fg=norm(fatherGivenOf(persons[id]));
   if(fg && typed && typed!==fg) toast('שים לב: בשם כתוב «'+m[1].trim()+'» אך האב המשויך הוא «'+(fatherNameOf(persons[id])||'—')+'»');
 }
 function applyRowPatch(id, finalize){
