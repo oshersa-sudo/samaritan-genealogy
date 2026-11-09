@@ -204,6 +204,12 @@ for m in integ['modern']:
         m['mother_src'] = 'מרשם הקהילה (עמודת האם)'; cov['modern: text only'] += 1
     LOG.append({'id': m['id'], 'name': m['name'], 'mother': m.get('mother'), 'mother_id': m.get('mother_id'), 'src': m['mother_src']})
 
+# mothers the matcher cannot reach (spelling רסמייה/רסמיה; the mother is a registry person) — identified by the owner / the events register
+MODERN_MOTHER = {'M40': '153', 'M486': 'M226', 'M506': 'M226', 'M529': 'M226'}
+for m in integ['modern']:
+    if m['id'] in MODERN_MOTHER:
+        m['mother_id'] = MODERN_MOTHER[m['id']]; m.pop('mother', None); m['mother_src'] = 'רשם הקהילה; זיהוי האם לפי הבעלים וסגל המאורעות'
+
 io.open('master_v2.json', 'w', encoding='utf-8').write(json.dumps(master, ensure_ascii=False, indent=1))
 io.open('integrate.json', 'w', encoding='utf-8').write(json.dumps(integ, ensure_ascii=False, indent=1))
 io.open('mothers_derived_20261106.json', 'w', encoding='utf-8').write(json.dumps({'coverage': cov, 'rows': LOG}, ensure_ascii=False, indent=1))

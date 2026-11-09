@@ -1,0 +1,79 @@
+[
+ {
+  "added": "M40",
+  "name": "יוסף",
+  "parent": "#137"
+ },
+ {
+  "added": "M222",
+  "name": "אברהם (ברהום)",
+  "parent": "M40"
+ },
+ {
+  "added": "M239",
+  "name": "חבר (סמיר)",
+  "parent": "M40"
+ },
+ {
+  "added": "M281",
+  "name": "נועמן",
+  "parent": "M40"
+ },
+ {
+  "added": "M327",
+  "name": "נואל",
+  "parent": "M40"
+ },
+ {
+  "added": "M486",
+  "name": "שירין",
+  "parent": "M222"
+ },
+ {
+  "added": "M506",
+  "name": "יוסף (יוסי)",
+  "parent": "M222"
+ },
+ {
+  "added": "M529",
+  "name": "רינת",
+  "parent": "M222"
+ },
+ {
+  "added": "M543",
+  "name": "זהיה (זהו)",
+  "parent": "M239"
+ },
+ {
+  "added": "M561",
+  "name": "דיאנה",
+  "parent": "M239"
+ },
+ {
+  "added": "M579",
+  "name": "הנה",
+  "parent": "M239"
+ },
+ {
+  "added": "M652",
+  "name": "שריהאן",
+  "parent": "M239"
+ },
+ {
+  "added": "M667",
+  "name": "יזן",
+  "parent": "M281"
+ },
+ {
+  "added": "M691",
+  "name": "יוסף",
+  "parent": "M281"
+ },
+ {
+  "added": "M697",
+  "name": "נאראם",
+  "parent": "M281"
+ },
+ "spouse M222-M226",
+ "M190 died 3.3.2022"
+]
