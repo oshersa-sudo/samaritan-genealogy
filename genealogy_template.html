@@ -113,6 +113,9 @@
     color:#fff; background:rgba(60,45,20,.45); border-radius:4px; padding:0 3px; pointer-events:none}
   .node-box.male .nb-sex{background:var(--male)} .node-box.female .nb-sex{background:var(--female)}
   .node-box.modern{background:#f3f8fc}
+  .node-box.me{border:3px solid #b8860b; background:#fffbea; box-shadow:0 0 0 3px #f2c14e, 0 0 16px 5px rgba(242,193,78,.75)}
+  .node-box.me::before{content:'★ אנוכי'; position:absolute; bottom:1px; inset-inline-end:4px; font-size:9px; font-weight:700; color:#8a6508}
+  .me-box{border:2px solid #b8860b; background:#fffbea; border-radius:8px; padding:6px 10px; font-weight:700; color:#6b4e06}
   .node-box.modern::after{content:'·דור חדש'; position:absolute; bottom:1px; inset-inline-start:4px; font-size:7.5px; color:#7a93ad}
   .node-box .nb-gen{font-size:9px; color:#fff; background:var(--accent2); border-radius:8px; padding:0 6px;
                     position:absolute; top:3px; inset-inline-end:4px}
@@ -610,7 +613,7 @@ houseNames.forEach(hn=>{ ['דנפים','מרחיבים','צפרים','כהונה
 (MODERN.modern||[]).forEach(m=>{
   persons[m.id]={ id:m.id, name:m.name, sex:m.sex, _modern:true, g:m.g, byear:m.byear,
     bmonth:m.bmonth, bday:m.bday, dyear:m.dyear, age:m.age, family:m.family, father:m.father,
-    job:m.job, bplace:m.bplace, mother:m.mother, mother_id:m.mother_id, mother_house:m.mother_house, mother_src:m.mother_src, note:m.notes, _parentRaw:m.parent, spouses:m.spouses, src:m.src, bamb:m.bamb, uid:m.uid };
+    job:m.job, bplace:m.bplace, mother:m.mother, mother_id:m.mother_id, mother_house:m.mother_house, mother_src:m.mother_src, note:m.notes, me:m.me, _parentRaw:m.parent, spouses:m.spouses, src:m.src, bamb:m.bamb, uid:m.uid };
 });
 (MODERN.modern||[]).forEach(m=>{
   if(!childMap[m.id]) childMap[m.id]=[];
@@ -902,7 +905,7 @@ function makeNodeBox(id){
     return d;
   }
   const p=persons[id];
-  d.className='node-box '+(p.sex==='M'?'male':p.sex==='F'?'female':'unk')+(p._modern?' modern':'')+' '+houseClass(p._house);
+  d.className='node-box '+(p.sex==='M'?'male':p.sex==='F'?'female':'unk')+(p._modern?' modern':'')+(p.me?' me':'')+' '+houseClass(p._house);
   const gen=genOf(id), ko=kidOrdinal(id);
   const story=(STORIES[id]&&STORIES[id].t)?' <span class="nb-story" title="יש סיפור חיים">📖</span>':'';
   const ys0=displayYears(id,p), ai0=ageInfo(id), ys=ys0+(ai0? (ys0?' · ':'')+(ai0.kind==='now'?'גיל '+(ai0.approx?'≈':'')+ai0.n+' כיום':'גיל '+(ai0.approx?'≈':'')+ai0.n):'');
@@ -1085,6 +1088,7 @@ function openPerson(id){
   else { if(p.code) meta.push('קוד עץ: '+esc(p.code)); }
   meta.push('מין: '+(p.sex==='M'?'זכר':p.sex==='F'?'נקבה':'לא ידוע'));
   if(p._modern && p.family) meta.push('משפחה: '+esc(p.family));
+  if(p.me) html+=field('★ אנוכי','<div class="me-box">זה אני — בעל האתר, בנם של שוהם ובדיעה. כאן אני עומד בעץ המשפחה.</div>');
   html+=field('פרטים', meta.join(' · '));
   { const st=p.src||(p._added?'הוזן ע״י מנהל באתר':''); if(st) html+=field('מקור המידע', esc(st)); }
   if(p.links&&p.links.length) html+=field('קישורים', p.links.filter(l=>/^https:\/\//.test(l.url||'')).map(l=>'<a href="'+escAttr(l.url)+'" target="_blank" rel="noopener">'+esc(l.label||l.url)+'</a>').join('<br>'));
@@ -1252,7 +1256,7 @@ function kidOrdinal(id){
   const f=parentOf[id]; if(!f || !persons[f] || halfMomInfo(id)) return null;
   const sibs=(childMap[f]||[]).filter(c=>persons[c]); if(sibs.length<2) return null;
   const ord=sibs.slice().sort(byBirthIds), n=ord.indexOf(id)+1; if(!n) return null;
-  const exact=sibs.every(c=>birthSortKey(c)<99999);
+  const exact=sibs.every(c=>hasBirthYear(c));
   return {n, exact, text:'ילד '+(exact?'':'≈')+n, full:'הילד ה-'+n+' מתוך '+sibs.length+' ילדי האב, לפי הגילאים'+(exact?'':' (לחלק מהאחים אין שנת לידה — הסדר משוער)')};
 }
 function motherShort(p){ const m=motherPerson(p); if(m) return givenOnly(m.name); const t=motherText(p); return t?givenOnly(t):''; }
@@ -1496,7 +1500,8 @@ function toast(msg){
   const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
   clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),1900);
 }
-function birthSortKey(id){ const p=persons[id]; if(!p) return 99999; if(p._modern) return p.byear||99999; return numYear(p.birth)||99999; }
+function hasBirthYear(id){ const p=persons[id]; return !!p && (p._modern ? !!p.byear : numYear(p.birth)!=null); }
+function birthSortKey(id){ const p=persons[id]; if(!p) return 99999; if(p._modern) return p.byear||p.ord_year||99999; return numYear(p.birth)||p.ord_year||99999; }   // ord_year: a sort position only (the prose states the order, not the year)
 function byBirthIds(a,b){ return birthSortKey(a)-birthSortKey(b); }
 function buildTreeText(rootIds, title){
   const lines=[];
@@ -1582,6 +1587,7 @@ function drawTreeImage(rootIds, title, maxGen, withSpouses){
     const p=persons[id], x=X(v.x)-NW/2, y=Y(v.y), col=houseColorOf(p._house), isRoot=rootIds.includes(id);
     c.fillStyle=isRoot?'#fff3c4':(p.sex==='F'?'#f8eaf1':p.sex==='M'?'#e7f0f6':'#f3f0ea'); c.strokeStyle=col; c.lineWidth=isRoot?3.5:2;
     c.beginPath(); if(c.roundRect) c.roundRect(x,y,NW,NH,9); else c.rect(x,y,NW,NH); c.fill(); c.stroke();
+    if(p.me){ c.save(); c.strokeStyle='#e0a800'; c.lineWidth=4; c.strokeRect(x-3,y-3,NW+6,NH+6); c.fillStyle='#8a6508'; c.font='bold 9px "Segoe UI",Arial,sans-serif'; c.textAlign='right'; c.fillText('★ אנוכי',x+NW-4,y+NH-4); c.restore(); }
     { const ko=kidOrdinal(id); if(ko){ c.save(); c.font='9px "Segoe UI","Arial Hebrew",Arial,sans-serif'; c.fillStyle='#8a8478'; c.textAlign='left'; c.fillText(ko.text,x+4,y+11); c.restore(); } }
     { const hm=halfMomInfo(id); if(hm){ c.save(); c.font='9px "Segoe UI","Arial Hebrew",Arial,sans-serif'; c.fillStyle='#7b5e2e'; c.textAlign='right'; c.fillText(wrapLines(c,hm.text,60,1)[0],x+NW-3,y-4); c.restore(); } }
     c.fillStyle='#2c2620'; c.font='bold 13px "Segoe UI","Arial Hebrew",Arial,sans-serif';

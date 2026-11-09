@@ -53,6 +53,7 @@ function drawTreeImage(rootIds, title, maxGen, withSpouses){
     const p=persons[id], x=X(v.x)-NW/2, y=Y(v.y), col=houseColorOf(p._house), isRoot=rootIds.includes(id);
     c.fillStyle=isRoot?'#fff3c4':(p.sex==='F'?'#f8eaf1':p.sex==='M'?'#e7f0f6':'#f3f0ea'); c.strokeStyle=col; c.lineWidth=isRoot?3.5:2;
     c.beginPath(); if(c.roundRect) c.roundRect(x,y,NW,NH,9); else c.rect(x,y,NW,NH); c.fill(); c.stroke();
+    if(p.me){ c.save(); c.strokeStyle='#e0a800'; c.lineWidth=4; c.strokeRect(x-3,y-3,NW+6,NH+6); c.fillStyle='#8a6508'; c.font='bold 9px "Segoe UI",Arial,sans-serif'; c.textAlign='right'; c.fillText('★ אנוכי',x+NW-4,y+NH-4); c.restore(); }
     c.fillStyle='#2c2620'; c.font='bold 13px "Segoe UI","Arial Hebrew",Arial,sans-serif';
     const nl=wrapLines(c,displayName(p),NW-12,2); let ty=y+17; nl.forEach(t=>{ c.fillText(t,x+NW/2,ty); ty+=15; });
     const yr=(displayYears(id,p)||'').replace(/^\(|\)$/g,'');
