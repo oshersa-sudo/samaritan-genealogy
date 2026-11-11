@@ -1,0 +1,292 @@
+[
+ {
+  "merged": "M30",
+  "into": "65ג"
+ },
+ {
+  "merged": "M59",
+  "into": "הס-עבדאלה140"
+ },
+ {
+  "added": "M99",
+  "name": "פואד",
+  "parent": "#59",
+  "why": "wife-match"
+ },
+ {
+  "added": "M102",
+  "name": "פיאד (זבולן)",
+  "parent": "#44",
+  "why": "wife-match"
+ },
+ {
+  "added": "M110",
+  "name": "שוכרי",
+  "parent": "#44",
+  "why": "wife-match"
+ },
+ {
+  "added": "M134",
+  "name": "רבקה",
+  "parent": "#44",
+  "why": "wife-match"
+ },
+ {
+  "added": "M135",
+  "name": "בוסיינה",
+  "parent": "#59",
+  "why": "wife-match"
+ },
+ {
+  "added": "M159",
+  "name": "מרים",
+  "parent": "#63",
+  "why": "events: רגא עבדאללה מרגאנ | אליס עמראנ אסחק"
+ },
+ {
+  "added": "M173",
+  "name": "עבלה",
+  "parent": "#61",
+  "why": "events: בדר עבדאללה מרגאנ | עטיה נאגי כצר"
+ },
+ {
+  "added": "M182",
+  "name": "באסימה",
+  "parent": "#63",
+  "why": "events: רגא עבדאללה מרגאנ | אליס עמראנ אסחק"
+ },
+ {
+  "added": "M183",
+  "name": "פתינה",
+  "parent": "#61",
+  "why": "events: בדר עבדאללה מרגאנ | עטיה נאגי כצר"
+ },
+ {
+  "added": "M194",
+  "name": "נעמת",
+  "parent": "#59",
+  "why": "wife-match"
+ },
+ {
+  "added": "M202",
+  "name": "פרוק",
+  "parent": "#63",
+  "why": "events: רגא עבדאללה מרגאנ | אליס עמראנ אסחק"
+ },
+ {
+  "added": "M208",
+  "name": "טארק",
+  "parent": "#61",
+  "why": "events: בדר עבדאללה מרגאנ | עטיה נאגי כצר"
+ },
+ {
+  "added": "M219",
+  "name": "חמדי (יהודה)",
+  "parent": "#63",
+  "why": "events: רגא עבדאללה מרגאנ | אליס עמראנ אסחק"
+ },
+ {
+  "added": "M221",
+  "name": "נביה",
+  "parent": "#44",
+  "why": "wife-match"
+ },
+ {
+  "added": "M234",
+  "name": "לילה",
+  "parent": "#61",
+  "why": "events: בדר עבדאללה מרגאנ | עטיה נאגי כצר"
+ },
+ {
+  "added": "M236",
+  "name": "סמי",
+  "parent": "#63",
+  "why": "events: רגא עבדאללה מרגאנ | אליס עמראנ אסחק"
+ },
+ {
+  "added": "M254",
+  "name": "ופא",
+  "parent": "#63",
+  "why": "events: רגא עבדאללה מרגאנ | אליס עמראנ אסחק"
+ },
+ {
+  "added": "M262",
+  "name": "מאהיר",
+  "parent": "#61",
+  "why": "events: בדר עבדאללה מרגאנ | עטיה נאגי כצר"
+ },
+ {
+  "added": "M276",
+  "name": "עזאם",
+  "parent": "#63",
+  "why": "events: רגא עבדאללה מרגאנ | אליס עמראנ אסחק"
+ },
+ {
+  "added": "M277",
+  "name": "מהא",
+  "parent": "#63",
+  "why": "events: רגא עבדאללה מרגאנ | אליס עמראנ אסחק"
+ },
+ {
+  "added": "M385",
+  "name": "ורדה",
+  "parent": "M102",
+  "why": "wife-match"
+ },
+ {
+  "added": "M399",
+  "name": "הנאדי",
+  "parent": "M130",
+  "why": "wife-match"
+ },
+ {
+  "added": "M403",
+  "name": "לוטפי",
+  "parent": "M102",
+  "why": "wife-match"
+ },
+ {
+  "added": "M416",
+  "name": "אורלי",
+  "parent": "M149",
+  "why": "wife-match"
+ },
+ {
+  "added": "M424",
+  "name": "רים",
+  "parent": "M130",
+  "why": "wife-match"
+ },
+ {
+  "added": "M435",
+  "name": "רנה",
+  "parent": "M102",
+  "why": "wife-match"
+ },
+ {
+  "added": "M439",
+  "name": "אמני",
+  "parent": "M149",
+  "why": "wife-match"
+ },
+ {
+  "added": "M451",
+  "name": "תמים",
+  "parent": "M149",
+  "why": "wife-match"
+ },
+ {
+  "added": "M476",
+  "name": "נג'לא",
+  "parent": "M233",
+  "why": "wife-match"
+ },
+ {
+  "added": "M481",
+  "name": "אמג'ד (גד)",
+  "parent": "M149",
+  "why": "wife-match"
+ },
+ {
+  "added": "M492",
+  "name": "ברק",
+  "parent": "M102",
+  "why": "wife-match"
+ },
+ {
+  "added": "M498",
+  "name": "עזיזה",
+  "parent": "M233",
+  "why": "wife-match"
+ },
+ {
+  "added": "M503",
+  "name": "רג'אי",
+  "parent": "M219",
+  "why": "wife-match"
+ },
+ {
+  "added": "M504",
+  "name": "רנאד",
+  "parent": "M219",
+  "why": "wife-match"
+ },
+ {
+  "added": "M512",
+  "name": "בהאא",
+  "parent": "M149",
+  "why": "wife-match"
+ },
+ {
+  "added": "M521",
+  "name": "עטיאט",
+  "parent": "M233",
+  "why": "wife-match"
+ },
+ {
+  "added": "M535",
+  "name": "עובדיה",
+  "parent": "M216",
+  "why": "wife-match"
+ },
+ {
+  "added": "M537",
+  "name": "ריאד",
+  "parent": "M233",
+  "why": "wife-match"
+ },
+ {
+  "added": "M541",
+  "name": "ראפת",
+  "parent": "M219",
+  "why": "wife-match"
+ },
+ {
+  "added": "M572",
+  "name": "נטלי",
+  "parent": "M301",
+  "why": "wife-match"
+ },
+ {
+  "added": "M577",
+  "name": "נורה",
+  "parent": "M262",
+  "why": "wife-match"
+ },
+ {
+  "added": "M600",
+  "name": "תאמר",
+  "parent": "M216",
+  "why": "wife-match"
+ },
+ {
+  "added": "M610",
+  "name": "רובה",
+  "parent": "M262",
+  "why": "wife-match"
+ },
+ {
+  "added": "M624",
+  "name": "רצון",
+  "parent": "M216",
+  "why": "wife-match"
+ },
+ {
+  "added": "M627",
+  "name": "חן",
+  "parent": "M301",
+  "why": "wife-match"
+ },
+ {
+  "added": "M648",
+  "name": "בדור",
+  "parent": "M262",
+  "why": "wife-match"
+ },
+ {
+  "added": "M668",
+  "name": "עבדללא",
+  "parent": "M262",
+  "why": "wife-match"
+ }
+]

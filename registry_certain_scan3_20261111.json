@@ -1,0 +1,249 @@
+{
+ "dups": {
+  "M30": [
+   "65ג"
+  ]
+ },
+ "certain": {
+  "M59": {
+   "father": "140",
+   "kind": "census",
+   "why": "wife-match"
+  },
+  "M99": {
+   "father": "59",
+   "kind": "census",
+   "why": "wife-match"
+  },
+  "M102": {
+   "father": "44",
+   "kind": "census",
+   "why": "wife-match"
+  },
+  "M110": {
+   "father": "44",
+   "kind": "census",
+   "why": "wife-match"
+  },
+  "M134": {
+   "father": "44",
+   "kind": "census",
+   "why": "wife-match"
+  },
+  "M135": {
+   "father": "59",
+   "kind": "census",
+   "why": "wife-match"
+  },
+  "M159": {
+   "father": "63",
+   "kind": "census",
+   "why": "events: רגא עבדאללה מרגאנ | אליס עמראנ אסחק"
+  },
+  "M173": {
+   "father": "61",
+   "kind": "census",
+   "why": "events: בדר עבדאללה מרגאנ | עטיה נאגי כצר"
+  },
+  "M182": {
+   "father": "63",
+   "kind": "census",
+   "why": "events: רגא עבדאללה מרגאנ | אליס עמראנ אסחק"
+  },
+  "M183": {
+   "father": "61",
+   "kind": "census",
+   "why": "events: בדר עבדאללה מרגאנ | עטיה נאגי כצר"
+  },
+  "M194": {
+   "father": "59",
+   "kind": "census",
+   "why": "wife-match"
+  },
+  "M202": {
+   "father": "63",
+   "kind": "census",
+   "why": "events: רגא עבדאללה מרגאנ | אליס עמראנ אסחק"
+  },
+  "M208": {
+   "father": "61",
+   "kind": "census",
+   "why": "events: בדר עבדאללה מרגאנ | עטיה נאגי כצר"
+  },
+  "M219": {
+   "father": "63",
+   "kind": "census",
+   "why": "events: רגא עבדאללה מרגאנ | אליס עמראנ אסחק"
+  },
+  "M221": {
+   "father": "44",
+   "kind": "census",
+   "why": "wife-match"
+  },
+  "M234": {
+   "father": "61",
+   "kind": "census",
+   "why": "events: בדר עבדאללה מרגאנ | עטיה נאגי כצר"
+  },
+  "M236": {
+   "father": "63",
+   "kind": "census",
+   "why": "events: רגא עבדאללה מרגאנ | אליס עמראנ אסחק"
+  },
+  "M254": {
+   "father": "63",
+   "kind": "census",
+   "why": "events: רגא עבדאללה מרגאנ | אליס עמראנ אסחק"
+  },
+  "M262": {
+   "father": "61",
+   "kind": "census",
+   "why": "events: בדר עבדאללה מרגאנ | עטיה נאגי כצר"
+  },
+  "M276": {
+   "father": "63",
+   "kind": "census",
+   "why": "events: רגא עבדאללה מרגאנ | אליס עמראנ אסחק"
+  },
+  "M277": {
+   "father": "63",
+   "kind": "census",
+   "why": "events: רגא עבדאללה מרגאנ | אליס עמראנ אסחק"
+  },
+  "M385": {
+   "father": "M102",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M399": {
+   "father": "M130",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M403": {
+   "father": "M102",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M416": {
+   "father": "M149",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M424": {
+   "father": "M130",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M435": {
+   "father": "M102",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M439": {
+   "father": "M149",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M451": {
+   "father": "M149",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M476": {
+   "father": "M233",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M481": {
+   "father": "M149",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M492": {
+   "father": "M102",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M498": {
+   "father": "M233",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M503": {
+   "father": "M219",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M504": {
+   "father": "M219",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M512": {
+   "father": "M149",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M521": {
+   "father": "M233",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M535": {
+   "father": "M216",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M537": {
+   "father": "M233",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M541": {
+   "father": "M219",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M572": {
+   "father": "M301",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M577": {
+   "father": "M262",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M600": {
+   "father": "M216",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M610": {
+   "father": "M262",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M624": {
+   "father": "M216",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M627": {
+   "father": "M301",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M648": {
+   "father": "M262",
+   "kind": "modern",
+   "why": "wife-match"
+  },
+  "M668": {
+   "father": "M262",
+   "kind": "modern",
+   "why": "wife-match"
+  }
+ }
+}
