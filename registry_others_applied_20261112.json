@@ -1,0 +1,388 @@
+[
+ {
+  "merged": "M12",
+  "into": "222"
+ },
+ {
+  "merged": "M33",
+  "into": "מר-אברהם208"
+ },
+ {
+  "added": "M32",
+  "name": "רבקה",
+  "family": "מרחיב",
+  "parent": "#206",
+  "why": "wife-match"
+ },
+ {
+  "added": "M39",
+  "name": "כוסר",
+  "family": "מרחיב",
+  "parent": "#206",
+  "why": "wife-match"
+ },
+ {
+  "added": "M43",
+  "name": "ברוך",
+  "family": "מרחיב",
+  "parent": "#208",
+  "why": "wife-match"
+ },
+ {
+  "added": "M53",
+  "name": "וג'יה",
+  "family": "מרחיב",
+  "parent": "#206",
+  "why": "wife-match"
+ },
+ {
+  "added": "M66",
+  "name": "תמאם",
+  "family": "צדקה",
+  "parent": "#231",
+  "why": "wife-match"
+ },
+ {
+  "added": "M72",
+  "name": "גלאל",
+  "family": "צדקה",
+  "parent": "#235",
+  "why": "wife-match"
+ },
+ {
+  "added": "M86",
+  "name": "תמים",
+  "family": "צדקה",
+  "parent": "#235",
+  "why": "wife-match"
+ },
+ {
+  "added": "M127",
+  "name": "פרידה",
+  "family": "מרחיב",
+  "parent": "#204",
+  "why": "wife-match"
+ },
+ {
+  "added": "M163",
+  "name": "מנשה",
+  "family": "מרחיב",
+  "parent": "#מר-אברהם208",
+  "why": "events: אבראהימ סעד | וגיהה"
+ },
+ {
+  "added": "M167",
+  "name": "הילל (מאג'ת)",
+  "family": "צדקה",
+  "parent": "#230",
+  "why": "wife-match"
+ },
+ {
+  "added": "M199",
+  "name": "יצחק (ריבחי)",
+  "family": "מרחיב",
+  "parent": "#מר-אברהם208",
+  "why": "events: אבראהימ סעד | וגיהה"
+ },
+ {
+  "added": "M213",
+  "name": "ניסים",
+  "family": "מרחיב",
+  "parent": "#מר-אברהם208",
+  "why": "events: אבראהימ סעד | וגיהה"
+ },
+ {
+  "added": "M237",
+  "name": "ברוך",
+  "family": "מרחיב",
+  "parent": "#מר-אברהם208",
+  "why": "events: אבראהימ סעד | וגיהה"
+ },
+ {
+  "added": "M273",
+  "name": "רצון",
+  "family": "מרחיב",
+  "parent": "#מר-אברהם208",
+  "why": "events: אבראהימ סעד | וגיהה"
+ },
+ {
+  "added": "M283",
+  "name": "מרים",
+  "family": "צדקה",
+  "parent": "M86",
+  "why": "wife-match"
+ },
+ {
+  "added": "M285",
+  "name": "חביב",
+  "family": "צדקה",
+  "parent": "M72",
+  "why": "wife-match"
+ },
+ {
+  "added": "M292",
+  "name": "מלכה",
+  "family": "צדקה",
+  "parent": "M86",
+  "why": "wife-match"
+ },
+ {
+  "added": "M298",
+  "name": "נפתלי",
+  "family": "צדקה",
+  "parent": "M86",
+  "why": "wife-match"
+ },
+ {
+  "added": "M311",
+  "name": "זכיה",
+  "family": "צדקה",
+  "parent": "M72",
+  "why": "wife-match"
+ },
+ {
+  "added": "M319",
+  "name": "נתנ-אל",
+  "family": "מרחיב",
+  "parent": "M43",
+  "why": "wife-match"
+ },
+ {
+  "added": "M331",
+  "name": "ציפורה",
+  "family": "צדקה",
+  "parent": "M86",
+  "why": "wife-match"
+ },
+ {
+  "added": "M332",
+  "name": "רחל",
+  "family": "צדקה",
+  "parent": "M176",
+  "why": "wife-match"
+ },
+ {
+  "added": "M333",
+  "name": "שושנה",
+  "family": "מרחיב",
+  "parent": "M163",
+  "why": "wife-match"
+ },
+ {
+  "added": "M361",
+  "name": "דורון",
+  "family": "צדקה",
+  "parent": "M86",
+  "why": "wife-match"
+ },
+ {
+  "added": "M367",
+  "name": "גדי",
+  "family": "צדקה",
+  "parent": "M167",
+  "why": "wife-match"
+ },
+ {
+  "added": "M371",
+  "name": "אברהם",
+  "family": "מרחיב",
+  "parent": "M163",
+  "why": "wife-match"
+ },
+ {
+  "added": "M383",
+  "name": "רונית",
+  "family": "צדקה",
+  "parent": "M212",
+  "why": "wife-match"
+ },
+ {
+  "added": "M386",
+  "name": "יצחק",
+  "family": "מרחיב",
+  "parent": "M163",
+  "why": "wife-match"
+ },
+ {
+  "added": "M397",
+  "name": "עופר",
+  "family": "צדקה",
+  "parent": "M167",
+  "why": "wife-match"
+ },
+ {
+  "added": "M411",
+  "name": "תמיר",
+  "family": "צדקה",
+  "parent": "M212",
+  "why": "wife-match"
+ },
+ {
+  "added": "M423",
+  "name": "חנוך",
+  "family": "מרחיב",
+  "parent": "M199",
+  "why": "wife-match"
+ },
+ {
+  "added": "M448",
+  "name": "גלעד",
+  "family": "צדקה",
+  "parent": "M210",
+  "why": "wife-match"
+ },
+ {
+  "added": "M462",
+  "name": "יעקב",
+  "family": "מרחיב",
+  "parent": "M163",
+  "why": "wife-match"
+ },
+ {
+  "added": "M471",
+  "name": "סגית",
+  "family": "מרחיב",
+  "parent": "M199",
+  "why": "wife-match"
+ },
+ {
+  "added": "M490",
+  "name": "הילה",
+  "family": "צדקה",
+  "parent": "M212",
+  "why": "wife-match"
+ },
+ {
+  "added": "M509",
+  "name": "אושרית",
+  "family": "מרחיב",
+  "parent": "M199",
+  "why": "wife-match"
+ },
+ {
+  "added": "M511",
+  "name": "יפעת",
+  "family": "צדקה",
+  "parent": "M210",
+  "why": "wife-match"
+ },
+ {
+  "added": "M531",
+  "name": "ברי",
+  "family": "צדקה",
+  "parent": "M212",
+  "why": "wife-match"
+ },
+ {
+  "added": "M539",
+  "name": "אופק",
+  "family": "מרחיב",
+  "parent": "M237",
+  "why": "wife-match"
+ },
+ {
+  "added": "M559",
+  "name": "גד",
+  "family": "מרחיב",
+  "parent": "M237",
+  "why": "wife-match"
+ },
+ {
+  "added": "M574",
+  "name": "אברהם",
+  "family": "מרחיב",
+  "parent": "M237",
+  "why": "wife-match"
+ },
+ {
+  "added": "M588",
+  "name": "יוסף",
+  "family": "צדקה",
+  "parent": "M317",
+  "why": "wife-match"
+ },
+ {
+  "added": "M607",
+  "name": "יפית",
+  "family": "צדקה",
+  "parent": "M298",
+  "why": "wife-match"
+ },
+ {
+  "added": "M625",
+  "name": "תמי",
+  "family": "צדקה",
+  "parent": "M285",
+  "why": "wife-match"
+ },
+ {
+  "added": "M630",
+  "name": "לביא",
+  "family": "מרחיב",
+  "parent": "M237",
+  "why": "wife-match"
+ },
+ {
+  "added": "M632",
+  "name": "תום",
+  "family": "צדקה",
+  "parent": "M298",
+  "why": "wife-match"
+ },
+ {
+  "added": "M642",
+  "name": "עומר",
+  "family": "צדקה",
+  "parent": "M317",
+  "why": "wife-match"
+ },
+ {
+  "added": "M663",
+  "name": "רותם",
+  "family": "צדקה",
+  "parent": "M298",
+  "why": "wife-match"
+ },
+ {
+  "added": "M682",
+  "name": "יופיה",
+  "family": "צדקה",
+  "parent": "M329",
+  "why": "wife-match"
+ },
+ {
+  "added": "M684",
+  "name": "אברהם",
+  "family": "לוי",
+  "parent": "#כ-יעקב10",
+  "why": "events: יעקוב יוספ אבואלחסנ | עביר הרונ אבואלחסנ"
+ },
+ {
+  "added": "M703",
+  "name": "רחל",
+  "family": "צדקה",
+  "parent": "M329",
+  "why": "wife-match"
+ },
+ {
+  "added": "M704",
+  "name": "יוסף",
+  "family": "לוי",
+  "parent": "#כ-יעקב10",
+  "why": "events: יעקוב יוספ אבואלחסנ | עביר הרונ אבואלחסנ"
+ },
+ {
+  "added": "M708",
+  "name": "נועה",
+  "family": "צדקה",
+  "parent": "M370",
+  "why": "wife-match"
+ },
+ {
+  "added": "M711",
+  "name": "בת אל",
+  "family": "צדקה",
+  "parent": "M361",
+  "why": "wife-match"
+ }
+]
