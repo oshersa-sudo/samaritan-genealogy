@@ -12,11 +12,15 @@ def norm(s):
 people = json.load(io.open('modern_people.json', encoding='utf-8'))
 st = {(norm(p['name']), str(p['byear'] or ''), norm(p['father'])): p.get('bdate_status') for p in people}
 integ = json.load(io.open('integrate.json', encoding='utf-8'))
+try: SHIFT = json.load(io.open('birthdate_shift_20261118.json', encoding='utf-8'))['persons']
+except FileNotFoundError: SHIFT = {}
 n = 0
 for m in integ['modern']:
     if not (m.get('bmonth') and m.get('bday')):
         continue
-    s = st.get((norm(m['name']), str(m.get('byear') or ''), norm(m.get('father'))))
+    # the raw Excel keeps the ORIGINAL year; a person whose birth date was moved a day back across 1 January has a new byear
+    oy = (SHIFT.get(m['id']) or {}).get('orig', [m.get('byear')])[0]
+    s = st.get((norm(m['name']), str(oy or ''), norm(m.get('father'))))
     if s == 'ambiguous_md':
         m['bamb'] = True; n += 1
     else:

@@ -6,8 +6,11 @@ $enc = New-Object System.Text.UTF8Encoding($false)   # UTF-8, no BOM
 # every person must have a unique numeric ID (uid): assigns running numbers to anyone new, never changes an existing one
 Push-Location $dir
 if (Get-Command py -ErrorAction SilentlyContinue) { py -3 -X utf8 assign_uids.py } elseif (Get-Command python -ErrorAction SilentlyContinue) { python assign_uids.py } else { Write-Warning "python not found - assign_uids.py not run" }
+# STANDING (owner, 2026-11-18): every birth date taken from the registry Excel is one day earlier than the file says. Idempotent (originals kept in birthdate_shift_20261118.json), so it is safe on every build and covers persons added later.
+Push-Location $dir
+if (Get-Command py -ErrorAction SilentlyContinue) { py -3 -X utf8 shift_excel_birthdates_20261118.py } elseif (Get-Command python -ErrorAction SilentlyContinue) { python shift_excel_birthdates_20261118.py } else { Write-Warning "python not found - shift_excel_birthdates_20261118.py not run" }
 Pop-Location
-$json    = [System.IO.File]::ReadAllText("$dir\master_v2.json", [System.Text.Encoding]::UTF8)
+$json    =[System.IO.File]::ReadAllText("$dir\master_v2.json", [System.Text.Encoding]::UTF8)
 $stories = [System.IO.File]::ReadAllText("$dir\stories.json",  [System.Text.Encoding]::UTF8)
 $modern  = [System.IO.File]::ReadAllText("$dir\integrate.json", [System.Text.Encoding]::UTF8)
 $html    = [System.IO.File]::ReadAllText("$dir\genealogy_template.html", [System.Text.Encoding]::UTF8)
