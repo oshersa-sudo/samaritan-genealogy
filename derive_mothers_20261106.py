@@ -200,6 +200,8 @@ for m in integ['modern']:
         elif r.get('mother'): m['mother'] = r['mother']; m['mother_house'] = r.get('mother_house', '')
         if not m.get('mother_house'): m.pop('mother_house', None)
         m['mother_src'] = r['mother_src']; cov['modern: matched father spouse'] += 1
+    elif m['id'].startswith('mx-'):
+        m['mother_src'] = 'לפי הבעלים (אשת אברהם בן יששכר)'; cov['modern: text only'] += 1   # owner-supplied person: no registry column
     else:
         m['mother_src'] = 'מרשם הקהילה (עמודת האם)'; cov['modern: text only'] += 1
     LOG.append({'id': m['id'], 'name': m['name'], 'mother': m.get('mother'), 'mother_id': m.get('mother_id'), 'src': m['mother_src']})

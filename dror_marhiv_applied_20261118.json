@@ -1,0 +1,32 @@
+[
+ {
+  "added": "mx-avr-yis",
+  "name": "אברהם",
+  "parent": "#195",
+  "source": "owner"
+ },
+ {
+  "added": "mx-yissachar",
+  "name": "יששכר",
+  "parent": "mx-avr-yis",
+  "source": "owner"
+ },
+ {
+  "added": "M342",
+  "name": "דרור",
+  "parent": "mx-avr-yis",
+  "source": "registry row"
+ },
+ {
+  "added": "M350",
+  "name": "מרים",
+  "parent": "mx-avr-yis",
+  "source": "registry row"
+ },
+ {
+  "added": "M694",
+  "name": "עדן",
+  "parent": "M342",
+  "source": "registry row"
+ }
+]

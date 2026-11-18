@@ -17,8 +17,8 @@
   "by המאמר, עמ׳ 90 (ופרטי": 3,
   "by המאמר, עמ׳ 95 (ופרטי": 1,
   "modern: matched father spouse": 57,
-  "modern: text only": 205,
-  "modern: no mother": 5
+  "modern: text only": 209,
+  "modern: no mother": 6
  },
  "rows": [
   {
@@ -3210,6 +3210,34 @@
    "id": "M711",
    "name": "בת אל",
    "mother": "הילה",
+   "mother_id": null,
+   "src": "מרשם הקהילה (עמודת האם)"
+  },
+  {
+   "id": "mx-yissachar",
+   "name": "יששכר",
+   "mother": "דליה",
+   "mother_id": null,
+   "src": "לפי הבעלים (אשת אברהם בן יששכר)"
+  },
+  {
+   "id": "M342",
+   "name": "דרור",
+   "mother": "דליה",
+   "mother_id": null,
+   "src": "מרשם הקהילה (עמודת האם)"
+  },
+  {
+   "id": "M350",
+   "name": "מרים",
+   "mother": "דליה",
+   "mother_id": null,
+   "src": "מרשם הקהילה (עמודת האם)"
+  },
+  {
+   "id": "M694",
+   "name": "עדן",
+   "mother": "נרימן",
    "mother_id": null,
    "src": "מרשם הקהילה (עמודת האם)"
   }

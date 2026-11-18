@@ -2472,6 +2472,31 @@ renderTree();
 // fit the whole root level (all houses) to the screen width on first load
 fitToWidth();
 centerApex();
+
+/* ---------- מגיעים לכאן מן החיפוש ----------
+   אפליקציית "אבני שהם" מחפשת בבת אחת בכל בתיה — ואילן היוחסין בכללם: היא
+   קוראת את המיפקד מתוך העמוד הזה עצמו. שורה בתשובתה שהיא אדם מן האילן
+   פותחת את העמוד הזה עם השם בכתובת, ‎?q=<שם>‎, וכאן הוא מתקבל: השם נכנס
+   לתיבת החיפוש, וחיפוש האפליקציה עצמו רץ עליו — אותו חיפוש בדיוק שהיה רץ
+   אילו הוקלד ביד. זיהה אדם אחד — העץ קופץ אליו; מצא כמה — נפתחת הרשימה
+   והבחירה היא של הקורא. */
+function openFromQuery(){
+  var q = '';
+  try { q = new URLSearchParams(location.search).get('q') || ''; }
+  catch(e){ return; }                      // כתובת בלי פרמטרים
+  q = q.trim();
+  if(!q) return;
+  search.value = q;
+  var hits = searchPersons(q);
+  if(hits.length && (hits.length === 1 || hits[0].ownHits === 99)){
+    results.classList.remove('open');
+    search.value = hits[0].p.name || q;    // מה שנשלח יכול להיות מספר; בתיבה יעמוד השם
+    focusNode(hits[0].p.id);               // ישר אל הצומת בעץ
+  } else {
+    showResults(hits);                     // כמה מועמדים, או אף אחד
+  }
+}
+setTimeout(openFromQuery, 80);             // אחרי שהעץ עומד על רגליו
 // admin editing: restore admin UI if already logged in this session, then pull cloud overrides
 setAdminUI();
 loadOverrides();

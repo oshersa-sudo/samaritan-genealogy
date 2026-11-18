@@ -157,6 +157,8 @@ for m in integ['modern']:
     if re.fullmatch(r'M\d+', m['id']) and m['id'] in excel_rows:
         e = excel_rows[m['id']]
         m['src'] = f"קובץ מיפקד.xlsx — גיליון «{e['sheet']}», שורה {e['row']}"; n_by['excel'] += 1
+    elif m['id'].startswith('mx-') and m.get('src'):
+        n_by['owner'] = n_by.get('owner', 0) + 1     # owner-supplied persons: the script that adds them writes the exact source
     elif m['id'].startswith('ev-'):
         m['src'] = 'נוסף מסגל האירועים ונערך ע״י מנהל באתר'; n_by['admin'] += 1
     else:
